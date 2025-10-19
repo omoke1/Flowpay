@@ -18,6 +18,7 @@
     "@onflow/fcl": "^1.20.2",
     "@onflow/types": "^1.4.2",
     "@supabase/supabase-js": "^2.75.1",
+    "@transak/transak-sdk": "^4.0.0",
     "@types/node": "^24.8.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

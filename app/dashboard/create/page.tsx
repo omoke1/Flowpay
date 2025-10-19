@@ -22,6 +22,8 @@ export default function CreatePaymentLinkPage() {
     amount: "100",
     token: "USDC",
     redirectUrl: "",
+    acceptCrypto: true,
+    acceptFiat: true,
   });
 
   if (!loggedIn) {
@@ -40,6 +42,13 @@ export default function CreatePaymentLinkPage() {
     setLoading(true);
 
     try {
+      // Validate at least one payment method is selected
+      if (!formData.acceptCrypto && !formData.acceptFiat) {
+        alert("Please enable at least one payment method");
+        setLoading(false);
+        return;
+      }
+
       // Create payment link via API
       const response = await fetch("/api/payment-links", {
         method: "POST",
@@ -51,6 +60,8 @@ export default function CreatePaymentLinkPage() {
           amount: formData.amount,
           token: formData.token,
           redirectUrl: formData.redirectUrl,
+          acceptCrypto: formData.acceptCrypto,
+          acceptFiat: formData.acceptFiat,
         }),
       });
 
@@ -184,6 +195,37 @@ export default function CreatePaymentLinkPage() {
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Where to redirect customers after successful payment
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <Label className="text-sm font-medium text-gray-900 dark:text-white">Payment Methods</Label>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.acceptCrypto}
+                          onChange={(e) =>
+                            setFormData({ ...formData, acceptCrypto: e.target.checked })
+                          }
+                          className="w-4 h-4 text-[#97F11D] bg-white dark:bg-[#0D0D0D] border-gray-300 dark:border-gray-700 rounded focus:ring-[#97F11D]"
+                        />
+                        <span className="text-sm text-gray-900 dark:text-white">Accept Crypto Payments (FLOW, USDC.e)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.acceptFiat}
+                          onChange={(e) =>
+                            setFormData({ ...formData, acceptFiat: e.target.checked })
+                          }
+                          className="w-4 h-4 text-[#97F11D] bg-white dark:bg-[#0D0D0D] border-gray-300 dark:border-gray-700 rounded focus:ring-[#97F11D]"
+                        />
+                        <span className="text-sm text-gray-900 dark:text-white">Accept Card Payments (via Transak)</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      At least one payment method must be enabled
                     </p>
                   </div>
 

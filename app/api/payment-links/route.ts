@@ -5,12 +5,29 @@ import { WalletService } from "@/lib/wallet-service";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { merchantId, productName, description, amount, token, redirectUrl } = body;
+    const { 
+      merchantId, 
+      productName, 
+      description, 
+      amount, 
+      token, 
+      redirectUrl,
+      acceptCrypto = true,
+      acceptFiat = true
+    } = body;
 
     // Validate required fields
     if (!merchantId || !productName || !amount || !token) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate at least one payment method is enabled
+    if (!acceptCrypto && !acceptFiat) {
+      return NextResponse.json(
+        { error: "At least one payment method must be enabled" },
         { status: 400 }
       );
     }
@@ -55,6 +72,8 @@ export async function POST(request: NextRequest) {
         token,
         redirect_url: redirectUrl || null,
         status: "active",
+        accept_crypto: acceptCrypto,
+        accept_fiat: acceptFiat,
       })
       .select()
       .single();
@@ -70,7 +89,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       paymentLink: data,
-      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${data.id}`,
+      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/${data.id}`,
     });
   } catch (error) {
     console.error("Error creating payment link:", error);
