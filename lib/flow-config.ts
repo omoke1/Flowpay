@@ -31,9 +31,18 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
+// Singleton flag to ensure FCL is only initialized once
+let fclInitialized = false;
+
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = () => {
   if (typeof window === "undefined") return;
+  
+  // Prevent multiple initializations
+  if (fclInitialized) {
+    console.log("FCL already initialized, skipping...");
+    return;
+  }
   
   try {
     // Use the official FCL configuration pattern from Flow documentation
@@ -67,18 +76,27 @@ export const initializeFCL = () => {
       "0xFlowToken": "0x7e60df042a9c0868",
       "0xFungibleToken": "0x9a0766d93b6608b7"
     });
+    
+    fclInitialized = true;
+    console.log("FCL initialized successfully");
   } catch (error) {
     console.warn("FCL configuration warning (non-critical):", error);
     // Fallback to minimal configuration
-    fcl.config({
-      "flow.network": "testnet",
-      "accessNode.api": "https://rest-testnet.onflow.org",
-      "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
-      "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
-      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
-      "app.detail.title": "FlowPay",
-      "app.detail.icon": "https://flowpay.app/logo.svg"
-    });
+    try {
+      fcl.config({
+        "flow.network": "testnet",
+        "accessNode.api": "https://rest-testnet.onflow.org",
+        "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+        "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
+        "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
+        "app.detail.title": "FlowPay",
+        "app.detail.icon": "https://flowpay.app/logo.svg"
+      });
+      fclInitialized = true;
+      console.log("FCL initialized with fallback configuration");
+    } catch (fallbackError) {
+      console.error("FCL initialization failed completely:", fallbackError);
+    }
   }
 };
 

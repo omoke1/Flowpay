@@ -30,10 +30,7 @@ export class WalletService {
     try {
       if (typeof window === "undefined") return null;
       
-      // Initialize FCL if not already done
-      const { initializeFCL } = await import("./flow-config");
-      initializeFCL();
-      
+      // FCL should already be initialized by FlowProvider
       // Authenticate with Flow Port
       const user = await fcl.authenticate();
       
@@ -61,10 +58,7 @@ export class WalletService {
     try {
       if (typeof window === "undefined") return null;
       
-      // Initialize FCL if not already done
-      const { initializeFCL } = await import("./flow-config");
-      initializeFCL();
-      
+      // FCL should already be initialized by FlowProvider
       // Authenticate with external wallet
       const user = await fcl.authenticate();
       
