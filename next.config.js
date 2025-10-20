@@ -1,6 +1,9 @@
+const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Silence monorepo/workspace root warnings on Vercel
+  outputFileTracingRoot: path.join(__dirname),
   
   // Security headers
   async headers() {
