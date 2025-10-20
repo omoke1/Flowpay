@@ -4,6 +4,12 @@ import { Resend } from 'resend';
 const resendApiKey = process.env.RESEND_API_KEY;
 export const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+// Email sender configuration (env-driven)
+const fromEmail = process.env.NEXT_PUBLIC_FROM_EMAIL || 'contact@useflowpay.xyz';
+const fromName = process.env.NEXT_PUBLIC_FROM_EMAIL_NAME || 'FlowPay';
+const defaultFrom = `${fromName} <${fromEmail}>`;
+const replyToEmail = process.env.NEXT_PUBLIC_REPLY_TO_EMAIL;
+
 export interface PaymentReceiptData {
   customerEmail?: string;
   merchantEmail?: string;
@@ -22,10 +28,11 @@ export async function sendCustomerReceipt(data: PaymentReceiptData) {
 
   try {
     await resend.emails.send({
-      from: 'FlowPay <payments@useflowpay.xyz>',
+      from: defaultFrom,
       to: data.customerEmail,
       subject: `Payment Confirmation - ${data.productName}`,
       html: generateCustomerReceiptHTML(data),
+      ...(replyToEmail ? { reply_to: replyToEmail } : {}),
     });
   } catch (error) {
     console.error('Failed to send customer receipt:', error);
@@ -40,10 +47,11 @@ export async function sendMerchantNotification(data: PaymentReceiptData) {
 
   try {
     await resend.emails.send({
-      from: 'FlowPay <payments@useflowpay.xyz>',
+      from: defaultFrom,
       to: data.merchantEmail,
       subject: `Payment Received - ${data.amount} ${data.token}`,
       html: generateMerchantNotificationHTML(data),
+      ...(replyToEmail ? { reply_to: replyToEmail } : {}),
     });
   } catch (error) {
     console.error('Failed to send merchant notification:', error);
