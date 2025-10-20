@@ -75,14 +75,14 @@ export function getTransakConfig(params: {
     widgetUrl: TRANSAK_CONFIG.environment === 'PRODUCTION' 
       ? 'https://global.transak.com' 
       : 'https://global-stg.transak.com',
-    referrer: process.env.NEXT_PUBLIC_APP_URL || 'https://flowpay.app',
+    referrer: process.env.NEXT_PUBLIC_APP_URL || 'https://useflowpay.xyz',
     walletAddress: params.walletAddress,
     cryptoCurrencyCode: params.cryptoCurrency || 'USDC',
     fiatCurrency: params.fiatCurrency || 'USD',
     fiatAmount: params.fiatAmount,
     cryptoAmount: params.cryptoAmount,
     network: 'flow', // Flow blockchain
-    redirectURL: params.redirectURL || `${process.env.NEXT_PUBLIC_APP_URL || 'https://flowpay.app'}/checkout/success`,
+    redirectURL: params.redirectURL || `${process.env.NEXT_PUBLIC_APP_URL || 'https://useflowpay.xyz'}/checkout/success`,
     themeColor: '97F11D', // FlowPay brand color
     exchangeScreenTitle: 'Buy Crypto to Pay',
     partnerOrderId: params.partnerOrderId,

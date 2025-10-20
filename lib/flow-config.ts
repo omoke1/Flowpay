@@ -38,8 +38,8 @@ let fclInitialized = false;
 export const initializeFCL = () => {
   if (typeof window === "undefined") return;
   
-  // Prevent multiple initializations
-  if (fclInitialized) {
+  // Prevent multiple initializations using a global flag
+  if ((window as any).__fclInitialized) {
     console.log("FCL already initialized, skipping...");
     return;
   }
@@ -62,9 +62,9 @@ export const initializeFCL = () => {
       
       // App details for wallet discovery
       "app.detail.title": "FlowPay",
-      "app.detail.icon": "https://flowpay.app/logo.svg",
+      "app.detail.icon": "https://useflowpay.xyz/logo.svg",
       "app.detail.description": "Professional payment platform for Flow blockchain",
-      "app.detail.url": "https://flowpay.app",
+      "app.detail.url": "https://useflowpay.xyz",
       
       // OpenID Connect scopes
       "service.OpenID.scopes": "email",
@@ -78,6 +78,7 @@ export const initializeFCL = () => {
     });
     
     fclInitialized = true;
+    (window as any).__fclInitialized = true;
     console.log("FCL initialized successfully");
   } catch (error) {
     console.warn("FCL configuration warning (non-critical):", error);
@@ -90,9 +91,10 @@ export const initializeFCL = () => {
         "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
         "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
         "app.detail.title": "FlowPay",
-        "app.detail.icon": "https://flowpay.app/logo.svg"
+        "app.detail.icon": "https://useflowpay.xyz/logo.svg"
       });
       fclInitialized = true;
+      (window as any).__fclInitialized = true;
       console.log("FCL initialized with fallback configuration");
     } catch (fallbackError) {
       console.error("FCL initialization failed completely:", fallbackError);

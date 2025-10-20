@@ -22,7 +22,7 @@ export async function sendCustomerReceipt(data: PaymentReceiptData) {
 
   try {
     await resend.emails.send({
-      from: 'FlowPay <payments@flowpay.app>',
+      from: 'FlowPay <payments@useflowpay.xyz>',
       to: data.customerEmail,
       subject: `Payment Confirmation - ${data.productName}`,
       html: generateCustomerReceiptHTML(data),
@@ -40,7 +40,7 @@ export async function sendMerchantNotification(data: PaymentReceiptData) {
 
   try {
     await resend.emails.send({
-      from: 'FlowPay <payments@flowpay.app>',
+      from: 'FlowPay <payments@useflowpay.xyz>',
       to: data.merchantEmail,
       subject: `Payment Received - ${data.amount} ${data.token}`,
       html: generateMerchantNotificationHTML(data),
