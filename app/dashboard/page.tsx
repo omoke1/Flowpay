@@ -85,7 +85,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-black dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -126,7 +126,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Tabs: Payments | Analytics | Links */}
-            <div className="rounded-2xl border border-zinc-900/10 dark:border-white/10 bg-white dark:bg-gray-900">
+            <div className="rounded-2xl border border-zinc-100/10 dark:border-white/10 bg-black dark:bg-[#0D0D0D]">
               <DashboardTabs 
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}

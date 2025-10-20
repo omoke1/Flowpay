@@ -138,17 +138,17 @@ export default function AnalyticsPage() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm text-gray-700 dark:text-gray-300">Gross Volume</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">${analytics.grossVolume?.toLocaleString() || '0'}</div>
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Total revenue</div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm text-gray-700 dark:text-gray-300">Successful Payments</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{analytics.successfulPayments || 0}</div>
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Completed transactions</div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm text-gray-700 dark:text-gray-300">Refund Rate</div>
               <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{analytics.refundRate?.toFixed(1) || '0.0'}%</div>
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Refund percentage</div>
@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-700 dark:text-gray-300">Daily volume</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Last 14 days</div>
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
                 )}
               </div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-700 dark:text-gray-300">Top tokens</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Share of volume</div>
@@ -232,7 +232,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Top Links */}
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
             <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Top payment links</div>
             {analytics.topLinks && analytics.topLinks.length > 0 ? (
               <ul className="space-y-2 text-sm">

@@ -51,7 +51,7 @@ export function DashboardTabs({
 
   // Transform real data to display format
   const displayPayments = payments.map(payment => ({
-    id: payment.id || payment.tx_hash?.slice(-6) || "N/A",
+    id: payment.id ? `#${payment.id.slice(-8)}` : payment.tx_hash ? `#${payment.tx_hash.slice(-8)}` : "N/A",
     customer: payment.payer_address ? `${payment.payer_address.slice(0, 6)}...${payment.payer_address.slice(-4)}` : "Unknown",
     amount: `$${payment.amount}`,
     token: payment.token,
@@ -223,12 +223,12 @@ export function DashboardTabs({
           </button>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
-          <button className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200 border border-zinc-900/10 dark:border-white/10">
+          <button className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-zinc-500/10 hover:bg-zinc-500/20 text-xs sm:text-sm text-gray-800 dark:text-gray-200 border border-zinc-500/20">
             <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Export CSV</span>
             <span className="sm:hidden">Export</span>
           </button>
-          <button className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200 border border-zinc-900/10 dark:border-white/10">
+          <button className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-zinc-500/10 hover:bg-zinc-500/20 text-xs sm:text-sm text-gray-800 dark:text-gray-200 border border-zinc-500/20">
             <Activity className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">Webhooks</span>
             <span className="sm:hidden">Web</span>
@@ -252,7 +252,7 @@ export function DashboardTabs({
                   <div className="flex flex-wrap items-center gap-2">
                 {/* Status Filter */}
                 <div className="relative">
-                  <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
+                  <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
                     <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Status: {statusFilter}</span>
                     <span className="sm:hidden">{statusFilter}</span>
@@ -261,19 +261,19 @@ export function DashboardTabs({
                 </div>
                 {/* Token Filter */}
                 <div className="relative">
-                  <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
+                  <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-xs sm:text-sm text-gray-800 dark:text-gray-200">
                     <Coins className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">Token: {tokenFilter}</span>
                     <span className="sm:hidden">{tokenFilter}</span>
                     <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                   </button>
                 </div>
-                <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-xs sm:text-sm border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200">
+                <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-zinc-500/10 hover:bg-zinc-500/20 text-xs sm:text-sm border border-zinc-500/20 text-gray-800 dark:text-gray-200">
                   <SortDesc className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Sort: {sortBy}</span>
                   <span className="sm:hidden">{sortBy}</span>
                 </button>
-                <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-xs sm:text-sm border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200">
+                <button className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-lg bg-zinc-500/10 hover:bg-zinc-500/20 text-xs sm:text-sm border border-zinc-500/20 text-gray-800 dark:text-gray-200">
                   <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span className="hidden sm:inline">Last 30 days</span>
                   <span className="sm:hidden">30d</span>
@@ -282,9 +282,9 @@ export function DashboardTabs({
                 </div>
 
                 {/* Payments Table */}
-                <div className="overflow-x-auto rounded-xl border border-zinc-900/10 dark:border-white/10">
+                <div className="overflow-x-auto rounded-xl border border-zinc-100/10 dark:border-white/10">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-zinc-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-300">
+                    <thead className="bg-zinc-950 dark:bg-white/[0.03] text-gray-400 dark:text-gray-300">
                   <tr className="[&>th]:px-3 [&>th]:py-3 [&>th]:font-medium [&>th]:text-left">
                     <th className="w-40">Payment ID</th>
                     <th>Customer</th>
@@ -295,32 +295,32 @@ export function DashboardTabs({
                     <th className="w-28 text-right pr-4">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900/10 dark:divide-white/10 bg-white dark:bg-gray-900">
+                <tbody className="divide-y divide-zinc-100/10 dark:divide-white/10 bg-black dark:bg-[#0D0D0D]">
                   {displayPayments.map((payment) => (
-                    <tr key={payment.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.03] cursor-pointer">
+                      <tr key={payment.id} className="hover:bg-zinc-950 dark:hover:bg-white/[0.03] cursor-pointer">
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900 dark:text-white">#{payment.id}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{payment.id}</span>
                           <button 
-                            onClick={() => copyToClipboard(`#${payment.id}`)}
-                            className="copy-btn inline-flex items-center justify-center h-7 w-7 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10"
+                            onClick={() => copyToClipboard(payment.id)}
+                            className="copy-btn inline-flex items-center justify-center h-7 w-7 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10"
                           >
-                            <Copy className="h-3.5 w-3.5 text-gray-500 dark:text-gray-300" />
+                            <Copy className="h-3.5 w-3.5 text-gray-500" />
                           </button>
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{payment.customer}</td>
+                      <td className="px-3 py-3 text-gray-500">{payment.customer}</td>
                       <td className="px-3 py-3 text-gray-900 dark:text-white">{payment.amount}</td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{payment.token}</td>
+                      <td className="px-3 py-3 text-gray-500">{payment.token}</td>
                       <td className="px-3 py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${getStatusColor(payment.status)}`}>
                           {getStatusIcon(payment.status)}
                           {payment.status}
                         </span>
                       </td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{payment.date}</td>
+                      <td className="px-3 py-3 text-gray-500">{payment.date}</td>
                       <td className="px-3 py-3 text-right pr-4">
-                        <button className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200">
+                        <button className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-gray-800 dark:text-gray-200">
                           <ExternalLink className="h-4 w-4" />
                           Details
                         </button>
@@ -330,16 +330,16 @@ export function DashboardTabs({
                 </tbody>
               </table>
               {/* Pagination */}
-              <div className="flex items-center justify-between px-3 py-3 bg-white dark:bg-gray-900 border-t border-zinc-900/10 dark:border-white/10 text-sm">
-                <div className="text-gray-500 dark:text-gray-400">Showing 1–10 of 48</div>
+              <div className="flex items-center justify-between px-3 py-3 bg-black dark:bg-[#0D0D0D] border-t border-zinc-100/10 dark:border-white/10 text-sm">
+                <div className="text-gray-500">Showing 1–10 of 48</div>
                 <div className="flex items-center gap-1.5">
-                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10">
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10">
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.06] dark:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-900 dark:text-white">1</button>
-                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10">2</button>
-                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10">3</button>
-                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10">
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.06] dark:bg-white/10 border border-zinc-500/20 text-gray-900 dark:text-white">1</button>
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10">2</button>
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10">3</button>
+                  <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10">
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -362,9 +362,9 @@ export function DashboardTabs({
               <>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Line Chart */}
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700 dark:text-gray-300">Payments over time</div>
+                    <div className="text-sm text-gray-300 dark:text-gray-300">Payments over time</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">Last 30 days</div>
                 </div>
                 <div className="mt-4">
@@ -426,10 +426,10 @@ export function DashboardTabs({
                 </div>
               </div>
               {/* Pie Chart */}
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700 dark:text-gray-300">Token distribution</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">USDC, FLOW, USDT</div>
+                    <div className="text-sm text-gray-300 dark:text-gray-300">Token distribution</div>
+                  <div className="text-xs text-gray-500">USDC, FLOW, USDT</div>
                 </div>
                 <div className="mt-4 flex items-center justify-center">
                   {(() => {
@@ -496,9 +496,9 @@ export function DashboardTabs({
                 </div>
               </div>
               {/* Bar Chart */}
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-700 dark:text-gray-300">Revenue by customer</div>
+                    <div className="text-sm text-gray-300 dark:text-gray-300">Revenue by customer</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">Top 5</div>
                 </div>
                 <div className="mt-4">
@@ -567,8 +567,8 @@ export function DashboardTabs({
             </div>
             {/* Insights */}
             <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
-                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Top payment links</div>
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+                  <div className="text-sm text-gray-300 dark:text-gray-300 mb-2">Top payment links</div>
                 <ul className="space-y-2 text-sm">
                   {paymentLinks.slice(0, 3).map((link, index) => (
                     <li key={link.id} className="flex items-center justify-between">
@@ -581,14 +581,14 @@ export function DashboardTabs({
                   )}
                 </ul>
               </div>
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
-                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Total payments</div>
-                <div className="text-2xl tracking-tight font-semibold text-gray-900 dark:text-white">{payments.length}</div>
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+                  <div className="text-sm text-gray-300 dark:text-gray-300 mb-2">Total payments</div>
+                  <div className="text-2xl tracking-tight font-semibold text-gray-100 dark:text-white">{payments.length}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">completed transactions</div>
               </div>
-              <div className="rounded-xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
-                <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Success rate</div>
-                <div className="text-2xl tracking-tight font-semibold text-gray-900 dark:text-white">
+              <div className="rounded-xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+                <div className="text-sm text-gray-300 dark:text-gray-300 mb-2">Success rate</div>
+                <div className="text-2xl tracking-tight font-semibold text-gray-100 dark:text-white">
                   {payments.length > 0 ? Math.round((payments.filter(p => p.status === 'completed').length / payments.length) * 100) : 0}%
                 </div>
                 <div className="text-xs text-[#97F11D] mt-1">payment success</div>
@@ -619,9 +619,9 @@ export function DashboardTabs({
                 New Link
               </button>
             </div>
-            <div className="overflow-hidden rounded-xl border border-zinc-900/10 dark:border-white/10">
+            <div className="overflow-hidden rounded-xl border border-zinc-100/10 dark:border-white/10">
               <table className="min-w-full text-sm">
-                <thead className="bg-zinc-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-300">
+                <thead className="bg-zinc-950 dark:bg-white/[0.03] text-gray-400 dark:text-gray-300">
                   <tr className="[&>th]:px-3 [&>th]:py-3 [&>th]:font-medium [&>th]:text-left">
                     <th>Link Name</th>
                     <th className="w-28">Token</th>
@@ -631,12 +631,12 @@ export function DashboardTabs({
                     <th className="w-48 text-right pr-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900/10 dark:divide-white/10 bg-white dark:bg-gray-900">
+                <tbody className="divide-y divide-zinc-100/10 dark:divide-white/10 bg-black dark:bg-[#0D0D0D]">
                   {displayLinks.map((link) => (
-                    <tr key={link.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.03]">
-                      <td className="px-3 py-3 text-gray-900 dark:text-white">{link.name}</td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{link.token}</td>
-                      <td className="px-3 py-3 text-gray-900 dark:text-white">{link.price}</td>
+                      <tr key={link.id} className="hover:bg-zinc-950 dark:hover:bg-white/[0.03]">
+                      <td className="px-3 py-3 text-gray-100 dark:text-white">{link.name}</td>
+                      <td className="px-3 py-3 text-gray-300 dark:text-gray-300">{link.token}</td>
+                      <td className="px-3 py-3 text-gray-100 dark:text-white">{link.price}</td>
                       <td className="px-3 py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
                           link.status === 'active' 
@@ -652,21 +652,21 @@ export function DashboardTabs({
                         <div className="inline-flex gap-2">
                           <button 
                             onClick={() => copyToClipboard(`https://pay.flow/${link.id}`)}
-                            className="copy-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
+                            className="copy-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
                           >
                             <Copy className="h-4 w-4" />
                             Copy
                           </button>
                           <button 
                             onClick={() => handlePauseResume(link.id, link.status)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
                           >
                             {link.status === 'active' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                             {link.status === 'active' ? 'Pause' : 'Resume'}
                           </button>
                           <button 
                             onClick={() => handleDelete(link.id, link.name)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-700 dark:hover:text-red-300 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-700 dark:hover:text-red-300 border border-zinc-500/20 text-gray-800 dark:text-gray-200"
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete
@@ -677,8 +677,8 @@ export function DashboardTabs({
                   ))}
                 </tbody>
               </table>
-              <div className="px-3 py-3 bg-white dark:bg-gray-900 border-t border-zinc-900/10 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">
-                Total earned from links: <span className="text-gray-900 dark:text-white">
+              <div className="px-3 py-3 bg-black dark:bg-[#0D0D0D] border-t border-zinc-100/10 dark:border-white/10 text-sm text-gray-400 dark:text-gray-400">
+                Total earned from links: <span className="text-gray-100 dark:text-white">
                   ${payments.reduce((sum, payment) => sum + parseFloat(payment.amount || 0), 0).toFixed(2)}
                 </span>
               </div>

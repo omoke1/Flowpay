@@ -109,7 +109,7 @@ export default function CreatePaymentLinkPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-black dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -130,10 +130,10 @@ export default function CreatePaymentLinkPage() {
         {/* Modal Backdrop */}
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-lg my-8">
-            <Card className="bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 max-h-[90vh] overflow-y-auto">
-              <CardHeader className="pb-3 sticky top-0 bg-white dark:bg-gray-900 z-10 border-b border-zinc-900/10 dark:border-white/10">
+            <Card className="bg-black dark:bg-[#0D0D0D] border border-zinc-100/10 dark:border-white/10 max-h-[90vh] overflow-y-auto">
+              <CardHeader className="pb-3 sticky top-0 bg-black dark:bg-[#0D0D0D] z-10 border-b border-zinc-100/10 dark:border-white/10">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Create payment link</CardTitle>
+                  <CardTitle className="text-base sm:text-lg font-semibold text-gray-100 dark:text-white">Create payment link</CardTitle>
                   <button 
                     onClick={() => router.push("/dashboard")}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -147,7 +147,7 @@ export default function CreatePaymentLinkPage() {
               <CardContent className="pt-4">
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="productName" className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Link name</Label>
+                    <Label htmlFor="productName" className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Link name</Label>
                     <Input
                       id="productName"
                       placeholder="e.g. Design Service"
@@ -156,13 +156,13 @@ export default function CreatePaymentLinkPage() {
                         setFormData({ ...formData, productName: e.target.value })
                       }
                       required
-                      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white h-9 text-sm"
+                      className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white h-9 text-sm"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label htmlFor="amount" className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Price (USD)</Label>
+                      <Label htmlFor="amount" className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Price (USD)</Label>
                       <Input
                         id="amount"
                         type="number"
@@ -173,19 +173,19 @@ export default function CreatePaymentLinkPage() {
                           setFormData({ ...formData, amount: e.target.value })
                         }
                         required
-                        className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white h-9 text-sm"
+                        className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white h-9 text-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="token" className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Token</Label>
+                      <Label htmlFor="token" className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Token</Label>
                       <Select
                         id="token"
                         value={formData.token}
                         onChange={(e) =>
                           setFormData({ ...formData, token: e.target.value })
                         }
-                        className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white h-9 text-sm"
+                        className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white h-9 text-sm"
                       >
                         <option value="USDC">USDC.e</option>
                         <option value="FLOW">FLOW</option>
@@ -194,7 +194,7 @@ export default function CreatePaymentLinkPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="description" className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Description (Optional)</Label>
+                    <Label htmlFor="description" className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Description (Optional)</Label>
                     <Textarea
                       id="description"
                       placeholder="What is this link for?"
@@ -202,12 +202,12 @@ export default function CreatePaymentLinkPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, description: e.target.value })
                       }
-                      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white min-h-[60px] text-sm resize-none"
+                      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-100 dark:text-white min-h-[60px] text-sm resize-none"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="redirectUrl" className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Redirect URL (Optional)</Label>
+                    <Label htmlFor="redirectUrl" className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Redirect URL (Optional)</Label>
                     <Input
                       id="redirectUrl"
                       type="url"
@@ -216,12 +216,12 @@ export default function CreatePaymentLinkPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, redirectUrl: e.target.value })
                       }
-                      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white h-9 text-sm"
+                      className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white h-9 text-sm"
                     />
                   </div>
 
                   <div className="space-y-2 pt-1">
-                    <Label className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Payment Methods</Label>
+                    <Label className="text-xs sm:text-sm font-medium text-gray-100 dark:text-white">Payment Methods</Label>
                     <div className="space-y-1.5 bg-gray-50 dark:bg-gray-950 p-3 rounded-lg border border-gray-200 dark:border-gray-800">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -232,7 +232,7 @@ export default function CreatePaymentLinkPage() {
                           }
                           className="w-3.5 h-3.5 text-[#97F11D] bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 rounded focus:ring-[#97F11D]"
                         />
-                        <span className="text-xs sm:text-sm text-gray-900 dark:text-white">Crypto (FLOW, USDC.e)</span>
+                        <span className="text-xs sm:text-sm text-gray-100 dark:text-white">Crypto (FLOW, USDC.e)</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -243,7 +243,7 @@ export default function CreatePaymentLinkPage() {
                           }
                           className="w-3.5 h-3.5 text-[#97F11D] bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 rounded focus:ring-[#97F11D]"
                         />
-                        <span className="text-xs sm:text-sm text-gray-900 dark:text-white">Card (via Transak)</span>
+                        <span className="text-xs sm:text-sm text-gray-100 dark:text-white">Card (via Transak)</span>
                       </label>
                     </div>
                   </div>
@@ -253,7 +253,7 @@ export default function CreatePaymentLinkPage() {
                       type="button"
                       variant="outline"
                       onClick={() => router.push("/dashboard")}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm border-gray-300 dark:border-gray-700 text-gray-100 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Cancel
                     </Button>

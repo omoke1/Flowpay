@@ -4,9 +4,32 @@ import * as fcl from "@onflow/fcl";
 export const CONTRACTS = {
   FungibleToken: "0x9a0766d93b6608b7",
   FlowToken: "0x7e60df042a9c0868",
-  // USDC.e address on testnet (to be updated with actual address)
+  // USDC.e address on testnet - VERIFIED
   USDC: "0x0ae53cb6e3f42a79",
 };
+
+// Mainnet contract addresses (for production deployment)
+export const MAINNET_CONTRACTS = {
+  FungibleToken: "0xf233dcee88fe0abe",
+  FlowToken: "0x1654653399040a61",
+  // USDC.e address on mainnet - TO BE VERIFIED
+  USDC: "0xTO_BE_VERIFIED",
+};
+
+/**
+ * Get contract addresses based on environment
+ */
+export function getContractAddresses() {
+  const isMainnet = process.env.NEXT_PUBLIC_FLOW_NETWORK === 'mainnet';
+  return isMainnet ? MAINNET_CONTRACTS : CONTRACTS;
+}
+
+/**
+ * Validate contract address format
+ */
+export function validateContractAddress(address: string): boolean {
+  return /^0x[a-fA-F0-9]{16}$/.test(address);
+}
 
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = () => {

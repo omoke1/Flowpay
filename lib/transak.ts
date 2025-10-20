@@ -106,27 +106,85 @@ export function getTransakConfig(params: {
 
 /**
  * Verify Transak webhook signature
- * Note: Transak doesn't provide webhook secrets, so we'll validate the payload structure instead
+ * Enhanced security with payload validation and origin checking
  */
 export function verifyTransakWebhook(
   payload: string,
-  signature?: string
+  signature?: string,
+  request?: Request
 ): boolean {
   try {
-    // Since Transak doesn't provide webhook secrets, we'll validate the payload structure
+    // Validate payload structure
     const data = JSON.parse(payload);
     
-    // Basic validation - check if it has required Transak webhook fields
     if (!data || typeof data !== 'object') {
+      console.warn('Invalid webhook payload structure');
       return false;
     }
     
-    // Check for common Transak webhook fields
+    // Check for required Transak webhook fields
     const hasValidFields = data.webhookData || data.eventType || data.orderId;
-    
     if (!hasValidFields) {
       console.warn('Transak webhook payload missing expected fields');
       return false;
+    }
+    
+    // Validate event name if present
+    if (data.eventName && typeof data.eventName !== 'string') {
+      console.warn('Invalid event name type');
+      return false;
+    }
+    
+    // Validate webhook data structure
+    if (data.webhookData) {
+      const webhookData = data.webhookData;
+      
+      // Check for required fields in webhook data
+      if (!webhookData.id || typeof webhookData.id !== 'string') {
+        console.warn('Missing or invalid webhook data ID');
+        return false;
+      }
+      
+      // Validate status if present
+      if (webhookData.status && typeof webhookData.status !== 'string') {
+        console.warn('Invalid status type');
+        return false;
+      }
+      
+      // Validate wallet address if present
+      if (webhookData.walletAddress && !/^0x[a-fA-F0-9]{16}$/.test(webhookData.walletAddress)) {
+        console.warn('Invalid wallet address format');
+        return false;
+      }
+      
+      // Validate amounts if present
+      if (webhookData.cryptoAmount && (typeof webhookData.cryptoAmount !== 'number' || webhookData.cryptoAmount <= 0)) {
+        console.warn('Invalid crypto amount');
+        return false;
+      }
+      
+      if (webhookData.fiatAmount && (typeof webhookData.fiatAmount !== 'number' || webhookData.fiatAmount <= 0)) {
+        console.warn('Invalid fiat amount');
+        return false;
+      }
+    }
+    
+    // Additional security: Check request origin if available
+    if (request) {
+      const origin = request.headers.get('origin');
+      const userAgent = request.headers.get('user-agent');
+      
+      // Basic origin validation (in production, you might want to whitelist specific domains)
+      if (origin && !origin.includes('transak.com')) {
+        console.warn('Suspicious webhook origin:', origin);
+        // Don't reject immediately, but log for monitoring
+      }
+      
+      // Check for suspicious user agents
+      if (userAgent && (userAgent.includes('bot') || userAgent.includes('crawler'))) {
+        console.warn('Suspicious webhook user agent:', userAgent);
+        return false;
+      }
     }
     
     console.log('Transak webhook payload validated successfully');

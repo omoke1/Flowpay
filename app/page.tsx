@@ -22,21 +22,13 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center gap-3 opacity-0 animate-fade-in">
-              <Link href="#" className="hidden sm:inline-block text-sm transition-colors text-white/80 hover:text-white">
-                Sign in
-              </Link>
               {loggedIn ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/80">
-                    {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connected"}
-                  </span>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#97F11D]/90 border-[#97F11D]"
-                  >
-                    Dashboard
-                  </Link>
-                </div>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#97F11D]/90 border-[#97F11D]"
+                >
+                  Dashboard
+                </Link>
               ) : (
                 <button
                   onClick={() => setShowRegistrationModal(true)}

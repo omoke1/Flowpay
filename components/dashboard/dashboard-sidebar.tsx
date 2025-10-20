@@ -66,7 +66,7 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
 
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white dark:bg-gray-900 border-r border-zinc-900/10 dark:border-white/10 flex flex-col transition-transform ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-black dark:bg-[#111111] border-r border-zinc-100/10 dark:border-white/10 flex flex-col transition-transform ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -74,11 +74,11 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
         <div className="h-16 px-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-[#97F11D] shadow-[0_0_20px_#97F11D80]"></div>
-            <div className="text-gray-900 dark:text-white text-lg tracking-tight font-semibold">FlowPay</div>
+            <div className="text-gray-100 dark:text-white text-lg tracking-tight font-semibold">FlowPay</div>
           </div>
           <button 
             onClick={closeSidebar}
-            className="lg:hidden inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5"
+            className="lg:hidden inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-100 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5"
           >
             <X className="h-4 w-4" />
           </button>
@@ -93,7 +93,7 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5 border-l-2 border-transparent ${
+                    className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-300 dark:text-gray-300 hover:text-gray-100 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5 border-l-2 border-transparent ${
                       isActive 
                         ? 'active:border-[#97F11D] active:bg-black/[0.02] dark:active:bg-white/[0.03]' 
                         : ''
@@ -110,12 +110,12 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="border-t border-zinc-900/10 dark:border-white/10 p-3">
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        <div className="border-t border-zinc-100/10 dark:border-white/10 p-3">
+          <div className="flex items-center justify-between text-xs text-gray-500">
             <span>v0.9.2</span>
             <button 
               onClick={onLogout}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-gray-700 dark:text-gray-200 border border-zinc-900/10 dark:border-white/10"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-gray-300 dark:text-gray-200 border border-zinc-100/10 dark:border-white/10"
             >
               <LogOut className="h-3.5 w-3.5" />
               Logout

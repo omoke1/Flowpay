@@ -111,3 +111,134 @@ export async function getFlowBalance(address: string): Promise<string> {
   return result;
 }
 
+/**
+ * Verify a Flow transaction on-chain
+ * This is critical for preventing payment fraud
+ */
+export async function verifyTransaction(
+  txHash: string,
+  expectedAmount: string,
+  expectedRecipient: string,
+  token: 'FLOW' | 'USDC'
+): Promise<{
+  isValid: boolean;
+  actualAmount?: string;
+  actualRecipient?: string;
+  status?: string;
+  error?: string;
+}> {
+  try {
+    // Get transaction details from Flow blockchain
+    const transaction = await fcl.tx(txHash).onceSealed();
+    
+    if (!transaction) {
+      return {
+        isValid: false,
+        error: 'Transaction not found or not sealed'
+      };
+    }
+
+    // Check transaction status
+    if (transaction.status !== 4) { // 4 = SEALED
+      return {
+        isValid: false,
+        status: transaction.statusString,
+        error: `Transaction not sealed. Status: ${transaction.statusString}`
+      };
+    }
+
+    // Parse transaction events to find transfer events
+    const events = transaction.events || [];
+    const transferEvent = events.find(event => {
+      if (token === 'FLOW') {
+        return event.type.includes('FlowToken.TokensWithdrawn') || 
+               event.type.includes('FlowToken.TokensDeposited');
+      } else {
+        return event.type.includes('FiatToken.TokensWithdrawn') || 
+               event.type.includes('FiatToken.TokensDeposited');
+      }
+    });
+
+    if (!transferEvent) {
+      return {
+        isValid: false,
+        error: 'No transfer event found in transaction'
+      };
+    }
+
+    // Extract amount and recipient from event
+    const eventData = transferEvent.data;
+    const actualAmount = eventData.amount || eventData.value;
+    const actualRecipient = eventData.to || eventData.receiver;
+
+    // Verify amount (with tolerance for precision)
+    const expectedAmountFloat = parseFloat(expectedAmount);
+    const actualAmountFloat = parseFloat(actualAmount);
+    const tolerance = 0.000001; // 6 decimal places tolerance
+
+    const amountMatches = Math.abs(expectedAmountFloat - actualAmountFloat) < tolerance;
+
+    // Verify recipient
+    const recipientMatches = actualRecipient === expectedRecipient;
+
+    return {
+      isValid: amountMatches && recipientMatches,
+      actualAmount: actualAmount,
+      actualRecipient: actualRecipient,
+      status: transaction.statusString
+    };
+
+  } catch (error) {
+    console.error('Error verifying transaction:', error);
+    return {
+      isValid: false,
+      error: `Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
+
+/**
+ * Get transaction details for verification
+ */
+export async function getTransactionDetails(txHash: string): Promise<any> {
+  try {
+    const transaction = await fcl.tx(txHash).onceSealed();
+    return transaction;
+  } catch (error) {
+    console.error('Error getting transaction details:', error);
+    return null;
+  }
+}
+
+/**
+ * Verify USDC transaction specifically
+ */
+export async function verifyUSDCTransaction(
+  txHash: string,
+  expectedAmount: string,
+  expectedRecipient: string
+): Promise<{
+  isValid: boolean;
+  actualAmount?: string;
+  actualRecipient?: string;
+  error?: string;
+}> {
+  return verifyTransaction(txHash, expectedAmount, expectedRecipient, 'USDC');
+}
+
+/**
+ * Verify FLOW transaction specifically
+ */
+export async function verifyFlowTransaction(
+  txHash: string,
+  expectedAmount: string,
+  expectedRecipient: string
+): Promise<{
+  isValid: boolean;
+  actualAmount?: string;
+  actualRecipient?: string;
+  error?: string;
+}> {
+  return verifyTransaction(txHash, expectedAmount, expectedRecipient, 'FLOW');
+}
+

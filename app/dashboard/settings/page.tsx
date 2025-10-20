@@ -261,14 +261,14 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Profile */}
-            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Profile</div>
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="text-sm">
                   <span className="block text-gray-600 dark:text-gray-400 mb-1">Name</span>
                   <input 
                     type="text" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-900/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
+                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
                     value={settings.name}
                     onChange={(e) => setSettings({...settings, name: e.target.value})}
                   />
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                   <span className="block text-gray-600 dark:text-gray-400 mb-1">Email</span>
                   <input 
                     type="email" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-900/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
+                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
                     value={settings.email}
                     onChange={(e) => setSettings({...settings, email: e.target.value})}
                   />
@@ -296,7 +296,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Preferences */}
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Preferences</div>
               <div className="mt-3 space-y-3 text-sm">
                 <label className="flex items-center justify-between gap-2">
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                         document.documentElement.classList.remove('dark');
                       }
                     }}
-                    className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10"
+                    className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10"
                   >
                     {settings.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                   </button>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                   <span className="text-gray-700 dark:text-gray-300">Email notifications</span>
                   <input 
                     type="checkbox" 
-                    className="h-4 w-7 rounded-full bg-black/[0.06] dark:bg-white/10 border border-zinc-900/10 dark:border-white/10 accent-[#97F11D]" 
+                    className="h-4 w-7 rounded-full bg-black/[0.06] dark:bg-white/10 border border-zinc-100/10 dark:border-white/10 accent-[#97F11D]" 
                     checked={settings.emailNotifications}
                     onChange={(e) => setSettings({...settings, emailNotifications: e.target.checked})}
                   />
@@ -332,7 +332,7 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* API & Webhooks */}
-            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">API & Webhooks</div>
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="text-sm">
@@ -342,11 +342,11 @@ export default function SettingsPage() {
                       type="text" 
                       readOnly 
                       value={settings.publicKey} 
-                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-900/10 dark:border-white/10 px-3 py-2" 
+                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
                     />
                     <button 
                       onClick={() => copyToClipboard(settings.publicKey, 'public')}
-                      className="inline-flex items-center justify-center h-9 px-3 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10"
+                      className="inline-flex items-center justify-center h-9 px-3 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10"
                     >
                       {copied === 'public' ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                     </button>
@@ -359,11 +359,11 @@ export default function SettingsPage() {
                       type={showSecretKey ? "text" : "password"} 
                       readOnly 
                       value={settings.secretKey} 
-                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-900/10 dark:border-white/10 px-3 py-2" 
+                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
                     />
                     <button 
                       onClick={() => setShowSecretKey(!showSecretKey)}
-                      className="inline-flex items-center justify-center h-9 px-3 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10"
+                      className="inline-flex items-center justify-center h-9 px-3 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10"
                     >
                       {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -374,7 +374,7 @@ export default function SettingsPage() {
                   <input 
                     type="url" 
                     placeholder="https://your-domain.com/webhooks/flowpay" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-900/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40"
+                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40"
                     value={settings.webhookUrl}
                     onChange={(e) => setSettings({...settings, webhookUrl: e.target.value})}
                   />
@@ -383,7 +383,7 @@ export default function SettingsPage() {
               <div className="mt-4">
                 <button 
                   onClick={() => router.push("/dashboard/settings/webhook-logs")}
-                  className="inline-flex items-center gap-2 rounded-lg px-3.5 py-2.5 bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-gray-900 dark:text-gray-200 border border-zinc-900/10 dark:border-white/10"
+                  className="inline-flex items-center gap-2 rounded-lg px-3.5 py-2.5 bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 text-gray-900 dark:text-gray-200 border border-zinc-100/10 dark:border-white/10"
                 >
                   <BarChart3 className="h-4 w-4" />
                   View webhook logs
@@ -392,7 +392,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Danger Zone */}
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Danger zone</div>
               <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">Rotate API keys and revoke sessions.</p>
               <div className="mt-3 space-y-2">

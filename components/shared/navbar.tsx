@@ -17,23 +17,12 @@ export function Navbar() {
           </Link>
 
           <div className="flex items-center gap-4">
-            {loggedIn && (
+            {loggedIn ? (
               <Link href="/dashboard">
-                <Button variant="ghost" size="sm">
+                <Button className="bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium">
                   Dashboard
                 </Button>
               </Link>
-            )}
-            
-            {loggedIn ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-text-secondary font-mono">
-                  {address ? formatAddress(address) : 'Unknown'}
-                </span>
-                <Button size="sm" variant="outline" onClick={logOut}>
-                  Disconnect
-                </Button>
-              </div>
             ) : (
               <Button size="sm" onClick={() => logIn()}>
                 Connect Wallet

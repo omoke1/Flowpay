@@ -2,19 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { sendCustomerReceipt, sendMerchantNotification } from "@/lib/resend";
 import { WalletService } from "@/lib/wallet-service";
+import { verifyTransaction } from "@/lib/flow-transactions";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateRequestBody, paymentSchema } from "@/lib/validation";
+import { logError, logInfo, logTransactionVerification, logSecurityEvent } from "@/lib/error-logging";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { linkId, payerAddress, amount, token, txHash } = body;
-
-    // Validate required fields
-    if (!linkId || !payerAddress || !amount || !token || !txHash) {
+    // Rate limiting check
+    const rateLimitResult = await checkRateLimit(request, "payments");
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        {
+          error: "Rate limit exceeded",
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          reset: rateLimitResult.reset,
+        },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+          }
+        }
+      );
+    }
+
+    const body = await request.json();
+    
+    // Validate and sanitize input
+    const validation = validateRequestBody(body, paymentSchema);
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          error: "Invalid input data", 
+          details: validation.details 
+        },
         { status: 400 }
       );
     }
+
+    const { linkId, payerAddress, amount, token, txHash } = validation.data;
 
     // Check if Supabase is configured
     if (!supabase) {
@@ -38,6 +68,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // CRITICAL SECURITY: Verify transaction on-chain
+    const verification = await verifyTransaction(
+      txHash,
+      amount.toString(),
+      linkData.users?.wallet_address || "",
+      token as 'FLOW' | 'USDC'
+    );
+
+    if (!verification.isValid) {
+      logTransactionVerification(txHash, false, {
+        error: verification.error,
+        expectedAmount: amount.toString(),
+        expectedRecipient: linkData.users?.wallet_address,
+        token
+      });
+      
+      logSecurityEvent('Transaction verification failed', 'high', {
+        txHash,
+        linkId,
+        payerAddress,
+        amount,
+        token
+      });
+      
+      return NextResponse.json(
+        { 
+          error: "Transaction verification failed", 
+          details: verification.error 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Log successful verification
+    logTransactionVerification(txHash, true, {
+      expectedAmount: amount.toString(),
+      actualAmount: verification.actualAmount,
+      expectedRecipient: linkData.users?.wallet_address,
+      actualRecipient: verification.actualRecipient,
+      token
+    });
+
+    // Additional security: Verify amount matches payment link
+    if (parseFloat(verification.actualAmount || "0") !== parseFloat(linkData.amount)) {
+      logSecurityEvent('Amount mismatch detected', 'high', {
+        txHash,
+        linkId,
+        expectedAmount: linkData.amount,
+        actualAmount: verification.actualAmount,
+        payerAddress
+      });
+      
+      return NextResponse.json(
+        { 
+          error: "Transaction amount does not match payment link amount",
+          expected: linkData.amount,
+          actual: verification.actualAmount
+        },
+        { status: 400 }
+      );
+    }
+
     // Insert payment record
     const { data: payment, error: paymentError } = await supabase
       .from("payments")
@@ -53,12 +145,28 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (paymentError) {
-      console.error("Supabase error:", paymentError);
+      logError("Failed to record payment in database", paymentError, {
+        linkId,
+        payerAddress,
+        amount,
+        token,
+        txHash
+      });
       return NextResponse.json(
         { error: "Failed to record payment" },
         { status: 500 }
       );
     }
+
+    // Log successful payment
+    logInfo("Payment recorded successfully", {
+      paymentId: payment.id,
+      linkId,
+      payerAddress,
+      amount,
+      token,
+      txHash
+    });
 
     // Send email notifications
     try {
@@ -76,7 +184,11 @@ export async function POST(request: NextRequest) {
         // Customer email would need their email address
       ]);
     } catch (emailError) {
-      console.error("Email error:", emailError);
+      logError("Failed to send email notifications", emailError, {
+        paymentId: payment.id,
+        linkId,
+        merchantEmail: linkData.users?.email
+      });
       // Don't fail the payment if email fails
     }
 
@@ -86,7 +198,10 @@ export async function POST(request: NextRequest) {
       redirectUrl: linkData.redirect_url,
     });
   } catch (error) {
-    console.error("Error processing payment:", error);
+    logError("Unexpected error in payment processing", error as Error, {
+      endpoint: '/api/payments',
+      method: 'POST'
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -96,6 +211,27 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimitResult = await checkRateLimit(request, "general");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          reset: rateLimitResult.reset,
+        },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+          }
+        }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get("merchantId");
 

@@ -152,43 +152,43 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen gradient-bg py-8 px-4">
+    <div className="min-h-screen gradient-bg py-4 sm:py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             {step !== 'select' && step !== 'confirmation' && (
               <button
                 onClick={handleBackToSelect}
-                className="p-3 hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/10"
+                className="p-2 sm:p-3 hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/10"
               >
-                <ArrowLeft className="w-5 h-5 text-white/80" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
               </button>
             )}
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
                 FlowPay Checkout
               </h1>
-              <p className="text-white/70 text-sm">
-                Secure payment powered by Flow blockchain
-              </p>
+                      <p className="text-gray-500 text-xs sm:text-sm">
+                        Secure payment powered by Flow blockchain
+                      </p>
             </div>
           </div>
 
           {/* Progress Indicator */}
-          <div className="glass p-4 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className={`flex-1 h-2 rounded-full transition-all duration-300 ${
+          <div className="glass p-3 sm:p-4 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                 step === 'select' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
-              <div className={`flex-1 h-2 rounded-full transition-all duration-300 ${
+              <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                 step === 'payment' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
-              <div className={`flex-1 h-2 rounded-full transition-all duration-300 ${
+              <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                 step === 'confirmation' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
             </div>
-            <div className="flex justify-between mt-3 text-xs text-white/60">
+                    <div className="flex justify-between mt-2 sm:mt-3 text-xs text-gray-500">
               <span className={step === 'select' ? 'text-[#97F11D] font-medium' : ''}>Select Method</span>
               <span className={step === 'payment' ? 'text-[#97F11D] font-medium' : ''}>Payment</span>
               <span className={step === 'confirmation' ? 'text-[#97F11D] font-medium' : ''}>Complete</span>
@@ -197,25 +197,25 @@ export default function CheckoutPage() {
         </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Product Summary Card */}
-          <div className="glass p-6 rounded-2xl border border-white/10 card-glow">
-            <div className="flex items-start justify-between mb-4">
+          <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10 card-glow">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">
                   {paymentData.product_name}
                 </h2>
-                {paymentData.description && (
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    {paymentData.description}
-                  </p>
-                )}
+                        {paymentData.description && (
+                          <p className="text-gray-500 text-sm leading-relaxed">
+                            {paymentData.description}
+                          </p>
+                        )}
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-[#97F11D] mb-1">
+              <div className="text-left sm:text-right">
+                <div className="text-2xl sm:text-3xl font-bold text-[#97F11D] mb-1">
                   ${paymentData.amount}
                 </div>
-                <div className="text-white/60 text-sm">USD</div>
+                        <div className="text-gray-500 text-sm">USD</div>
               </div>
             </div>
             
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-white/60 text-xs">Merchant</div>
+                            <div className="text-gray-500 text-xs">Merchant</div>
                     <div className="text-white font-medium">
                       {paymentData.users.display_name}
                     </div>
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Step Content */}
-          <div className="glass p-6 rounded-2xl border border-white/10">
+          <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10">
             {step === 'select' && (
               <PaymentMethodSelector
                 acceptCrypto={paymentData.accept_crypto}
@@ -286,14 +286,14 @@ export default function CheckoutPage() {
 
           {/* Security Notice */}
           {step !== 'confirmation' && (
-            <div className="glass p-4 rounded-xl border border-white/10 text-center">
-              <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
-                <svg className="w-4 h-4 text-[#97F11D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="glass p-3 sm:p-4 rounded-xl border border-white/10 text-center">
+                      <div className="flex items-center justify-center gap-2 text-gray-500 text-xs sm:text-sm">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-[#97F11D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <span>Secured by Flow Blockchain & Transak</span>
               </div>
-              <p className="text-white/50 text-xs mt-1">Your payment information is encrypted and secure</p>
+                      <p className="text-gray-500 text-xs mt-1">Your payment information is encrypted and secure</p>
             </div>
           )}
         </div>

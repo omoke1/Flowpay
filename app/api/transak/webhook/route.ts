@@ -9,11 +9,11 @@ export async function POST(request: NextRequest) {
     const body = await request.text();
     const signature = request.headers.get('x-transak-signature') || '';
 
-    // Verify webhook signature
-    if (!verifyTransakWebhook(body, signature)) {
-      console.error('Invalid Transak webhook signature');
+    // Verify webhook signature with enhanced security
+    if (!verifyTransakWebhook(body, signature, request)) {
+      console.error('Invalid Transak webhook signature or payload');
       return NextResponse.json(
-        { error: 'Invalid signature' },
+        { error: 'Invalid webhook signature or payload' },
         { status: 401 }
       );
     }

@@ -1,10 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { WalletService } from "@/lib/wallet-service";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { validateRequestBody, paymentLinkSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimitResult = await checkRateLimit(request, "paymentLinks");
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          reset: rateLimitResult.reset,
+        },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+          }
+        }
+      );
+    }
+
     const body = await request.json();
+    
+    // Validate and sanitize input
+    const validation = validateRequestBody(body, paymentLinkSchema);
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          error: "Invalid input data", 
+          details: validation.details 
+        },
+        { status: 400 }
+      );
+    }
+
     const { 
       merchantId, 
       productName, 
@@ -12,17 +48,9 @@ export async function POST(request: NextRequest) {
       amount, 
       token, 
       redirectUrl,
-      acceptCrypto = true,
-      acceptFiat = true
-    } = body;
-
-    // Validate required fields
-    if (!merchantId || !productName || !amount || !token) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+      acceptCrypto,
+      acceptFiat
+    } = validation.data;
 
     // Validate at least one payment method is enabled
     if (!acceptCrypto && !acceptFiat) {
