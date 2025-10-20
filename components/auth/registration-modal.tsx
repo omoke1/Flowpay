@@ -18,6 +18,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
   const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [registrationError, setRegistrationError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -60,21 +61,33 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
 
   const handleEmailRegistration = async () => {
     if (!email || !name) {
+      setRegistrationError('Please fill in all fields');
       return;
     }
 
+    setRegistrationError(null);
     setStep('authenticating');
     
     try {
-      // For now, we'll create a mock user with email registration
-      // In a real implementation, this would integrate with Flow Port or your backend
+      // Generate a more realistic Flow address format
+      const generateFlowAddress = () => {
+        const chars = '0123456789abcdef';
+        let address = '0x';
+        for (let i = 0; i < 16; i++) {
+          address += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return address;
+      };
+
       const mockUser = {
-        address: `0x${Math.random().toString(16).substr(2, 16)}`,
+        address: generateFlowAddress(),
         email: email,
         name: name,
         wallet_type: 'managed' as const,
         verified: false
       };
+
+      console.log("Creating mock user:", mockUser);
 
       // Simulate registration process
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -88,8 +101,11 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
         is_verified: mockUser.verified
       });
 
+      console.log("Database user created:", dbUser);
+
       if (dbUser) {
         // Set the user directly in the Flow provider
+        console.log("Setting user directly:", dbUser);
         setUserDirectly(dbUser);
         
         setStep('success');
@@ -104,10 +120,11 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
           setName('');
         }, 2000);
       } else {
-        throw new Error('Failed to create user account');
+        throw new Error('Failed to create user account in database');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Email registration failed:", err);
+      setRegistrationError(err.message || 'Registration failed. Please try again.');
       setStep('email-form');
     }
   };
@@ -119,6 +136,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       setSelectedMethod(null);
       setEmail('');
       setName('');
+      setRegistrationError(null);
     }
   };
 
@@ -246,6 +264,21 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
 
           {step === 'email-form' && (
             <div className="space-y-6">
+              {/* Registration Error Display */}
+              {registrationError && (
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-4 h-4 text-red-400" />
+                    </div>
+                    <div>
+                      <p className="text-red-300 font-medium text-sm">Registration Error</p>
+                      <p className="text-red-200 text-sm mt-1">{registrationError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
                 <div className="space-y-4">
                   <div>
@@ -292,7 +325,10 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                   
                   <div className="flex gap-3">
                     <Button
-                      onClick={() => setStep('select')}
+                      onClick={() => {
+                        setStep('select');
+                        setRegistrationError(null);
+                      }}
                       variant="outline"
                       className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
                     >

@@ -209,8 +209,18 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setUserDirectly = (user: any) => {
+    console.log("setUserDirectly called with:", user);
     setWalletUser(user);
-    setUser({ loggedIn: true, addr: user.address });
+    setUser({ 
+      loggedIn: true, 
+      addr: user.wallet_address || user.address,
+      email: user.email,
+      name: user.display_name,
+      verified: user.is_verified
+    });
+    setError(null);
+    setLoading(false);
+    setIsConnecting(false);
   };
 
   const resetLoadingState = () => {
