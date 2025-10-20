@@ -84,18 +84,18 @@ export const paymentLinkSchema = z.object({
   productName: z.string()
     .min(1, "Product name is required")
     .max(100, "Product name too long")
-    .transform(sanitizeText),
+    .transform((val) => sanitizeText(val, 100)),
   description: z.string()
     .max(500, "Description too long")
     .optional()
-    .transform(val => val ? sanitizeText(val, 500) : undefined),
+    .transform((val) => val ? sanitizeText(val, 500) : undefined),
   amount: z.string()
     .refine(validateAmount, "Invalid amount"),
-  token: z.enum(['FLOW', 'USDC'], { errorMap: () => ({ message: "Invalid token" }) }),
+  token: z.enum(['FLOW', 'USDC']),
   redirectUrl: z.string()
     .optional()
-    .refine(val => !val || sanitizeUrl(val), "Invalid redirect URL")
-    .transform(val => val ? sanitizeUrl(val) : undefined),
+    .refine((val) => !val || !!sanitizeUrl(val), "Invalid redirect URL")
+    .transform((val) => val ? sanitizeUrl(val) : undefined),
   acceptCrypto: z.boolean().default(true),
   acceptFiat: z.boolean().default(true),
 });
@@ -104,7 +104,7 @@ export const paymentSchema = z.object({
   linkId: z.string().uuid("Invalid payment link ID"),
   payerAddress: z.string().refine(validateFlowAddress, "Invalid payer address"),
   amount: z.string().refine(validateAmount, "Invalid amount"),
-  token: z.enum(['FLOW', 'USDC'], { errorMap: () => ({ message: "Invalid token" }) }),
+  token: z.enum(['FLOW', 'USDC']),
   txHash: z.string().refine(validateTransactionHash, "Invalid transaction hash"),
 });
 
@@ -113,16 +113,16 @@ export const settingsSchema = z.object({
   displayName: z.string()
     .max(50, "Display name too long")
     .optional()
-    .transform(val => val ? sanitizeText(val, 50) : undefined),
+    .transform((val) => val ? sanitizeText(val, 50) : undefined),
   webhookUrl: z.string()
     .url("Invalid webhook URL")
     .optional()
-    .refine(val => !val || sanitizeUrl(val), "Invalid webhook URL")
-    .transform(val => val ? sanitizeUrl(val) : undefined),
+    .refine((val) => !val || !!sanitizeUrl(val), "Invalid webhook URL")
+    .transform((val) => val ? sanitizeUrl(val) : undefined),
   apiKeyName: z.string()
     .max(50, "API key name too long")
     .optional()
-    .transform(val => val ? sanitizeText(val, 50) : undefined),
+    .transform((val) => val ? sanitizeText(val, 50) : undefined),
 });
 
 export const transakOrderSchema = z.object({
@@ -153,7 +153,7 @@ export function validateRequestBody<T>(
       return {
         success: false,
         error: "Validation failed",
-        details: result.error.errors
+        details: (result as any).error?.issues ?? undefined
       };
     }
   } catch (error) {

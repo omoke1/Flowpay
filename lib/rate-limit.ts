@@ -84,12 +84,14 @@ export async function checkRateLimit(
   try {
     const ip = getClientIP(request);
     const { success, limit, remaining, reset } = await rateLimiters[endpoint].limit(ip);
+    // Upstash returns `reset` as a unix epoch in seconds; convert to Date
+    const resetDate = new Date(typeof reset === "number" ? reset * 1000 : Date.now());
     
     return {
       success,
       limit,
       remaining,
-      reset,
+      reset: resetDate,
     };
   } catch (error) {
     console.error("Rate limiting error:", error);

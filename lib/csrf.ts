@@ -80,7 +80,7 @@ export function withCSRFProtection(
   const csrfValidation = validateCSRF(request);
   
   if (!csrfValidation.isValid) {
-    return new Response(
+    return Promise.resolve(new Response(
       JSON.stringify({
         error: 'CSRF validation failed',
         details: csrfValidation.error
@@ -91,7 +91,7 @@ export function withCSRFProtection(
           'Content-Type': 'application/json',
         },
       }
-    );
+    ));
   }
   
   return handler();

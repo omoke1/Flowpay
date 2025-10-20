@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         // Customer email would need their email address
       ]);
     } catch (emailError) {
-      logError("Failed to send email notifications", emailError, {
+      logError("Failed to send email notifications", emailError as Error, {
         paymentId: payment.id,
         linkId,
         merchantEmail: linkData.users?.email
