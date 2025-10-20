@@ -84,7 +84,6 @@ export function getTransakConfig(params: {
     network: 'flow', // Flow blockchain
     redirectURL: params.redirectURL || `${process.env.NEXT_PUBLIC_APP_URL || 'https://flowpay.app'}/checkout/success`,
     themeColor: '97F11D', // FlowPay brand color
-    hideMenu: true,
     exchangeScreenTitle: 'Buy Crypto to Pay',
     partnerOrderId: params.partnerOrderId,
     partnerCustomerId: params.partnerCustomerId,
