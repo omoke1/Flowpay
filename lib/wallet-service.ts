@@ -40,10 +40,10 @@ export class WalletService {
       if (user && user.addr) {
         return {
           address: user.addr,
-          email: user.email,
-          name: user.name,
-          avatar: user.avatar,
-          verified: user.verified || false
+          email: (user as any).email || '',
+          name: (user as any).name || '',
+          avatar: (user as any).avatar || '',
+          verified: (user as any).verified || false
         };
       }
       
@@ -88,19 +88,7 @@ export class WalletService {
   ): Promise<WalletUser | null> {
     try {
       if (!supabase) {
-        // Return mock user if Supabase not configured
-        return {
-          id: `user_${Date.now()}`,
-          wallet_address: walletAddress,
-          email: userData?.email,
-          wallet_type: userData?.wallet_type || 'external',
-          flow_port_user_id: userData?.flow_port_user_id,
-          display_name: userData?.display_name,
-          avatar_url: userData?.avatar_url,
-          is_verified: userData?.is_verified || false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+        throw new Error("Database not configured. Please set up Supabase.");
       }
 
       // First, try to find existing user by wallet address
@@ -265,7 +253,7 @@ export class WalletService {
       if (typeof window === "undefined") return false;
       
       const user = await fcl.currentUser();
-      return user && user.loggedIn;
+      return user && (user as any).addr;
     } catch (error) {
       console.error("Error checking authentication:", error);
       return false;
@@ -280,7 +268,7 @@ export class WalletService {
       if (typeof window === "undefined") return "0";
       
       // This would need to be implemented with proper Flow scripts
-      // For now, return a mock balance
+      // For now, return 0 balance
       return "0";
     } catch (error) {
       console.error("Error getting wallet balance:", error);

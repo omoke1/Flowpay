@@ -13,30 +13,102 @@ interface RegistrationModalProps {
 }
 
 export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationModalProps) {
-  const { logIn, loading, error } = useFlowUser();
+  const { logIn, loading, error, loggedIn, address, setUserDirectly } = useFlowUser();
   const [selectedMethod, setSelectedMethod] = useState<'external' | 'flowport' | null>(null);
-  const [step, setStep] = useState<'select' | 'authenticating' | 'success'>('select');
+  const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
 
   if (!isOpen) return null;
 
   const handleAuthentication = async (method: 'external' | 'flowport') => {
     setSelectedMethod(method);
+    
+    if (method === 'flowport') {
+      // Show email registration form
+      setStep('email-form');
+    } else {
+      // Direct wallet connection
+      setStep('authenticating');
+      
+      try {
+        await logIn(method);
+        
+        // Check if authentication was successful
+        if (loggedIn && address) {
+          setStep('success');
+          
+          // Auto-close after success
+          setTimeout(() => {
+            onSuccess?.();
+            onClose();
+            setStep('select');
+            setSelectedMethod(null);
+          }, 2000);
+        } else {
+          // Authentication didn't complete successfully
+          setStep('select');
+          setSelectedMethod(null);
+        }
+      } catch (err) {
+        console.error("Authentication failed:", err);
+        setStep('select');
+        setSelectedMethod(null);
+      }
+    }
+  };
+
+  const handleEmailRegistration = async () => {
+    if (!email || !name) {
+      return;
+    }
+
     setStep('authenticating');
     
     try {
-      await logIn(method);
-      setStep('success');
+      // For now, we'll create a mock user with email registration
+      // In a real implementation, this would integrate with Flow Port or your backend
+      const mockUser = {
+        address: `0x${Math.random().toString(16).substr(2, 16)}`,
+        email: email,
+        name: name,
+        wallet_type: 'managed' as const,
+        verified: false
+      };
+
+      // Simulate registration process
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Auto-close after success
-      setTimeout(() => {
-        onSuccess?.();
-        onClose();
-        setStep('select');
-        setSelectedMethod(null);
-      }, 2000);
+      // Create user in database
+      const { WalletService } = await import("@/lib/wallet-service");
+      const dbUser = await WalletService.getOrCreateUser(mockUser.address, {
+        email: mockUser.email,
+        wallet_type: mockUser.wallet_type,
+        display_name: mockUser.name,
+        is_verified: mockUser.verified
+      });
+
+      if (dbUser) {
+        // Set the user directly in the Flow provider
+        setUserDirectly(dbUser);
+        
+        setStep('success');
+        
+        // Auto-close after success
+        setTimeout(() => {
+          onSuccess?.();
+          onClose();
+          setStep('select');
+          setSelectedMethod(null);
+          setEmail('');
+          setName('');
+        }, 2000);
+      } else {
+        throw new Error('Failed to create user account');
+      }
     } catch (err) {
-      setStep('select');
-      setSelectedMethod(null);
+      console.error("Email registration failed:", err);
+      setStep('email-form');
     }
   };
 
@@ -45,106 +117,119 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       onClose();
       setStep('select');
       setSelectedMethod(null);
+      setEmail('');
+      setName('');
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="glass w-full max-w-lg rounded-2xl border border-white/10 card-glow">
+        <div className="relative p-8">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 {step === 'select' && 'Connect to FlowPay'}
+                {step === 'email-form' && 'Create Your Account'}
                 {step === 'authenticating' && 'Connecting...'}
                 {step === 'success' && 'Welcome to FlowPay!'}
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
+              </h2>
+              <p className="text-white/70 text-sm">
                 {step === 'select' && 'Choose how you want to connect your wallet'}
+                {step === 'email-form' && 'Enter your details to create a managed wallet'}
                 {step === 'authenticating' && 'Please complete the authentication process'}
                 {step === 'success' && 'You are now connected and ready to use FlowPay'}
-              </CardDescription>
+              </p>
             </div>
             {step !== 'authenticating' && (
               <button 
                 onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/10"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             )}
           </div>
-        </CardHeader>
-        
-        <CardContent>
+          
+          {/* Error Display */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                </div>
+                <div>
+                  <p className="text-red-300 font-medium text-sm">Connection Error</p>
+                  <p className="text-red-200 text-sm mt-1">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {step === 'select' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Flow Port Option */}
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-[#97F11D] dark:hover:border-[#97F11D] transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-200 group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/30 transition-all duration-200">
+                    <Mail className="w-6 h-6 text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Email Registration</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <h3 className="font-semibold text-white mb-2">Email Registration</h3>
+                    <p className="text-white/70 text-sm leading-relaxed mb-4">
                       Create a managed wallet with your email address. Perfect for beginners.
                     </p>
-                    <div className="mt-3">
-                      <Button
-                        onClick={() => handleAuthentication('flowport')}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                        disabled={loading}
-                      >
-                        {loading && selectedMethod === 'flowport' ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Creating Account...
-                          </>
-                        ) : (
-                          <>
-                            <Mail className="w-4 h-4 mr-2" />
-                            Sign up with Email
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={() => handleAuthentication('flowport')}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                      disabled={loading}
+                    >
+                      {loading && selectedMethod === 'flowport' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="w-4 h-4 mr-2" />
+                          Sign up with Email
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
 
               {/* External Wallet Option */}
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-[#97F11D] dark:hover:border-[#97F11D] transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-200 group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-[#97F11D]/20 rounded-2xl flex items-center justify-center group-hover:bg-[#97F11D]/30 transition-all duration-200">
+                    <Wallet className="w-6 h-6 text-[#97F11D]" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 dark:text-white">External Wallet</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <h3 className="font-semibold text-white mb-2">External Wallet</h3>
+                    <p className="text-white/70 text-sm leading-relaxed mb-4">
                       Connect your existing Flow wallet (Blocto, Ledger, etc.)
                     </p>
-                    <div className="mt-3">
-                      <Button
-                        onClick={() => handleAuthentication('external')}
-                        className="w-full bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium"
-                        disabled={loading}
-                      >
-                        {loading && selectedMethod === 'external' ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Connecting...
-                          </>
-                        ) : (
-                          <>
-                            <Wallet className="w-4 h-4 mr-2" />
-                            Connect Wallet
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={() => handleAuthentication('external')}
+                      className="w-full bg-[#97F11D] hover:bg-[#97F11D]/90 text-black py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                      disabled={loading}
+                    >
+                      {loading && selectedMethod === 'external' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <Wallet className="w-4 h-4 mr-2" />
+                          Connect Wallet
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -159,15 +244,91 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
             </div>
           )}
 
+          {step === 'email-form' && (
+            <div className="space-y-6">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#97F11D] focus:bg-white/15 transition-all duration-200"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#97F11D] focus:bg-white/15 transition-all duration-200"
+                    />
+                  </div>
+                  
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-blue-300 font-medium text-sm">Managed Wallet</p>
+                        <p className="text-blue-200 text-sm mt-1">
+                          We'll create a secure managed wallet for you. You can always connect an external wallet later.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => setStep('select')}
+                      variant="outline"
+                      className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleEmailRegistration}
+                      disabled={!email || !name || loading}
+                      className="flex-1 bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {step === 'authenticating' && (
-            <div className="text-center py-8">
-              <Loader2 className="w-12 h-12 text-[#97F11D] animate-spin mx-auto mb-4" />
-              <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                {selectedMethod === 'flowport' ? 'Creating your managed wallet...' : 'Connecting to your wallet...'}
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-[#97F11D]/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Loader2 className="w-8 h-8 text-[#97F11D] animate-spin" />
+              </div>
+              <h3 className="font-semibold text-white mb-3 text-lg">
+                {selectedMethod === 'flowport' ? 'Creating your account...' : 'Connecting to your wallet...'}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-white/70 text-sm leading-relaxed">
                 {selectedMethod === 'flowport' 
-                  ? 'Please complete the email verification process'
+                  ? 'Setting up your managed wallet and account'
                   : 'Please approve the connection in your wallet'
                 }
               </p>
@@ -175,18 +336,20 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
           )}
 
           {step === 'success' && (
-            <div className="text-center py-8">
-              <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400 mx-auto mb-4" />
-              <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-green-400" />
+              </div>
+              <h3 className="font-semibold text-white mb-3 text-lg">
                 Successfully Connected!
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-white/70 text-sm leading-relaxed">
                 You can now access your FlowPay dashboard
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -28,14 +28,14 @@ export function Navbar() {
             {loggedIn ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-text-secondary font-mono">
-                  {formatAddress(address)}
+                  {address ? formatAddress(address) : 'Unknown'}
                 </span>
                 <Button size="sm" variant="outline" onClick={logOut}>
                   Disconnect
                 </Button>
               </div>
             ) : (
-              <Button size="sm" onClick={logIn}>
+              <Button size="sm" onClick={() => logIn()}>
                 Connect Wallet
               </Button>
             )}

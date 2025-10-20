@@ -29,36 +29,41 @@ export default function CustomersPage() {
 
     const fetchCustomers = async () => {
       try {
-        // Mock customer data for now
-        setCustomers([
-          {
-            id: 'customer_1',
-            name: 'Chris V.',
-            handle: '@chrisv',
-            payments: 12,
-            totalSpent: 1240,
-            lastSeen: 'Oct 15, 2025',
-            status: 'active'
-          },
-          {
-            id: 'customer_2',
-            name: 'Sierra F.',
-            handle: '@sierra',
-            payments: 7,
-            totalSpent: 680,
-            lastSeen: 'Oct 15, 2025',
-            status: 'pending'
-          },
-          {
-            id: 'customer_3',
-            name: 'Hiromi A.',
-            handle: '@hiromi',
-            payments: 3,
-            totalSpent: 225,
-            lastSeen: 'Oct 14, 2025',
-            status: 'active'
+        // Fetch customers from payments data
+        const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
+        const paymentsData = await paymentsResponse.json();
+        const payments = paymentsData.payments || [];
+        
+        // Group payments by customer (payer_address)
+        const customerMap = new Map();
+        payments.forEach((payment: any) => {
+          const customerId = payment.payer_address;
+          if (!customerMap.has(customerId)) {
+            customerMap.set(customerId, {
+              id: customerId,
+              name: `Customer ${customerId.slice(0, 6)}...${customerId.slice(-4)}`,
+              handle: `@${customerId.slice(0, 8)}`,
+              payments: 0,
+              totalSpent: 0,
+              lastSeen: null,
+              status: 'active'
+            });
           }
-        ]);
+          
+          const customer = customerMap.get(customerId);
+          customer.payments += 1;
+          customer.totalSpent += parseFloat(payment.amount || 0);
+          
+          if (!customer.lastSeen || new Date(payment.paid_at) > new Date(customer.lastSeen)) {
+            customer.lastSeen = new Date(payment.paid_at).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric', 
+              year: 'numeric' 
+            });
+          }
+        });
+        
+        setCustomers(Array.from(customerMap.values()));
       } catch (error) {
         console.error("Error fetching customers:", error);
       } finally {
@@ -92,14 +97,14 @@ export default function CustomersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A0A0A] text-white">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950 text-white">
         <p>Loading customers...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -123,12 +128,12 @@ export default function CustomersPage() {
               <h2 className="text-xl tracking-tight font-semibold text-gray-900 dark:text-white">Customers</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">Directory of paying users</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-sm text-gray-800 dark:text-gray-200">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <button className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-sm text-gray-800 dark:text-gray-200">
                 <Download className="h-4 w-4" />
                 Export CSV
               </button>
-              <button className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[#97F11D] text-black font-medium hover:brightness-95 border border-[#97F11D]/40">
+              <button className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#97F11D] text-black font-medium hover:brightness-95 border border-[#97F11D]/40">
                 <UserPlus className="h-4 w-4" />
                 Add Customer
               </button>
@@ -136,7 +141,7 @@ export default function CustomersPage() {
           </div>
 
           {/* Customers Table */}
-          <div className="rounded-2xl border border-zinc-900/10 dark:border-white/10 bg-white dark:bg-[#0D0D0D]">
+          <div className="rounded-2xl border border-zinc-900/10 dark:border-white/10 bg-white dark:bg-gray-900">
             <div className="px-4 py-3 flex items-center gap-2">
               <div className="relative">
                 <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,59 +157,106 @@ export default function CustomersPage() {
               </div>
             </div>
             <div className="overflow-hidden rounded-b-2xl border-t border-zinc-900/10 dark:border-white/10">
-              <table className="min-w-full text-sm">
-                <thead className="bg-zinc-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-300">
-                  <tr className="[&>th]:px-3 [&>th]:py-3 [&>th]:font-medium [&>th]:text-left">
-                    <th className="w-40">Name</th>
-                    <th className="w-36">Handle</th>
-                    <th className="w-32">Payments</th>
-                    <th className="w-36">Total Spent</th>
-                    <th className="w-40">Last Seen</th>
-                    <th className="w-32">Status</th>
-                    <th className="w-40 text-right pr-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-900/10 dark:divide-white/10 bg-white dark:bg-[#0D0D0D]">
-                  {filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.03]">
-                      <td className="px-3 py-3 text-gray-900 dark:text-white">{customer.name}</td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{customer.handle}</td>
-                      <td className="px-3 py-3 text-gray-900 dark:text-white">{customer.payments}</td>
-                      <td className="px-3 py-3 text-gray-900 dark:text-white">${customer.totalSpent.toLocaleString()}</td>
-                      <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{customer.lastSeen}</td>
-                      <td className="px-3 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
-                          customer.status === 'active' 
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20'
-                            : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20'
-                        }`}>
-                          {customer.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
-                          {customer.status === 'active' ? 'Active' : 'Pending'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-right pr-4">
-                        <div className="inline-flex gap-2">
-                          <button 
-                            onClick={() => contactCustomer(customer)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
-                          >
-                            <Mail className="h-4 w-4" />
-                            Contact
-                          </button>
-                          <button 
-                            onClick={() => removeCustomer(customer.id)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-700 dark:hover:text-red-300 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
-                          >
-                            <UserX className="h-4 w-4" />
-                            Remove
-                          </button>
-                        </div>
-                      </td>
+              {/* Desktop Table */}
+              <div className="hidden lg:block">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-zinc-50 dark:bg-white/[0.03] text-gray-600 dark:text-gray-300">
+                    <tr className="[&>th]:px-3 [&>th]:py-3 [&>th]:font-medium [&>th]:text-left">
+                      <th className="w-40">Name</th>
+                      <th className="w-36">Handle</th>
+                      <th className="w-32">Payments</th>
+                      <th className="w-36">Total Spent</th>
+                      <th className="w-40">Last Seen</th>
+                      <th className="w-32">Status</th>
+                      <th className="w-40 text-right pr-4">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center justify-between px-3 py-3 bg-white dark:bg-[#0D0D0D] border-t border-zinc-900/10 dark:border-white/10 text-sm">
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900/10 dark:divide-white/10 bg-white dark:bg-gray-900">
+                    {filteredCustomers.map((customer) => (
+                      <tr key={customer.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.03]">
+                        <td className="px-3 py-3 text-gray-900 dark:text-white">{customer.name}</td>
+                        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{customer.handle}</td>
+                        <td className="px-3 py-3 text-gray-900 dark:text-white">{customer.payments}</td>
+                        <td className="px-3 py-3 text-gray-900 dark:text-white">${customer.totalSpent.toLocaleString()}</td>
+                        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{customer.lastSeen}</td>
+                        <td className="px-3 py-3">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
+                            customer.status === 'active' 
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20'
+                              : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20'
+                          }`}>
+                            {customer.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+                            {customer.status === 'active' ? 'Active' : 'Pending'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-right pr-4">
+                          <div className="inline-flex gap-2">
+                            <button 
+                              onClick={() => contactCustomer(customer)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
+                            >
+                              <Mail className="h-4 w-4" />
+                              Contact
+                            </button>
+                            <button 
+                              onClick={() => removeCustomer(customer.id)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-700 dark:hover:text-red-300 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
+                            >
+                              <UserX className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Mobile Cards */}
+              <div className="lg:hidden">
+                {filteredCustomers.map((customer) => (
+                  <div key={customer.id} className="p-4 border-b border-zinc-900/10 dark:border-white/10 last:border-b-0">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 dark:text-white">{customer.name}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{customer.handle}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {customer.payments} payments • ${customer.totalSpent.toLocaleString()} total
+                        </p>
+                      </div>
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
+                        customer.status === 'active' 
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20'
+                          : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20'
+                      }`}>
+                        {customer.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+                        {customer.status === 'active' ? 'Active' : 'Pending'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                      Last seen: {customer.lastSeen}
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => contactCustomer(customer)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200 text-sm"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Contact
+                      </button>
+                      <button 
+                        onClick={() => removeCustomer(customer.id)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-700 dark:hover:text-red-300 border border-zinc-900/10 dark:border-white/10 text-gray-800 dark:text-gray-200 text-sm"
+                      >
+                        <UserX className="h-4 w-4" />
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between px-3 py-3 bg-white dark:bg-gray-900 border-t border-zinc-900/10 dark:border-white/10 text-sm">
                 <div className="text-gray-600 dark:text-gray-400">Showing 1–10 of {filteredCustomers.length}</div>
                 <div className="flex items-center gap-1.5">
                   <button className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-900/10 dark:border-white/10">

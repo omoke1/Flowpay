@@ -66,7 +66,7 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
 
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white dark:bg-[#111111] border-r border-zinc-900/10 dark:border-white/10 flex flex-col transition-transform ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-white dark:bg-gray-900 border-r border-zinc-900/10 dark:border-white/10 flex flex-col transition-transform ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >

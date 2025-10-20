@@ -49,14 +49,14 @@ export default function PaymentsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A0A0A] text-white">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950 text-white">
         <p>Loading payments...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -97,7 +97,7 @@ export default function PaymentsPage() {
           </div>
 
           {/* Payments Table */}
-          <div className="rounded-2xl border border-zinc-900/10 dark:border-white/10 bg-white dark:bg-[#0D0D0D]">
+          <div className="rounded-2xl border border-zinc-900/10 dark:border-white/10 bg-white dark:bg-gray-900">
             <PaymentsTable payments={filteredPayments} />
           </div>
         </main>

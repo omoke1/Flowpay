@@ -32,7 +32,7 @@ export default function HomePage() {
                   </span>
                   <Link
                     href="/dashboard"
-                    className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#707070] border-[#97F11D]"
+                    className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#97F11D]/90 border-[#97F11D]"
                   >
                     Dashboard
                   </Link>

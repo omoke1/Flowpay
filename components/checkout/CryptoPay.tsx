@@ -47,11 +47,17 @@ export function CryptoPay({
     setError(null);
 
     try {
-      const { sendFlowTokens } = await import("@/lib/flow-transactions");
+      const { sendFlowTokens, sendUSDCTokens } = await import("@/lib/flow-transactions");
       const { fcl } = await import("@/lib/flow-config");
 
-      // Execute payment transaction
-      const txId = await sendFlowTokens(merchantAddress, amount);
+      // Execute payment transaction based on selected token
+      let txId: string;
+      if (token === 'USDC') {
+        txId = await sendUSDCTokens(merchantAddress, amount);
+      } else {
+        // Default to Flow Token for 'FLOW' or any other token
+        txId = await sendFlowTokens(merchantAddress, amount);
+      }
 
       // Wait for transaction to be sealed
       const transaction = await fcl.tx(txId).onceSealed();

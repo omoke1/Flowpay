@@ -79,7 +79,7 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
   };
 
   return (
-    <div className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 rounded-2xl overflow-hidden">
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Recent Payments</h2>
@@ -99,7 +99,8 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Desktop Table */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-white/5">
             <tr>
@@ -240,6 +241,56 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
             ))}
           </tbody>
         </table>
+      </div>
+      
+      {/* Mobile Cards */}
+      <div className="lg:hidden">
+        {sortedPayments.map((payment) => (
+          <div key={payment.id} className="p-4 border-b border-white/10 last:border-b-0">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1">
+                <h3 className="font-medium text-white text-sm">@{payment.customer}</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  ID: #{payment.id}
+                </p>
+                <p className="text-sm text-white font-medium mt-1">
+                  {payment.amount} {payment.token}
+                </p>
+              </div>
+              <span className={`flex items-center gap-2 ${getStatusColor(payment.status)}`}>
+                {getStatusIcon(payment.status)}
+                <span className="capitalize text-sm">{payment.status}</span>
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-400">
+                {payment.date}
+              </div>
+              <div className="flex items-center gap-2">
+                {payment.hash && (
+                  <button
+                    onClick={() => copyToClipboard(payment.hash!)}
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Copy transaction hash"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                )}
+                <button
+                  className="text-gray-400 hover:text-white transition-colors"
+                  title="View details"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {sortedPayments.length === 0 && (

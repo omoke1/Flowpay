@@ -16,23 +16,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Supabase is not configured, return mock data
+    // Check if Supabase is configured
     if (!supabase) {
-      const mockPayment = {
-        id: `payment_${Date.now()}`,
-        link_id: linkId,
-        payer_address: payerAddress,
-        amount: amount.toString(),
-        token,
-        tx_hash: txHash,
-        status: "completed",
-        paid_at: new Date().toISOString(),
-      };
-      return NextResponse.json({
-        success: true,
-        payment: mockPayment,
-        redirectUrl: null,
-      });
+      return NextResponse.json(
+        { error: "Database not configured. Please set up Supabase." },
+        { status: 500 }
+      );
     }
 
     // Get payment link details
@@ -117,42 +106,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If Supabase is not configured, return mock data
+    // Check if Supabase is configured
     if (!supabase) {
-      const mockPayments = [
-        {
-          id: 'payment_1',
-          link_id: 'link_1',
-          payer_address: '0x1234...5678',
-          amount: '250',
-          token: 'USDC.e',
-          tx_hash: '0xabcd...1234',
-          status: 'completed',
-          paid_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-          payment_links: {
-            product_name: 'Design Service',
-            merchant_id: merchantId
-          }
-        },
-        {
-          id: 'payment_2',
-          link_id: 'link_2',
-          payer_address: '0x9876...5432',
-          amount: '150',
-          token: 'FLOW',
-          tx_hash: '0xefgh...5678',
-          status: 'completed',
-          paid_at: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-          payment_links: {
-            product_name: 'Consultation',
-            merchant_id: merchantId
-          }
-        }
-      ];
-      return NextResponse.json({ payments: mockPayments });
+      return NextResponse.json(
+        { error: "Database not configured. Please set up Supabase." },
+        { status: 500 }
+      );
     }
 
-            // Use WalletService to get user
+    // Use WalletService to get user
             const userData = await WalletService.getUserByWalletAddress(merchantId);
             if (!userData) {
               return NextResponse.json(

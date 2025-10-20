@@ -63,7 +63,7 @@ export function DashboardHeader({
   };
 
   return (
-    <header className="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/95 dark:supports-[backdrop-filter]:bg-[#0A0A0A]/70 dark:bg-[#0A0A0A]/90 border-b border-zinc-900/10 dark:border-white/10">
+    <header className="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/70 dark:bg-gray-950/90 border-b border-zinc-900/10 dark:border-white/10">
       <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button 
@@ -125,7 +125,7 @@ export function DashboardHeader({
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </button>
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white dark:bg-[#111111] border border-zinc-900/10 dark:border-white/10 shadow-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 shadow-lg overflow-hidden">
                 <button className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200">
                   <Settings className="h-4 w-4" />
                   Settings

@@ -37,7 +37,6 @@ cp .env.example .env.local
 ```env
 NEXT_PUBLIC_TRANSAK_API_KEY=your_api_key_here
 TRANSAK_API_SECRET=your_api_secret_here
-TRANSAK_WEBHOOK_SECRET=your_webhook_secret_here
 NEXT_PUBLIC_TRANSAK_ENV=STAGING  # or PRODUCTION
 ```
 

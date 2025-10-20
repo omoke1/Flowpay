@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { FlowProvider } from "@/components/providers/flow-provider";
+import { NotificationProvider } from "@/components/providers/notification-provider";
 
 export const metadata: Metadata = {
   title: "FlowPay - Business Payments on Flow",
@@ -22,7 +23,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning={true}>
         <FlowProvider>
-          {children}
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
         </FlowProvider>
       </body>
     </html>

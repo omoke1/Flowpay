@@ -32,27 +32,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Supabase is not configured, return mock data
+    // Check if Supabase is configured
     if (!supabase) {
-      const mockData = {
-        id: `link_${Date.now()}`,
-        merchant_id: merchantId,
-        product_name: productName,
-        description: description || null,
-        amount: amount.toString(),
-        token,
-        redirect_url: redirectUrl || null,
-        status: "active",
-        created_at: new Date().toISOString(),
-      };
-      return NextResponse.json({
-        success: true,
-        paymentLink: mockData,
-        checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/pay/${mockData.id}`,
-      });
+      return NextResponse.json(
+        { error: "Database not configured. Please set up Supabase." },
+        { status: 500 }
+      );
     }
 
-            // Use WalletService to get or create user
+    // Use WalletService to get or create user
             const userData = await WalletService.getOrCreateUser(merchantId);
             if (!userData) {
               return NextResponse.json(
@@ -89,10 +77,73 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       paymentLink: data,
-      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/${data.id}`,
+      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pay/${data.id}`,
     });
   } catch (error) {
     console.error("Error creating payment link:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const merchantId = searchParams.get('merchantId');
+
+    if (!merchantId) {
+      return NextResponse.json(
+        { error: "Merchant ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if Supabase is configured
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Database not configured. Please set up Supabase." },
+        { status: 500 }
+      );
+    }
+
+    // First get the user record to get the user ID
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("wallet_address", merchantId)
+      .single();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete all payment links for this merchant
+    const { data, error } = await supabase
+      .from("payment_links")
+      .delete()
+      .eq("merchant_id", user.id)
+      .select();
+
+    if (error) {
+      console.error("Supabase error deleting payment links:", error);
+      return NextResponse.json(
+        { error: `Failed to delete payment links: ${error.message}` },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: `Deleted ${data?.length || 0} payment links successfully`,
+      deletedCount: data?.length || 0
+    });
+  } catch (error) {
+    console.error("Error deleting payment links:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -112,34 +163,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If Supabase is not configured, return mock data
+    // Check if Supabase is configured
     if (!supabase) {
-      const mockData = [
-        {
-          id: 'link_1',
-          merchant_id: merchantId,
-          product_name: 'Design Service',
-          description: 'Professional design consultation',
-          amount: '250',
-          token: 'USDC.e',
-          status: 'active',
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        },
-        {
-          id: 'link_2',
-          merchant_id: merchantId,
-          product_name: 'Consultation',
-          description: 'Business strategy consultation',
-          amount: '150',
-          token: 'FLOW',
-          status: 'active',
-          created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-        }
-      ];
-      return NextResponse.json({ paymentLinks: mockData });
+      return NextResponse.json(
+        { error: "Database not configured. Please set up Supabase." },
+        { status: 500 }
+      );
     }
 
-            // Use WalletService to get user
+    // Use WalletService to get user
             const userData = await WalletService.getUserByWalletAddress(merchantId);
             if (!userData) {
               return NextResponse.json(

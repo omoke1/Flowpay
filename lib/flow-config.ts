@@ -1,9 +1,9 @@
 import * as fcl from "@onflow/fcl";
 
-// Testnet contract addresses
+// Testnet contract addresses (from official Flow documentation)
 export const CONTRACTS = {
   FungibleToken: "0x9a0766d93b6608b7",
-  FlowToken: "0x0ae53cb6e3f42a79",
+  FlowToken: "0x7e60df042a9c0868",
   // USDC.e address on testnet (to be updated with actual address)
   USDC: "0x0ae53cb6e3f42a79",
 };
@@ -12,21 +12,51 @@ export const CONTRACTS = {
 export const initializeFCL = () => {
   if (typeof window === "undefined") return;
   
-  fcl.config({
-    "accessNode.api": "https://rest-testnet.onflow.org",
-    "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
-    "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
-    "app.detail.title": "FlowPay",
-    "app.detail.icon": "https://flowpay.app/logo.svg",
-    "service.OpenID.scopes": "email",
-    // Additional configuration for better UX
-    "fcl.limit": 1000,
-    "fcl.eventPollRate": 2000,
-    // Network configuration
-    "flow.network": "testnet",
-    // Flow Port configuration for managed wallets
-    "fcl.port": "https://port.onflow.org"
-  });
+  try {
+    // Use the official FCL configuration pattern from Flow documentation
+    fcl.config({
+      // Network configuration
+      "flow.network": "testnet",
+      "accessNode.api": "https://rest-testnet.onflow.org",
+      
+      // Wallet discovery configuration
+      "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+      "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
+      "discovery.wallet.method": "IFRAME/RPC",
+      
+      // WalletConnect configuration (required for wallet discovery)
+      // Get your project ID from: https://cloud.walletconnect.com/
+      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
+      
+      // App details for wallet discovery
+      "app.detail.title": "FlowPay",
+      "app.detail.icon": "https://flowpay.app/logo.svg",
+      "app.detail.description": "Professional payment platform for Flow blockchain",
+      "app.detail.url": "https://flowpay.app",
+      
+      // OpenID Connect scopes
+      "service.OpenID.scopes": "email",
+      
+      // Transaction limits
+      "fcl.limit": 1000,
+      
+      // Contract addresses for testnet
+      "0xFlowToken": "0x7e60df042a9c0868",
+      "0xFungibleToken": "0x9a0766d93b6608b7"
+    });
+  } catch (error) {
+    console.warn("FCL configuration warning (non-critical):", error);
+    // Fallback to minimal configuration
+    fcl.config({
+      "flow.network": "testnet",
+      "accessNode.api": "https://rest-testnet.onflow.org",
+      "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+      "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
+      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
+      "app.detail.title": "FlowPay",
+      "app.detail.icon": "https://flowpay.app/logo.svg"
+    });
+  }
 };
 
 // Utility functions for Flow transactions
@@ -42,8 +72,8 @@ export const isValidFlowAddress = (address: string) => {
 // Transaction templates
 export const TRANSACTION_TEMPLATES = {
   transferFlow: `
-    import FungibleToken from 0x9a0766d93b6608b7
-    import FlowToken from 0x0ae53cb6e3f42a79
+    import FungibleToken from 0xFungibleToken
+    import FlowToken from 0xFlowToken
     
     transaction(amount: UFix64, to: Address) {
       let sentVault: @FungibleToken.Vault
@@ -65,7 +95,7 @@ export const TRANSACTION_TEMPLATES = {
   `,
   
   transferUSDC: `
-    import FungibleToken from 0x9a0766d93b6608b7
+    import FungibleToken from 0xFungibleToken
     import FiatToken from 0x0ae53cb6e3f42a79
     
     transaction(amount: UFix64, to: Address) {

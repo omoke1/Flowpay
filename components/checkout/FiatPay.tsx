@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Loader2, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTransakConfig } from "@/lib/transak";
+// Dynamic import for Transak SDK
 
 interface FiatPayProps {
   paymentLinkId: string;
@@ -32,6 +33,12 @@ export function FiatPay({
       setCreating(true);
       setError(null);
 
+      // Check if Transak is configured
+      console.log('Transak API Key:', process.env.NEXT_PUBLIC_TRANSAK_API_KEY ? 'Set' : 'Not set');
+      if (!process.env.NEXT_PUBLIC_TRANSAK_API_KEY) {
+        throw new Error('Card payments are not available. Transak is not configured.');
+      }
+
       // Create order reference in our database
       const response = await fetch('/api/transak/create-order', {
         method: 'POST',
@@ -50,8 +57,6 @@ export function FiatPay({
       setOrderReference(data.orderReference);
 
       // Initialize Transak SDK
-      const TransakSDK = (await import('@transak/transak-sdk')).default;
-      
       const transakConfig = getTransakConfig({
         walletAddress: merchantWalletAddress,
         fiatAmount: parseFloat(amount),
@@ -61,34 +66,25 @@ export function FiatPay({
         partnerOrderId: data.orderReference,
       });
 
-      const transak = new TransakSDK(transakConfig);
+      // Dynamic import with proper error handling
+      const TransakModule = await import('@transak/transak-sdk');
+      
+      // The Transak SDK exports a 'Transak' property, not a default export
+      if (!TransakModule.Transak) {
+        throw new Error('Transak SDK not properly loaded');
+      }
 
-      // Listen for Transak events
-      transak.on(transak.ALL_EVENTS, (event: any) => {
-        console.log('Transak event:', event);
-      });
-
-      transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
-        console.log('Order successful:', orderData);
-        onSuccess({
-          ...orderData,
-          orderReference: data.orderReference,
-        });
-      });
-
-      transak.on(transak.EVENTS.TRANSAK_ORDER_FAILED, (orderData: any) => {
-        console.error('Order failed:', orderData);
-        onError('Payment failed. Please try again.');
-      });
-
-      transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
-        console.log('Widget closed');
-        setLoading(false);
-      });
+      console.log('Transak config being used:', JSON.stringify(transakConfig, null, 2));
+      
+      const transak = new TransakModule.Transak(transakConfig);
 
       // Open Transak widget
       setLoading(true);
       transak.init();
+      
+      // For now, we'll handle success/failure through webhooks
+      // The Transak widget will redirect to the success URL on completion
+      console.log('Transak widget initialized successfully');
     } catch (err: any) {
       console.error('Error initializing Transak:', err);
       setError(err.message || 'Failed to initialize payment. Please try again.');
@@ -100,46 +96,44 @@ export function FiatPay({
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">
-              Card Payment via Transak
-            </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-              Pay with your credit/debit card. Funds will be converted to USDC.e and sent directly to the merchant's wallet.
-            </p>
-          </div>
+      <div className="text-center">
+        <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <CreditCard className="w-8 h-8 text-blue-400" />
         </div>
+        <h3 className="text-xl font-semibold text-white mb-2">
+          Card Payment via Transak
+        </h3>
+        <p className="text-white/70 text-sm leading-relaxed">
+          Pay with your credit/debit card. Funds will be converted to USDC.e and sent directly to the merchant's wallet.
+        </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 dark:text-gray-400">Product</span>
-            <span className="font-medium text-gray-900 dark:text-white">{productName}</span>
-          </div>
-          
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 dark:text-gray-400">Amount</span>
-            <span className="font-semibold text-lg text-gray-900 dark:text-white">${amount} USD</span>
-          </div>
-          
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Settlement</span>
-            <span className="text-gray-700 dark:text-gray-300">USDC.e on Flow</span>
-          </div>
+      <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-white/70">Product</span>
+          <span className="font-medium text-white">{productName}</span>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="text-white/70">Amount</span>
+          <span className="font-bold text-[#97F11D] text-lg">${amount} USD</span>
+        </div>
+        
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-white/70">Settlement</span>
+          <span className="text-white/60">USDC.e on Flow</span>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-4 h-4 text-red-400" />
+            </div>
             <div>
-              <h4 className="font-medium text-red-900 dark:text-red-100">Payment Error</h4>
-              <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+              <p className="text-red-300 font-medium text-sm">Payment Error</p>
+              <p className="text-red-200 text-sm mt-1">{error}</p>
             </div>
           </div>
         </div>
@@ -148,7 +142,7 @@ export function FiatPay({
       <Button
         onClick={handlePayWithCard}
         disabled={creating || loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-medium"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
       >
         {creating ? (
           <>
@@ -168,7 +162,7 @@ export function FiatPay({
         )}
       </Button>
 
-      <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-center text-white/50">
         Powered by Transak • Secure payment processing
       </p>
     </div>

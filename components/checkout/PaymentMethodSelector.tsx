@@ -16,57 +16,72 @@ export function PaymentMethodSelector({
   onSelect,
 }: PaymentMethodSelectorProps) {
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-        Choose Payment Method
-      </h3>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h3 className="text-xl font-semibold text-white mb-2">
+          Choose Payment Method
+        </h3>
+        <p className="text-white/70 text-sm">
+          Select how you'd like to pay for this purchase
+        </p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Show message if no payment methods are available */}
+        {!acceptFiat && !acceptCrypto && (
+          <div className="col-span-2 text-center py-12">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <p className="text-white/70">
+              No payment methods are currently available for this link.
+            </p>
+          </div>
+        )}
+        
         {/* Card Payment Option */}
         {acceptFiat && (
           <button
             onClick={() => onSelect('fiat')}
-            className={`relative p-6 rounded-xl border-2 transition-all ${
+            className={`relative p-6 rounded-2xl border transition-all duration-200 group ${
               selectedMethod === 'fiat'
-                ? 'border-[#97F11D] bg-[#97F11D]/5'
-                : 'border-gray-200 dark:border-gray-700 hover:border-[#97F11D]/50'
+                ? 'border-[#97F11D] bg-[#97F11D]/10 shadow-lg shadow-[#97F11D]/20'
+                : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
             }`}
           >
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                 selectedMethod === 'fiat'
-                  ? 'bg-[#97F11D] text-black'
-                  : 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                  ? 'bg-[#97F11D] text-black shadow-lg'
+                  : 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
               }`}>
                 <CreditCard className="w-8 h-8" />
               </div>
               
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white">
+                <h4 className="font-semibold text-white mb-1">
                   Pay with Card
                 </h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-white/70">
                   Visa, Mastercard, Apple Pay
                 </p>
               </div>
               
               <div className="flex items-center gap-2 pt-2">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" 
-                  alt="Visa" 
-                  className="h-6"
-                />
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
-                  alt="Mastercard" 
-                  className="h-6"
-                />
+                <div className="px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-white/80">
+                  Visa
+                </div>
+                <div className="px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-white/80">
+                  Mastercard
+                </div>
               </div>
             </div>
             
             {selectedMethod === 'fiat' && (
-              <div className="absolute top-3 right-3">
-                <div className="w-6 h-6 rounded-full bg-[#97F11D] flex items-center justify-center">
+              <div className="absolute top-4 right-4">
+                <div className="w-6 h-6 rounded-full bg-[#97F11D] flex items-center justify-center shadow-lg">
                   <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
@@ -80,43 +95,43 @@ export function PaymentMethodSelector({
         {acceptCrypto && (
           <button
             onClick={() => onSelect('crypto')}
-            className={`relative p-6 rounded-xl border-2 transition-all ${
+            className={`relative p-6 rounded-2xl border transition-all duration-200 group ${
               selectedMethod === 'crypto'
-                ? 'border-[#97F11D] bg-[#97F11D]/5'
-                : 'border-gray-200 dark:border-gray-700 hover:border-[#97F11D]/50'
+                ? 'border-[#97F11D] bg-[#97F11D]/10 shadow-lg shadow-[#97F11D]/20'
+                : 'border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10'
             }`}
           >
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                 selectedMethod === 'crypto'
-                  ? 'bg-[#97F11D] text-black'
-                  : 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+                  ? 'bg-[#97F11D] text-black shadow-lg'
+                  : 'bg-green-500/20 text-green-400 group-hover:bg-green-500/30'
               }`}>
                 <Wallet className="w-8 h-8" />
               </div>
               
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white">
+                <h4 className="font-semibold text-white mb-1">
                   Pay with Crypto
                 </h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-white/70">
                   FLOW, USDC.e
                 </p>
               </div>
               
               <div className="flex items-center gap-2 pt-2">
-                <div className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300">
+                <div className="px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-white/80">
                   Flow
                 </div>
-                <div className="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300">
+                <div className="px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-white/80">
                   USDC.e
                 </div>
               </div>
             </div>
             
             {selectedMethod === 'crypto' && (
-              <div className="absolute top-3 right-3">
-                <div className="w-6 h-6 rounded-full bg-[#97F11D] flex items-center justify-center">
+              <div className="absolute top-4 right-4">
+                <div className="w-6 h-6 rounded-full bg-[#97F11D] flex items-center justify-center shadow-lg">
                   <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>

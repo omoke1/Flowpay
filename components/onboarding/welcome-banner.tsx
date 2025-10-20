@@ -1,0 +1,122 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  Sparkles, 
+  ArrowRight, 
+  X, 
+  Gift,
+  Zap,
+  Shield
+} from "lucide-react";
+
+interface WelcomeBannerProps {
+  isVisible: boolean;
+  onStartTour: () => void;
+  onDismiss: () => void;
+  onCreateFirstLink: () => void;
+}
+
+export function WelcomeBanner({ 
+  isVisible, 
+  onStartTour, 
+  onDismiss, 
+  onCreateFirstLink 
+}: WelcomeBannerProps) {
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    onDismiss();
+  };
+
+  if (!isVisible || isDismissed) return null;
+
+  return (
+    <div className="mb-6">
+      <Card className="bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-[#97F11D]/20 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-[#97F11D]" />
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Welcome to FlowPay! 🎉
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  You're all set to start accepting payments. Let's get you started with your first payment link.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Quick Setup</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Get started in minutes</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                      <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Secure Payments</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Blockchain-powered</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                      <Gift className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Multiple Methods</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Crypto + Cards</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={onCreateFirstLink}
+                    className="bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium flex items-center gap-2"
+                  >
+                    <Gift className="w-4 h-4" />
+                    Create Your First Payment Link
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={onStartTour}
+                    className="border-gray-300 dark:border-gray-600"
+                  >
+                    Take a Tour
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleDismiss}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+

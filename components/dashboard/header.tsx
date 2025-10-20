@@ -104,7 +104,7 @@ export function Header({ title, showCreateButton = true }: HeaderProps) {
 
             {/* Dropdown Menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-[#111111] border border-white/10 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 rounded-lg shadow-lg z-50">
                 <div className="py-2">
                   <Link
                     href="/dashboard/settings"

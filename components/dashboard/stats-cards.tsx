@@ -21,7 +21,7 @@ function StatCard({ title, value, icon, change, changeType = "neutral" }: StatCa
   };
 
   return (
-    <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 hover:bg-white/5 transition-colors">
+    <div className="bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 rounded-2xl p-6 hover:bg-white/5 dark:hover:bg-gray-800 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div className="text-2xl">{icon}</div>
         {change && (
