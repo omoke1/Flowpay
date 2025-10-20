@@ -1,144 +1,132 @@
-# FlowPay
+# FlowPay - Business Payments on Flow
 
-**Business Payments on Flow**
+A professional payment platform built on the Flow blockchain, enabling businesses to accept crypto payments with ease.
 
-Accept payments on Flow in seconds. Create links, get paid in crypto, automate your revenue.
+## 🚀 Features
 
-## Features
+- **Flow Blockchain Integration** - Accept USDC.e and FLOW token payments
+- **Payment Links** - Create shareable payment links for products/services
+- **Real-time Dashboard** - Track payments, analytics, and revenue
+- **Mobile Responsive** - Works seamlessly on all devices
+- **User Authentication** - Flow wallet integration with email registration
+- **Notification System** - Real-time payment confirmations
+- **Settings Management** - API keys, webhooks, and preferences
 
-- 🔗 Create payment links instantly
-- 💰 Accept FLOW and USDC.e payments
-- 📊 Track all transactions in merchant dashboard
-- ✉️ Automated email receipts
-- 🔐 Secure wallet authentication
+## 🛠️ Tech Stack
 
-## Tech Stack
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Blockchain**: Flow Client Library (FCL)
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Payments**: Flow blockchain, Transak integration
+- **Email**: Resend API
+- **Deployment**: Vercel-ready
 
-- **Frontend:** Next.js 14, Tailwind CSS, shadcn/ui
-- **Blockchain:** Flow (Cadence), FCL SDK
-- **Auth:** thirdweb
-- **Database:** Supabase
-- **Email:** Resend
-- **Hosting:** Vercel
+## 🏃‍♂️ Quick Start
 
-## Getting Started
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/omoke1/Flowpay.git
+   cd flowpay
+   ```
 
-### Prerequisites
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- Node.js 18+ and npm
-- Flow wallet (for testnet)
-- Supabase account
-- Resend API key
-- thirdweb client ID
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your `.env.local`:
+   ```env
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   
+   # Flow Blockchain
+   NEXT_PUBLIC_FLOW_NETWORK=testnet
+   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+   
+   # Transak (Optional)
+   NEXT_PUBLIC_TRANSAK_API_KEY=your_transak_api_key
+   TRANSAK_API_SECRET=your_transak_secret
+   NEXT_PUBLIC_TRANSAK_ENV=STAGING
+   
+   # Email (Optional)
+   RESEND_API_KEY=your_resend_api_key
+   
+   # App
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
 
-### Installation
+4. **Set up database**
+   - Create a Supabase project
+   - Run the SQL migration: `supabase-setup.sql`
+   - Configure Row Level Security (RLS)
 
-```bash
-# Install dependencies
-npm install
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-# Copy environment variables
-cp .env.example .env.local
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-# Configure your environment variables in .env.local
+## 📱 Usage
 
-# Run development server
-npm run dev
-```
+1. **Connect Wallet** - Use Flow Port or external wallet
+2. **Create Payment Link** - Set amount, description, and payment methods
+3. **Share Link** - Send to customers for payments
+4. **Track Payments** - Monitor in real-time dashboard
+5. **Manage Settings** - Configure API keys and preferences
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+## 🔧 API Endpoints
 
-## Environment Variables
+- `POST /api/payment-links` - Create payment link
+- `GET /api/payment-links` - List payment links
+- `PATCH /api/payment-links/[id]` - Update payment link
+- `DELETE /api/payment-links/[id]` - Delete payment link
+- `POST /api/payments` - Record payment
+- `GET /api/payments` - List payments
+- `POST /api/transak/create-order` - Create Transak order
+- `POST /api/transak/webhook` - Handle Transak webhooks
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-RESEND_API_KEY=your_resend_api_key
-NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_thirdweb_client_id
-NEXT_PUBLIC_FLOW_NETWORK=testnet
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+## 🚀 Deployment
 
-## Project Structure
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main
 
-```
-flowpay/
-├── app/                    # Next.js App Router pages
-│   ├── dashboard/         # Merchant dashboard
-│   ├── pay/[id]/          # Checkout pages
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   ├── dashboard/        # Dashboard components
-│   ├── forms/            # Form components
-│   └── checkout/         # Checkout components
-├── lib/                   # Utility functions
-│   ├── supabase.ts       # Supabase client
-│   ├── flow-config.ts    # Flow FCL configuration
-│   ├── flow-transactions.ts  # Flow transaction helpers
-│   ├── resend.ts         # Email service
-│   └── utils.ts          # General utilities
-└── public/               # Static assets
-```
+### Other Platforms
+- **Netlify**: Build command: `npm run build`
+- **Railway**: Connect GitHub repo and set env vars
+- **Render**: Connect GitHub repo and set env vars
 
-## Database Schema
+## 🔐 Security
 
-### Users Table
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  wallet_address TEXT UNIQUE NOT NULL,
-  email TEXT,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
+- Row Level Security (RLS) enabled on all tables
+- API key rotation and session management
+- Webhook signature verification
+- Input validation and sanitization
 
-### Payment Links Table
-```sql
-CREATE TABLE payment_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  merchant_id UUID REFERENCES users(id),
-  product_name TEXT NOT NULL,
-  description TEXT,
-  amount TEXT NOT NULL,
-  token TEXT NOT NULL CHECK (token IN ('FLOW', 'USDC')),
-  redirect_url TEXT,
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
+## 📄 License
 
-### Payments Table
-```sql
-CREATE TABLE payments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  link_id UUID REFERENCES payment_links(id),
-  payer_address TEXT NOT NULL,
-  amount TEXT NOT NULL,
-  token TEXT NOT NULL,
-  tx_hash TEXT NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed')),
-  paid_at TIMESTAMP DEFAULT NOW()
-);
-```
+MIT License - see LICENSE file for details
 
-## Development Roadmap
+## 🤝 Contributing
 
-- [x] Phase 1: Foundation setup
-- [ ] Phase 2: Authentication & Dashboard
-- [ ] Phase 3: Payment link creation
-- [ ] Phase 4: Checkout & payment flow
-- [ ] Phase 5: Receipts & polish
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## Contributing
+## 📞 Support
 
-This is a hackathon project. Contributions welcome!
-
-## License
-
-MIT
+For support, email support@flowpay.app or create an issue on GitHub.
 
 ---
 
-**Built on Flow** 🌊
-
+Built with ❤️ for the Flow ecosystem
