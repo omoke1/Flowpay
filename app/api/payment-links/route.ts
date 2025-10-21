@@ -6,6 +6,8 @@ import { validateRequestBody, paymentLinkSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("POST /api/payment-links - Starting payment link creation");
+    
     // Rate limiting check
     const rateLimitResult = await checkRateLimit(request, "paymentLinks");
     if (!rateLimitResult.success) {
