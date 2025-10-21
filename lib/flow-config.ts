@@ -46,8 +46,8 @@ export const initializeFCL = () => {
   
   // Check if FCL has the required discovery.wallet configuration
   try {
-    const currentConfig = fcl.config();
-    if (currentConfig && currentConfig["discovery.wallet"]) {
+    const discoveryWallet = fcl.config.get("discovery.wallet");
+    if (discoveryWallet) {
       console.log("FCL already configured with discovery.wallet, skipping configuration...");
       return;
     }
