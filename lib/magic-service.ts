@@ -105,14 +105,7 @@ export class MagicService {
   }
 
   /**
-   * Get user metadata
+   * Note: getUserMetadata method removed due to Magic.link API limitations
+   * Use standard Magic.link user methods instead
    */
-  static async getUserMetadata(): Promise<any> {
-    try {
-      return await this.magic.user.getMetadata();
-    } catch (error) {
-      console.error('Error getting user metadata:', error);
-      return null;
-    }
-  }
 }
