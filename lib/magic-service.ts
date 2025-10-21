@@ -1,12 +1,12 @@
 import { Magic } from 'magic-sdk';
 import { FlowExtension } from '@magic-ext/flow';
 
-// Magic.link configuration for Flow
+// Magic.link configuration for Flow Testnet
 const magic = new Magic(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!, {
   extensions: [
     new FlowExtension({
-      rpcUrl: 'https://rest-testnet.onflow.org', // Testnet RPC
-      network: 'testnet'
+      rpcUrl: 'https://rest-testnet.onflow.org', // Flow Testnet RPC
+      network: 'testnet' // Flow Testnet
     })
   ]
 });
