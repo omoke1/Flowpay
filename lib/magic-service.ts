@@ -33,27 +33,64 @@ export class MagicService {
         throw new Error('Magic.link authentication failed');
       }
 
-      console.log('Magic.link authentication successful, getting Flow wallet info...');
+      console.log('Magic.link authentication successful, creating Flow wallet...');
 
-      // For Magic.link managed wallets, we'll generate a proper Flow address
-      // Magic.link creates the wallet behind the scenes, this is a simplified approach
-      // In production, you'd want to get the actual Flow address from Magic.link
-      const flowAddress = `0x${Math.random().toString(16).substring(2, 42).padStart(40, '0')}`; // Proper Flow address format
+      // Create Flow wallet using Magic.link API
+      const walletResponse = await this.createFlowWallet(didToken);
       
+      if (!walletResponse) {
+        throw new Error('Failed to create Flow wallet');
+      }
+
       console.log('Magic Flow wallet created:', {
-        address: flowAddress,
-        publicKey: 'magic_public_key', // Placeholder for Magic.link public key
+        address: walletResponse.address,
+        publicKey: walletResponse.publicKey,
         isLoggedIn: true
       });
 
       return {
-        address: flowAddress,
-        publicKey: 'magic_public_key',
+        address: walletResponse.address,
+        publicKey: walletResponse.publicKey,
         isLoggedIn: true
       };
 
     } catch (error) {
       console.error('Magic.link authentication error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Create Flow wallet using Magic.link API
+   */
+  private static async createFlowWallet(didToken: string): Promise<{
+    address: string;
+    publicKey: string;
+  } | null> {
+    try {
+      const response = await fetch("https://tee.express.magiclabs.com/v1/wallet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${didToken}`,
+          "X-Magic-API-Key": process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!,
+          "X-Magic-Chain": "FLOW", // Use FLOW instead of ETH
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Magic.link wallet creation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        address: data.public_address,
+        publicKey: data.public_key || 'magic_public_key'
+      };
+
+    } catch (error) {
+      console.error('Error creating Flow wallet:', error);
       return null;
     }
   }
@@ -78,9 +115,29 @@ export class MagicService {
       const isLoggedIn = await this.isLoggedIn();
       if (!isLoggedIn) return null;
 
-      // For Magic.link managed wallets, we'll return a placeholder address
-      // In production, you'd want to get the actual Flow address from Magic.link
-      return `0x${Math.random().toString(16).substring(2, 42).padStart(40, '0')}`;
+      // Get the user's DID token for API calls
+      const didToken = await this.magic.user.getIdToken();
+      if (!didToken) return null;
+
+      // Get wallet info from Magic.link API
+      const response = await fetch("https://tee.express.magiclabs.com/v1/wallet", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${didToken}`,
+          "X-Magic-API-Key": process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY!,
+          "X-Magic-Chain": "FLOW",
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Failed to get wallet info:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.public_address || null;
+
     } catch (error) {
       console.error('Error getting Flow address:', error);
       return null;
