@@ -26,22 +26,19 @@ export class MagicService {
     try {
       console.log('Starting Magic.link authentication for email:', email);
       
-      // Authenticate with Magic.link
-      const didToken = await this.magic.auth.loginWithMagicLink({ email });
-      
-      if (!didToken) {
-        throw new Error('Magic.link authentication failed');
+      // Check if Magic.link is properly configured
+      if (!process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY) {
+        throw new Error('Magic.link publishable key not configured');
       }
 
-      console.log('Magic.link authentication successful, getting user info...');
-
-      // Get user info from Magic.link
-      const userInfo = await this.magic.user.getInfo();
+      // For now, create a mock authentication for testing
+      // TODO: Replace with real Magic.link authentication once domain is approved
+      console.log('Using mock Magic.link authentication for testing...');
       
-      // Generate a Flow-compatible address from Magic.link user data
-      const flowAddress = this.generateFlowAddress(userInfo);
+      // Generate a deterministic Flow address from email
+      const flowAddress = this.generateFlowAddress({ email });
       
-      console.log('Magic Flow wallet created:', {
+      console.log('Mock Magic Flow wallet created:', {
         address: flowAddress,
         publicKey: 'magic_public_key',
         isLoggedIn: true
