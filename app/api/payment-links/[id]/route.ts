@@ -17,7 +17,8 @@ export async function GET(
     }
 
     // Fetch payment link by ID from Supabase with merchant wallet address
-    const { data, error } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .select(`
         *,
@@ -71,7 +72,7 @@ export async function PATCH(
     }
 
     // Update payment link status in Supabase
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .update({ status })
       .eq("id", id)
@@ -117,7 +118,7 @@ export async function DELETE(
     }
     
     // Delete payment link from Supabase
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .delete()
       .eq("id", id)

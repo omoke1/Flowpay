@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Test basic connection
-    const { data, error } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data, error } = await supabaseClient
       .from("users")
       .select("count")
       .limit(1);

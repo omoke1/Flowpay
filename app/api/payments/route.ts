@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get payment link details
-    const { data: linkData, error: linkError } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data: linkData, error: linkError } = await supabaseClient
       .from("payment_links")
       .select("*, users!payment_links_merchant_id_fkey(wallet_address, email)")
       .eq("id", linkId)
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert payment record
-    const { data: payment, error: paymentError } = await supabase
+    const { data: payment, error: paymentError } = await supabaseClient
       .from("payments")
       .insert({
         link_id: linkId,
@@ -260,7 +261,7 @@ export async function GET(request: NextRequest) {
             }
 
     // Fetch payments for merchant
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("payments")
       .select(`
         *,

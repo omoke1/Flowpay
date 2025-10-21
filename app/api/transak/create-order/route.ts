@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch payment link details
-    const { data: paymentLink, error: linkError } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data: paymentLink, error: linkError } = await supabaseClient
       .from('payment_links')
       .select('*')
       .eq('id', paymentLinkId)
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     const orderReference = `flowpay_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // Create pending payment record
-    const { data: payment, error: paymentError } = await supabase
+    const { data: payment, error: paymentError } = await supabaseClient
       .from('payments')
       .insert({
         link_id: paymentLinkId,

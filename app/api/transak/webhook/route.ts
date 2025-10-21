@@ -52,7 +52,8 @@ async function handleOrderCompleted(orderData: TransakWebhookPayload['webhookDat
     }
 
     // Find the payment record by Transak order ID
-    const { data: existingPayment, error: fetchError } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data: existingPayment, error: fetchError } = await supabaseClient
       .from('payments')
       .select(`
         *,
@@ -71,7 +72,7 @@ async function handleOrderCompleted(orderData: TransakWebhookPayload['webhookDat
     }
 
     // Update payment status to completed
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseClient
       .from('payments')
       .update({
         status: 'completed',
@@ -128,7 +129,7 @@ async function handleOrderFailed(orderData: TransakWebhookPayload['webhookData']
     }
 
     // Update payment status to failed
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('payments')
       .update({
         status: 'failed',
