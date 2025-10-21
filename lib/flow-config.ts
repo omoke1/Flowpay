@@ -1,5 +1,34 @@
 import * as fcl from "@onflow/fcl";
 
+// Configure FCL immediately at module load time - BEFORE any async operations
+// This prevents the WalletConnect plugin from being loaded with incremental configurations
+if (typeof window !== "undefined" && !((window as any).__fclConfigured)) {
+  const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+  
+  if (walletConnectProjectId) {
+    // Configure FCL synchronously with complete configuration
+    fcl.config({
+      "flow.network": "testnet",
+      "accessNode.api": "https://rest-testnet.onflow.org",
+      "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+      "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
+      "discovery.wallet.method": "IFRAME/RPC",
+      "walletconnect.projectId": walletConnectProjectId,
+      "app.detail.title": "FlowPay",
+      "app.detail.icon": "https://useflowpay.xyz/logo.svg",
+      "app.detail.description": "Professional payment platform for Flow blockchain",
+      "app.detail.url": "https://useflowpay.xyz",
+      "service.OpenID.scopes": "email",
+      "fcl.limit": 1000,
+      "0xFlowToken": "0x7e60df042a9c0868",
+      "0xFungibleToken": "0x9a0766d93b6608b7"
+    });
+    
+    (window as any).__fclConfigured = true;
+    console.log("FCL configured synchronously at module load");
+  }
+}
+
 // Testnet contract addresses (from official Flow documentation)
 export const CONTRACTS = {
   FungibleToken: "0x9a0766d93b6608b7",
@@ -31,99 +60,23 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
-// Global FCL configuration state that persists across module reloads
-if (typeof window !== "undefined") {
-  (window as any).__fclConfiguring = false;
-  (window as any).__fclConfigured = false;
-  (window as any).__fclConfigAttempted = false;
-}
-
-// FCL Configuration function (to be called once on client-side)
+// FCL Configuration function (simplified - just verify configuration)
 export const initializeFCL = async () => {
   if (typeof window === "undefined") return;
   
-  // NUCLEAR OPTION: If FCL configuration has been attempted before, NEVER try again
-  if ((window as any).__fclConfigAttempted) {
-    console.log("FCL configuration already attempted, skipping permanently...");
-    return;
-  }
+  // FCL is already configured at module load time
+  console.log("FCL configuration check - already configured at module load");
   
-  // Mark that we're attempting configuration
-  (window as any).__fclConfigAttempted = true;
-  
-  // Check if FCL is already configured to prevent WalletConnect plugin errors
+  // Verify configuration was applied
   try {
     const discoveryWallet = await fcl.config.get("discovery.wallet");
     if (discoveryWallet) {
-      console.log("FCL already configured with discovery.wallet, skipping configuration...");
-      (window as any).__fclInitialized = true;
-      return;
+      console.log("FCL configuration verified. discovery.wallet:", discoveryWallet);
+    } else {
+      console.warn("FCL configuration issue: discovery.wallet not set");
     }
   } catch (e) {
-    // FCL not configured yet, proceed with configuration
-  }
-  
-  try {
-
-    // Build complete configuration object ONCE to prevent WalletConnect plugin errors
-    const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
-    
-    if (!walletConnectProjectId) {
-      console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
-      throw new Error("WalletConnect Project ID is required");
-    }
-
-    // Complete FCL configuration - all at once to prevent multiple plugin initializations
-    const fclConfig = {
-      // Network configuration
-      "flow.network": "testnet",
-      "accessNode.api": "https://rest-testnet.onflow.org",
-      
-      // Wallet discovery configuration
-      "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
-      "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
-      "discovery.wallet.method": "IFRAME/RPC",
-      
-      // WalletConnect configuration (required for wallet discovery)
-      "walletconnect.projectId": walletConnectProjectId,
-      
-      // App details for wallet discovery (all at once)
-      "app.detail.title": "FlowPay",
-      "app.detail.icon": "https://useflowpay.xyz/logo.svg",
-      "app.detail.description": "Professional payment platform for Flow blockchain",
-      "app.detail.url": "https://useflowpay.xyz",
-      
-      // OpenID Connect scopes
-      "service.OpenID.scopes": "email",
-      
-      // Transaction limits
-      "fcl.limit": 1000,
-      
-      // Contract addresses for testnet
-      "0xFlowToken": "0x7e60df042a9c0868",
-      "0xFungibleToken": "0x9a0766d93b6608b7"
-    };
-
-    // Configure FCL with complete configuration - ONLY ONCE
-    fcl.config(fclConfig);
-    
-    // Verify configuration was applied
-    try {
-      const appliedDiscoveryWallet = await fcl.config.get("discovery.wallet");
-      console.log("FCL configuration applied successfully. discovery.wallet:", appliedDiscoveryWallet);
-    } catch (e) {
-      console.error("Failed to verify FCL configuration:", e);
-    }
-    
-    console.log("FCL initialized successfully with complete configuration");
-    (window as any).__fclInitialized = true;
-    (window as any).__fclConfigured = true;
-  } catch (error) {
-    console.error("FCL initialization failed:", error);
-    // Don't try fallback configuration to avoid multiple plugin initializations
-    throw error;
-  } finally {
-    // Configuration attempt completed
+    console.error("Failed to verify FCL configuration:", e);
   }
 };
 
