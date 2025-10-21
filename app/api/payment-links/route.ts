@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert payment link into Supabase
-    const { data, error } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .insert({
         merchant_id: userData.id,
@@ -151,7 +152,8 @@ export async function DELETE(request: NextRequest) {
 
     // Get the user record by wallet address
     // Both managed and external wallets now have real Flow addresses
-    const { data: user, error: userError } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data: user, error: userError } = await supabaseClient
       .from("users")
       .select("id")
       .eq("wallet_address", merchantId)
@@ -165,7 +167,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete all payment links for this merchant
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .delete()
       .eq("merchant_id", user.id)
@@ -240,7 +242,8 @@ export async function GET(request: NextRequest) {
     console.log("GET /api/payment-links - Fetching payment links for user ID:", userData.id);
 
     // Fetch payment links for merchant
-    const { data, error } = await supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
+    const { data, error } = await supabaseClient
       .from("payment_links")
       .select("*")
       .eq("merchant_id", userData.id)
