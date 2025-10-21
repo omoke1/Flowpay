@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, isDatabaseConfigured, getDatabaseStatus } from "@/lib/supabase";
 import { WalletService } from "@/lib/wallet-service";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { validateRequestBody, paymentLinkSchema } from "@/lib/validation";
@@ -61,9 +61,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if Supabase is configured
-    if (!supabase) {
+    if (!isDatabaseConfigured()) {
+      const status = getDatabaseStatus();
+      console.error("Database configuration error:", status);
       return NextResponse.json(
-        { error: "Database not configured. Please set up Supabase." },
+        { 
+          error: "Database not configured", 
+          details: status.error,
+          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables"
+        },
         { status: 500 }
       );
     }
@@ -129,9 +135,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check if Supabase is configured
-    if (!supabase) {
+    if (!isDatabaseConfigured()) {
+      const status = getDatabaseStatus();
+      console.error("Database configuration error:", status);
       return NextResponse.json(
-        { error: "Database not configured. Please set up Supabase." },
+        { 
+          error: "Database not configured", 
+          details: status.error,
+          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables"
+        },
         { status: 500 }
       );
     }
@@ -195,10 +207,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if Supabase is configured
-    if (!supabase) {
-      console.log("GET /api/payment-links - Supabase not configured");
+    if (!isDatabaseConfigured()) {
+      const status = getDatabaseStatus();
+      console.log("GET /api/payment-links - Database not configured:", status);
       return NextResponse.json(
-        { error: "Database not configured. Please set up Supabase." },
+        { 
+          error: "Database not configured", 
+          details: status.error,
+          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables"
+        },
         { status: 500 }
       );
     }
