@@ -19,6 +19,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<'signup' | 'signin'>('signup');
 
   if (!isOpen) return null;
 
@@ -56,6 +57,77 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
         setStep('select');
         setSelectedMethod(null);
       }
+    }
+  };
+
+  const handleEmailSignIn = async () => {
+    if (!email) {
+      setRegistrationError('Please enter your email address');
+      return;
+    }
+
+    setRegistrationError(null);
+    setStep('authenticating');
+    
+    try {
+      // Simulate sign-in process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // For now, we'll create a mock user for sign-in
+      // In a real implementation, you'd verify the email and retrieve the user
+      const generateFlowAddress = () => {
+        const chars = '0123456789abcdef';
+        let address = '0x';
+        for (let i = 0; i < 16; i++) {
+          address += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return address;
+      };
+
+      const mockUser = {
+        address: generateFlowAddress(),
+        email: email,
+        name: 'Existing User', // In real implementation, get from database
+        wallet_type: 'managed' as const,
+        verified: true
+      };
+
+      console.log("Signing in user:", mockUser);
+
+      // Get or create user in database
+      const { WalletService } = await import("@/lib/wallet-service");
+      const dbUser = await WalletService.getOrCreateUser(mockUser.address, {
+        email: mockUser.email,
+        wallet_type: mockUser.wallet_type,
+        display_name: mockUser.name,
+        is_verified: mockUser.verified
+      });
+
+      console.log("Database user signed in:", dbUser);
+
+      if (dbUser) {
+        // Set the user directly in the Flow provider
+        console.log("Setting user directly:", dbUser);
+        setUserDirectly(dbUser);
+        
+        setStep('success');
+        
+        // Auto-close after success
+        setTimeout(() => {
+          onSuccess?.();
+          onClose();
+          setStep('select');
+          setSelectedMethod(null);
+          setEmail('');
+          setName('');
+        }, 2000);
+      } else {
+        throw new Error('Failed to sign in. Please check your email or sign up for a new account.');
+      }
+    } catch (err: any) {
+      console.error("Email sign-in failed:", err);
+      setRegistrationError(err.message || 'Sign-in failed. Please try again.');
+      setStep('email-form');
     }
   };
 
@@ -137,6 +209,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       setEmail('');
       setName('');
       setRegistrationError(null);
+      setAuthMode('signup');
     }
   };
 
@@ -148,13 +221,13 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
             <div>
               <h2 className="text-2xl font-bold text-gray-100 dark:text-gray-100 dark:text-white mb-2">
                 {step === 'select' && 'Connect to FlowPay'}
-                {step === 'email-form' && 'Create Your Account'}
+                {step === 'email-form' && (authMode === 'signup' ? 'Create Your Account' : 'Sign In to Your Account')}
                 {step === 'authenticating' && 'Connecting...'}
                 {step === 'success' && 'Welcome to FlowPay!'}
               </h2>
               <p className="text-gray-100 dark:text-white/70 text-sm">
                 {step === 'select' && 'Choose how you want to connect your wallet'}
-                {step === 'email-form' && 'Enter your details to create a managed wallet'}
+                {step === 'email-form' && (authMode === 'signup' ? 'Enter your details to create a managed wallet' : 'Enter your email to sign in to your account')}
                 {step === 'authenticating' && 'Please complete the authentication process'}
                 {step === 'success' && 'You are now connected and ready to use FlowPay'}
               </p>
@@ -264,6 +337,30 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
 
           {step === 'email-form' && (
             <div className="space-y-6">
+              {/* Auth Mode Toggle */}
+              <div className="flex bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 rounded-xl p-1">
+                <button
+                  onClick={() => setAuthMode('signup')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    authMode === 'signup'
+                      ? 'bg-[#97F11D] text-black'
+                      : 'text-gray-100 dark:text-white/70 hover:text-gray-100 dark:hover:text-white'
+                  }`}
+                >
+                  Sign Up
+                </button>
+                <button
+                  onClick={() => setAuthMode('signin')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    authMode === 'signin'
+                      ? 'bg-[#97F11D] text-black'
+                      : 'text-gray-100 dark:text-white/70 hover:text-gray-100 dark:hover:text-white'
+                  }`}
+                >
+                  Sign In
+                </button>
+              </div>
+
               {/* Registration Error Display */}
               {registrationError && (
                 <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
@@ -272,7 +369,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                       <AlertCircle className="w-4 h-4 text-red-400" />
                     </div>
                     <div>
-                      <p className="text-red-300 font-medium text-sm">Registration Error</p>
+                      <p className="text-red-300 font-medium text-sm">{authMode === 'signup' ? 'Registration Error' : 'Sign-in Error'}</p>
                       <p className="text-red-200 text-sm mt-1">{registrationError}</p>
                     </div>
                   </div>
@@ -281,18 +378,20 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
               
               <div className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 rounded-2xl p-6">
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-100 dark:text-white mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full px-4 py-3 bg-black/[0.03] dark:bg-white/10 border border-zinc-100/10 dark:border-white/20 rounded-xl text-gray-100 dark:text-white placeholder-gray-400 dark:placeholder-white/50 focus:outline-none focus:border-[#97F11D] focus:bg-black/[0.06] dark:focus:bg-white/15 transition-all duration-200"
-                    />
-                  </div>
+                  {authMode === 'signup' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-100 dark:text-white mb-2">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter your full name"
+                        className="w-full px-4 py-3 bg-black/[0.03] dark:bg-white/10 border border-zinc-100/10 dark:border-white/20 rounded-xl text-gray-100 dark:text-white placeholder-gray-400 dark:placeholder-white/50 focus:outline-none focus:border-[#97F11D] focus:bg-black/[0.06] dark:focus:bg-white/15 transition-all duration-200"
+                      />
+                    </div>
+                  )}
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-100 dark:text-white mb-2">
@@ -317,7 +416,10 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                       <div>
                         <p className="text-blue-300 font-medium text-sm">Managed Wallet</p>
                         <p className="text-blue-200 text-sm mt-1">
-                          We'll create a secure managed wallet for you. You can always connect an external wallet later.
+                          {authMode === 'signup' 
+                            ? "We'll create a secure managed wallet for you. You can always connect an external wallet later."
+                            : "Sign in to access your existing managed wallet and dashboard."
+                          }
                         </p>
                       </div>
                     </div>
@@ -335,17 +437,17 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                       Back
                     </Button>
                     <Button
-                      onClick={handleEmailRegistration}
-                      disabled={!email || !name || loading}
+                      onClick={authMode === 'signup' ? handleEmailRegistration : handleEmailSignIn}
+                      disabled={!email || (authMode === 'signup' && !name) || loading}
                       className="flex-1 bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium"
                     >
                       {loading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creating Account...
+                          {authMode === 'signup' ? 'Creating Account...' : 'Signing In...'}
                         </>
                       ) : (
-                        'Create Account'
+                        authMode === 'signup' ? 'Create Account' : 'Sign In'
                       )}
                     </Button>
                   </div>
