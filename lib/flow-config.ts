@@ -31,9 +31,22 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
+// Global configuration lock to prevent multiple FCL initializations
+let fclConfiguring = false;
+
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = async () => {
   if (typeof window === "undefined") return;
+  
+  // Prevent multiple simultaneous configurations
+  if (fclConfiguring) {
+    console.log("FCL configuration already in progress, waiting...");
+    // Wait for configuration to complete
+    while (fclConfiguring) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return;
+  }
   
   // Use a more robust global flag that persists across module reloads
   if ((window as any).__fclInitialized) {
@@ -41,19 +54,20 @@ export const initializeFCL = async () => {
     return;
   }
   
-  // Mark as initialized immediately to prevent race conditions
-  (window as any).__fclInitialized = true;
-  
-  // Check if FCL has the required discovery.wallet configuration
+  // Check if FCL is already configured to prevent WalletConnect plugin errors
   try {
     const discoveryWallet = await fcl.config.get("discovery.wallet");
     if (discoveryWallet) {
       console.log("FCL already configured with discovery.wallet, skipping configuration...");
+      (window as any).__fclInitialized = true;
       return;
     }
   } catch (e) {
     // FCL not configured yet, proceed with configuration
   }
+  
+  // Set configuration lock
+  fclConfiguring = true;
   
   try {
     // Use the official FCL configuration pattern from Flow documentation
@@ -92,6 +106,7 @@ export const initializeFCL = async () => {
     });
     
     console.log("FCL initialized successfully");
+    (window as any).__fclInitialized = true;
   } catch (error) {
     console.warn("FCL configuration warning (non-critical):", error);
     // Fallback to minimal configuration
@@ -109,9 +124,13 @@ export const initializeFCL = async () => {
         "app.detail.icon": "https://useflowpay.xyz/logo.svg"
       });
       console.log("FCL initialized with fallback configuration");
+      (window as any).__fclInitialized = true;
     } catch (fallbackError) {
       console.error("FCL initialization failed completely:", fallbackError);
     }
+  } finally {
+    // Always release the configuration lock
+    fclConfiguring = false;
   }
 };
 
