@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, Wallet, AlertCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFlowUser } from "@/components/providers/flow-provider";
+import { fcl } from "@/lib/flow-config";
 
 interface CryptoPayProps {
   paymentLinkId: string;
@@ -48,7 +49,6 @@ export function CryptoPay({
 
     try {
       const { sendFlowTokens, sendUSDCTokens } = await import("@/lib/flow-transactions");
-      const { fcl } = await import("@/lib/flow-config");
 
       // Execute payment transaction based on selected token
       let txId: string;
