@@ -1,5 +1,6 @@
 import { fcl } from "./flow-config";
 import { supabase, isDatabaseConfigured, getDatabaseStatus } from "./supabase";
+import bcrypt from "bcryptjs";
 
 export interface WalletUser {
   id: string;
@@ -10,6 +11,7 @@ export interface WalletUser {
   display_name?: string;
   avatar_url?: string;
   is_verified: boolean;
+  password_hash?: string;
   created_at: string;
   updated_at: string;
 }
@@ -74,6 +76,51 @@ export class WalletService {
   }
 
   /**
+   * Authenticate user with email and password
+   */
+  static async authenticateUser(email: string, password: string): Promise<WalletUser | null> {
+    try {
+      if (!isDatabaseConfigured()) {
+        const status = getDatabaseStatus();
+        console.error("Database configuration error:", status.error);
+        throw new Error(`Database not configured. ${status.error}. Please set up Supabase environment variables.`);
+      }
+
+      const supabaseClient = supabase!;
+
+      // Find user by email
+      const { data: user, error: fetchError } = await supabaseClient
+        .from("users")
+        .select("*")
+        .eq("email", email)
+        .single();
+
+      if (fetchError || !user) {
+        console.log("User not found with email:", email);
+        return null;
+      }
+
+      // Verify password
+      if (!user.password_hash) {
+        console.log("User has no password set");
+        return null;
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      if (!isValidPassword) {
+        console.log("Invalid password for user:", email);
+        return null;
+      }
+
+      console.log("User authenticated successfully:", user.email);
+      return user as WalletUser;
+    } catch (error) {
+      console.error("Error in authenticateUser:", error);
+      return null;
+    }
+  }
+
+  /**
    * Get or create user in database
    */
   static async getOrCreateUser(
@@ -102,17 +149,25 @@ export class WalletService {
       }
 
       // If user doesn't exist, create new user
+      const insertData: any = {
+        wallet_address: walletAddress,
+        email: userData?.email,
+        wallet_type: userData?.wallet_type || 'external',
+        flow_port_user_id: userData?.flow_port_user_id,
+        display_name: userData?.display_name,
+        avatar_url: userData?.avatar_url,
+        is_verified: userData?.is_verified || false
+      };
+
+      // Hash password if provided
+      if (userData?.password) {
+        const saltRounds = 12;
+        insertData.password_hash = await bcrypt.hash(userData.password, saltRounds);
+      }
+
       const { data: newUser, error: createError } = await supabaseClient
         .from("users")
-        .insert({
-          wallet_address: walletAddress,
-          email: userData?.email,
-          wallet_type: userData?.wallet_type || 'external',
-          flow_port_user_id: userData?.flow_port_user_id,
-          display_name: userData?.display_name,
-          avatar_url: userData?.avatar_url,
-          is_verified: userData?.is_verified || false
-        })
+        .insert(insertData)
         .select()
         .single();
 

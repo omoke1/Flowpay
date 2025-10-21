@@ -18,6 +18,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
   const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<'signup' | 'signin'>('signup');
 
@@ -61,8 +62,8 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
   };
 
   const handleEmailSignIn = async () => {
-    if (!email) {
-      setRegistrationError('Please enter your email address');
+    if (!email || !password) {
+      setRegistrationError('Please enter both email and password');
       return;
     }
 
@@ -73,35 +74,9 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       // Simulate sign-in process
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // For now, we'll create a mock user for sign-in
-      // In a real implementation, you'd verify the email and retrieve the user
-      const generateFlowAddress = () => {
-        const chars = '0123456789abcdef';
-        let address = '0x';
-        for (let i = 0; i < 16; i++) {
-          address += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return address;
-      };
-
-      const mockUser = {
-        address: generateFlowAddress(),
-        email: email,
-        name: 'Existing User', // In real implementation, get from database
-        wallet_type: 'managed' as const,
-        verified: true
-      };
-
-      console.log("Signing in user:", mockUser);
-
-      // Get or create user in database
+      // Authenticate user with email and password
       const { WalletService } = await import("@/lib/wallet-service");
-      const dbUser = await WalletService.getOrCreateUser(mockUser.address, {
-        email: mockUser.email,
-        wallet_type: mockUser.wallet_type,
-        display_name: mockUser.name,
-        is_verified: mockUser.verified
-      });
+      const dbUser = await WalletService.authenticateUser(email, password);
 
       console.log("Database user signed in:", dbUser);
 
@@ -120,9 +95,10 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
           setSelectedMethod(null);
           setEmail('');
           setName('');
+          setPassword('');
         }, 2000);
       } else {
-        throw new Error('Failed to sign in. Please check your email or sign up for a new account.');
+        throw new Error('Invalid email or password. Please check your credentials or sign up for a new account.');
       }
     } catch (err: any) {
       console.error("Email sign-in failed:", err);
@@ -132,7 +108,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
   };
 
   const handleEmailRegistration = async () => {
-    if (!email || !name) {
+    if (!email || !name || !password) {
       setRegistrationError('Please fill in all fields');
       return;
     }
@@ -170,7 +146,8 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
         email: mockUser.email,
         wallet_type: mockUser.wallet_type,
         display_name: mockUser.name,
-        is_verified: mockUser.verified
+        is_verified: mockUser.verified,
+        password: password
       });
 
       console.log("Database user created:", dbUser);
@@ -208,6 +185,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       setSelectedMethod(null);
       setEmail('');
       setName('');
+      setPassword('');
       setRegistrationError(null);
       setAuthMode('signup');
     }
@@ -406,6 +384,19 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                     />
                   </div>
                   
+                  <div>
+                    <label className="block text-sm font-medium text-gray-100 dark:text-white mb-2">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={authMode === 'signup' ? "Create a secure password" : "Enter your password"}
+                      className="w-full px-4 py-3 bg-black/[0.03] dark:bg-white/10 border border-zinc-100/10 dark:border-white/20 rounded-xl text-gray-100 dark:text-white placeholder-gray-400 dark:placeholder-white/50 focus:outline-none focus:border-[#97F11D] focus:bg-black/[0.06] dark:focus:bg-white/15 transition-all duration-200"
+                    />
+                  </div>
+                  
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -438,7 +429,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                     </Button>
                     <Button
                       onClick={authMode === 'signup' ? handleEmailRegistration : handleEmailSignIn}
-                      disabled={!email || (authMode === 'signup' && !name) || loading}
+                      disabled={!email || !password || (authMode === 'signup' && !name) || loading}
                       className="flex-1 bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-medium"
                     >
                       {loading ? (
