@@ -88,10 +88,11 @@ export const initializeFCL = async () => {
   try {
     // Final check - if FCL is already configured, don't configure again
     try {
-      const existingConfig = fcl.config();
-      if (existingConfig && Object.keys(existingConfig).length > 0) {
-        console.log("FCL already configured, skipping configuration...");
+      const discoveryWallet = await fcl.config.get("discovery.wallet");
+      if (discoveryWallet) {
+        console.log("FCL already configured with discovery.wallet, skipping configuration...");
         (window as any).__fclInitialized = true;
+        (window as any).__fclConfigured = true;
         fclConfigured = true;
         return;
       }
@@ -140,6 +141,14 @@ export const initializeFCL = async () => {
 
     // Configure FCL with complete configuration - ONLY ONCE
     fcl.config(fclConfig);
+    
+    // Verify configuration was applied
+    try {
+      const appliedDiscoveryWallet = await fcl.config.get("discovery.wallet");
+      console.log("FCL configuration applied successfully. discovery.wallet:", appliedDiscoveryWallet);
+    } catch (e) {
+      console.error("Failed to verify FCL configuration:", e);
+    }
     
     console.log("FCL initialized successfully with complete configuration");
     (window as any).__fclInitialized = true;
