@@ -117,40 +117,28 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
     setStep('authenticating');
     
     try {
-      // Generate a more realistic Flow address format
-      const generateFlowAddress = () => {
-        const chars = '0123456789abcdef';
-        let address = '0x';
-        for (let i = 0; i < 16; i++) {
-          address += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return address;
-      };
-
-      const mockUser = {
-        address: generateFlowAddress(),
-        email: email,
-        name: name,
-        wallet_type: 'managed' as const,
-        verified: false
-      };
-
-      console.log("Creating mock user:", mockUser);
-
-      // Simulate registration process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log("Starting Flow Port authentication for email registration...");
       
-      // Create user in database
+      // Use REAL Flow Port authentication - this creates a real Flow wallet
       const { WalletService } = await import("@/lib/wallet-service");
-      const dbUser = await WalletService.getOrCreateUser(mockUser.address, {
-        email: mockUser.email,
-        wallet_type: mockUser.wallet_type,
-        display_name: mockUser.name,
-        is_verified: mockUser.verified,
+      const flowPortUser = await WalletService.authenticateWithFlowPort();
+      
+      if (!flowPortUser) {
+        throw new Error('Flow Port authentication failed. Please try again.');
+      }
+
+      console.log("Flow Port user authenticated:", flowPortUser);
+
+      // Create user in database with REAL Flow wallet address
+      const dbUser = await WalletService.getOrCreateUser(flowPortUser.address, {
+        email: email, // Use the email from form, not from Flow Port
+        wallet_type: 'managed',
+        display_name: name,
+        is_verified: flowPortUser.verified,
         password: password
       });
 
-      console.log("Database user created:", dbUser);
+      console.log("Database user created with real Flow wallet:", dbUser);
 
       if (dbUser) {
         // Set the user directly in the Flow provider
@@ -172,7 +160,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
         throw new Error('Failed to create user account in database');
       }
     } catch (err: any) {
-      console.error("Email registration failed:", err);
+      console.error("Flow Port registration failed:", err);
       setRegistrationError(err.message || 'Registration failed. Please try again.');
       setStep('email-form');
     }
@@ -246,9 +234,9 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                     <Mail className="w-6 h-6 text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-100 dark:text-white mb-2">Email Registration</h3>
+                    <h3 className="font-semibold text-gray-100 dark:text-white mb-2">Flow Port Wallet</h3>
                     <p className="text-gray-100 dark:text-white/70 text-sm leading-relaxed mb-4">
-                      Create a managed wallet with your email address. Perfect for beginners.
+                      Create a real Flow wallet with your email address. Managed by Flow Port, perfect for beginners.
                     </p>
                     <Button
                       onClick={() => handleAuthentication('flowport')}
@@ -405,11 +393,11 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                         </svg>
                       </div>
                       <div>
-                        <p className="text-blue-300 font-medium text-sm">Managed Wallet</p>
+                        <p className="text-blue-300 font-medium text-sm">Real Flow Wallet</p>
                         <p className="text-blue-200 text-sm mt-1">
                           {authMode === 'signup' 
-                            ? "We'll create a secure managed wallet for you. You can always connect an external wallet later."
-                            : "Sign in to access your existing managed wallet and dashboard."
+                            ? "We'll create a real Flow wallet for you via Flow Port. You can receive actual FLOW/USDC payments."
+                            : "Sign in to access your existing Flow Port wallet and dashboard."
                           }
                         </p>
                       </div>

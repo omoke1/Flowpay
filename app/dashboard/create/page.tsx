@@ -54,10 +54,9 @@ export default function CreatePaymentLinkPage() {
         return;
       }
 
-      // Determine merchant ID based on wallet type
-      const merchantId = walletUser?.wallet_type === 'managed' 
-        ? walletUser.id  // Use user ID for managed wallets (email registration)
-        : address;       // Use wallet address for external wallets
+      // Use the real wallet address for both managed and external wallets
+      // Managed wallets now have REAL Flow addresses from Flow Port
+      const merchantId = address; // Always use the real wallet address
 
       console.log("Creating payment link with merchantId:", merchantId, "walletType:", walletUser?.wallet_type);
 
