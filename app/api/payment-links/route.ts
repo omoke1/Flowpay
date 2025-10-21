@@ -228,8 +228,17 @@ export async function GET(request: NextRequest) {
     
     // Use WalletService to get user by wallet address
     // Both managed and external wallets now have real Flow addresses
-    const userData = await WalletService.getUserByWalletAddress(merchantId);
-    console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
+    let userData;
+    try {
+      userData = await WalletService.getUserByWalletAddress(merchantId);
+      console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
+    } catch (userError) {
+      console.error("GET /api/payment-links - Error looking up user:", userError);
+      return NextResponse.json(
+        { error: "Failed to lookup user", details: userError instanceof Error ? userError.message : "Unknown error" },
+        { status: 500 }
+      );
+    }
     
     if (!userData) {
       console.log("GET /api/payment-links - User not found for merchantId:", merchantId);
@@ -243,16 +252,28 @@ export async function GET(request: NextRequest) {
 
     // Fetch payment links for merchant
     const supabaseClient = supabase!; // We know supabase is not null due to the check above
-    const { data, error } = await supabaseClient
-      .from("payment_links")
-      .select("*")
-      .eq("merchant_id", userData.id)
-      .order("created_at", { ascending: false });
+    let data, error;
+    try {
+      const result = await supabaseClient
+        .from("payment_links")
+        .select("*")
+        .eq("merchant_id", userData.id)
+        .order("created_at", { ascending: false });
+      
+      data = result.data;
+      error = result.error;
+    } catch (queryError) {
+      console.error("GET /api/payment-links - Query error:", queryError);
+      return NextResponse.json(
+        { error: "Database query failed", details: queryError instanceof Error ? queryError.message : "Unknown error" },
+        { status: 500 }
+      );
+    }
 
     if (error) {
       console.error("GET /api/payment-links - Supabase error:", error);
       return NextResponse.json(
-        { error: "Failed to fetch payment links" },
+        { error: "Failed to fetch payment links", details: error.message },
         { status: 500 }
       );
     }
