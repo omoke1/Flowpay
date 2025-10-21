@@ -22,9 +22,11 @@ if (typeof window !== "undefined" && !((window as any).__fclConfigured)) {
       "fcl.limit": 1000,
       "0xFlowToken": "0x7e60df042a9c0868",
       "0xFungibleToken": "0x9a0766d93b6608b7",
-      // Add explicit wallet discovery configuration to fix "no topics" issue
-      "discovery.wallet.method.default": "IFRAME/RPC",
-      "discovery.wallet.method.include": ["IFRAME/RPC", "POP/RPC", "TAB/RPC"]
+      // Fix wallet discovery - use POP/RPC for mobile wallets
+      "discovery.wallet.method.default": "POP/RPC",
+      "discovery.wallet.method.include": ["POP/RPC", "IFRAME/RPC", "TAB/RPC"],
+      // Add explicit wallet services for better discovery
+      "discovery.wallet.method.include.services": ["https://fcl-discovery.onflow.org/testnet/authn"]
     });
     
     (window as any).__fclConfigured = true;

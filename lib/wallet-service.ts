@@ -1,5 +1,5 @@
 import { fcl } from "./flow-config";
-import { supabase } from "./supabase";
+import { supabase, isDatabaseConfigured, getDatabaseStatus } from "./supabase";
 
 export interface WalletUser {
   id: string;
@@ -81,8 +81,10 @@ export class WalletService {
     userData?: Partial<WalletUser>
   ): Promise<WalletUser | null> {
     try {
-      if (!supabase) {
-        throw new Error("Database not configured. Please set up Supabase.");
+      if (!isDatabaseConfigured()) {
+        const status = getDatabaseStatus();
+        console.error("Database configuration error:", status.error);
+        throw new Error(`Database not configured. ${status.error}. Please set up Supabase environment variables.`);
       }
 
       // First, try to find existing user by wallet address

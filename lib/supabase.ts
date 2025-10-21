@@ -8,6 +8,25 @@ export const supabase = (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
+// Helper function to check if database is configured
+export const isDatabaseConfigured = () => {
+  return supabase !== null;
+};
+
+// Helper function to get database configuration status
+export const getDatabaseStatus = () => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return { configured: false, error: "NEXT_PUBLIC_SUPABASE_URL is not set" };
+  }
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return { configured: false, error: "NEXT_PUBLIC_SUPABASE_ANON_KEY is not set" };
+  }
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
+    return { configured: false, error: "NEXT_PUBLIC_SUPABASE_URL contains placeholder value" };
+  }
+  return { configured: true, error: null };
+};
+
 // Database types
 export interface User {
   id: string;
