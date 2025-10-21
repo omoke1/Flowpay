@@ -130,19 +130,9 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
       }, 15000); // 15 second timeout
       
       if (method === 'flowport') {
-        // Use Flow Port for email-based registration
-        const flowPortUser = await WalletService.authenticateWithFlowPort();
-        if (flowPortUser) {
-          // Get or create user in database
-          const dbUser = await WalletService.getOrCreateUser(flowPortUser.address, {
-            email: flowPortUser.email,
-            wallet_type: 'managed',
-            display_name: flowPortUser.name,
-            avatar_url: flowPortUser.avatar,
-            is_verified: flowPortUser.verified
-          });
-          setWalletUser(dbUser);
-        }
+        // Magic.link authentication is handled in the registration modal
+        // This method should not be called directly for Magic.link
+        throw new Error("Magic.link authentication should be handled through the registration modal.");
       } else {
         // Use external wallet authentication with better error handling
         try {
@@ -192,8 +182,23 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setIsConnecting(false);
       setError(null);
-      await WalletService.disconnect();
+      
+      // Handle both FCL and Magic.link logout
+      if (walletUser?.wallet_type === 'managed') {
+        // Magic.link logout
+        try {
+          const { MagicService } = await import("@/lib/magic-service");
+          await MagicService.logout();
+        } catch (magicError) {
+          console.warn("Magic.link logout failed:", magicError);
+        }
+      } else {
+        // FCL logout for external wallets
+        await WalletService.disconnect();
+      }
+      
       setWalletUser(null);
+      setUser(null);
       console.log("Logout completed");
       
       // Redirect to home page after logout

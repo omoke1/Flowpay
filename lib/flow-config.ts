@@ -152,19 +152,19 @@ export const TRANSACTION_TEMPLATES = {
   `
 };
 
-// Flow Port specific utilities
-export const FLOW_PORT_CONFIG = {
-  // Flow Port service URL
-  serviceUrl: "https://port.onflow.org",
+// Magic.link specific utilities
+export const MAGIC_CONFIG = {
+  // Magic.link service URL
+  serviceUrl: "https://auth.magic.link",
   // Supported authentication methods
-  authMethods: ["email", "google", "discord"],
+  authMethods: ["email", "magic_link"],
   // Default scopes for user data
   scopes: ["email", "profile"]
 };
 
 // Wallet type detection
 export const getWalletType = (address: string): 'managed' | 'external' => {
-  // Flow Port managed wallets typically have specific patterns
+  // Magic.link managed wallets typically have specific patterns
   // This is a simplified detection - in production you'd want more sophisticated logic
   return 'external'; // Default to external for now
 };

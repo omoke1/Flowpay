@@ -125,7 +125,7 @@ flowpay/
 
 ## 📱 Usage
 
-1. **Connect Wallet** - Use Flow Port or external wallet
+1. **Connect Wallet** - Use Magic.link email wallet or external wallet
 2. **Create Payment Link** - Set amount, description, and payment methods
 3. **Share Link** - Send to customers for payments
 4. **Track Payments** - Monitor in real-time dashboard

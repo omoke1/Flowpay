@@ -55,7 +55,7 @@ export default function CreatePaymentLinkPage() {
       }
 
       // Use the real wallet address for both managed and external wallets
-      // Managed wallets now have REAL Flow addresses from Flow Port
+      // Managed wallets now have REAL Flow addresses from Magic.link
       const merchantId = address; // Always use the real wallet address
 
       console.log("Creating payment link with merchantId:", merchantId, "walletType:", walletUser?.wallet_type);
