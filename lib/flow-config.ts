@@ -70,8 +70,16 @@ export const initializeFCL = async () => {
   fclConfiguring = true;
   
   try {
-    // Use the official FCL configuration pattern from Flow documentation
-    fcl.config({
+    // Build complete configuration object ONCE to prevent WalletConnect plugin errors
+    const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+    
+    if (!walletConnectProjectId) {
+      console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
+      throw new Error("WalletConnect Project ID is required");
+    }
+
+    // Complete FCL configuration - all at once to prevent multiple plugin initializations
+    const fclConfig = {
       // Network configuration
       "flow.network": "testnet",
       "accessNode.api": "https://rest-testnet.onflow.org",
@@ -82,13 +90,9 @@ export const initializeFCL = async () => {
       "discovery.wallet.method": "IFRAME/RPC",
       
       // WalletConnect configuration (required for wallet discovery)
-      // Get your project ID from: https://cloud.walletconnect.com/
-      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || (() => {
-        console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
-        return "demo-project-id";
-      })(),
+      "walletconnect.projectId": walletConnectProjectId,
       
-      // App details for wallet discovery
+      // App details for wallet discovery (all at once)
       "app.detail.title": "FlowPay",
       "app.detail.icon": "https://useflowpay.xyz/logo.svg",
       "app.detail.description": "Professional payment platform for Flow blockchain",
@@ -103,31 +107,17 @@ export const initializeFCL = async () => {
       // Contract addresses for testnet
       "0xFlowToken": "0x7e60df042a9c0868",
       "0xFungibleToken": "0x9a0766d93b6608b7"
-    });
+    };
+
+    // Configure FCL with complete configuration - ONLY ONCE
+    fcl.config(fclConfig);
     
-    console.log("FCL initialized successfully");
+    console.log("FCL initialized successfully with complete configuration");
     (window as any).__fclInitialized = true;
   } catch (error) {
-    console.warn("FCL configuration warning (non-critical):", error);
-    // Fallback to minimal configuration
-    try {
-      fcl.config({
-        "flow.network": "testnet",
-        "accessNode.api": "https://rest-testnet.onflow.org",
-        "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
-        "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
-        "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || (() => {
-          console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
-          return "demo-project-id";
-        })(),
-        "app.detail.title": "FlowPay",
-        "app.detail.icon": "https://useflowpay.xyz/logo.svg"
-      });
-      console.log("FCL initialized with fallback configuration");
-      (window as any).__fclInitialized = true;
-    } catch (fallbackError) {
-      console.error("FCL initialization failed completely:", fallbackError);
-    }
+    console.error("FCL initialization failed:", error);
+    // Don't try fallback configuration to avoid multiple plugin initializations
+    throw error;
   } finally {
     // Always release the configuration lock
     fclConfiguring = false;
