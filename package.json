@@ -21,6 +21,8 @@
   "type": "commonjs",
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@magic-ext/flow": "^26.0.0",
+    "@magic-sdk/provider": "^31.0.0",
     "@onflow/fcl": "^1.20.2",
     "@onflow/types": "^1.4.2",
     "@supabase/supabase-js": "^2.75.1",
@@ -40,6 +42,7 @@
     "framer-motion": "^12.23.24",
     "jsdom": "^27.0.1",
     "lucide-react": "^0.546.0",
+    "magic-sdk": "^31.0.0",
     "next": "^15.5.6",
     "postcss": "^8.5.6",
     "react": "^19.2.0",

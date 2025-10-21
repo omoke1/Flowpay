@@ -117,28 +117,29 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
     setStep('authenticating');
     
     try {
-      console.log("Starting Flow Port authentication for email registration...");
+      console.log("Starting Magic.link authentication for email registration...");
       
-      // Use REAL Flow Port authentication - this creates a real Flow wallet
-      const { WalletService } = await import("@/lib/wallet-service");
-      const flowPortUser = await WalletService.authenticateWithFlowPort();
+      // Use Magic.link authentication - this creates a real Flow wallet
+      const { MagicService } = await import("@/lib/magic-service");
+      const magicUser = await MagicService.authenticateWithEmail(email);
       
-      if (!flowPortUser) {
-        throw new Error('Flow Port authentication failed. Please try again.');
+      if (!magicUser) {
+        throw new Error('Magic.link authentication failed. Please check your email for the magic link.');
       }
 
-      console.log("Flow Port user authenticated:", flowPortUser);
+      console.log("Magic.link user authenticated:", magicUser);
 
-      // Create user in database with REAL Flow wallet address
-      const dbUser = await WalletService.getOrCreateUser(flowPortUser.address, {
-        email: email, // Use the email from form, not from Flow Port
+      // Create user in database with REAL Flow wallet address from Magic.link
+      const { WalletService } = await import("@/lib/wallet-service");
+      const dbUser = await WalletService.getOrCreateUser(magicUser.address, {
+        email: email,
         wallet_type: 'managed',
         display_name: name,
-        is_verified: flowPortUser.verified,
+        is_verified: true, // Magic.link handles verification
         password: password
       });
 
-      console.log("Database user created with real Flow wallet:", dbUser);
+      console.log("Database user created with real Flow wallet from Magic.link:", dbUser);
 
       if (dbUser) {
         // Set the user directly in the Flow provider
@@ -160,8 +161,8 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
         throw new Error('Failed to create user account in database');
       }
     } catch (err: any) {
-      console.error("Flow Port registration failed:", err);
-      setRegistrationError(err.message || 'Registration failed. Please try again.');
+      console.error("Magic.link registration failed:", err);
+      setRegistrationError(err.message || 'Registration failed. Please check your email for the magic link and try again.');
       setStep('email-form');
     }
   };
@@ -227,16 +228,16 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
           
           {step === 'select' && (
             <div className="space-y-6">
-              {/* Flow Port Option */}
+              {/* Magic.link Email Wallet Option */}
               <div className="bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 rounded-2xl p-6 hover:border-zinc-100/20 dark:hover:border-white/20 transition-all duration-200 group">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center group-hover:bg-blue-500/30 transition-all duration-200">
                     <Mail className="w-6 h-6 text-blue-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-100 dark:text-white mb-2">Flow Port Wallet</h3>
+                    <h3 className="font-semibold text-gray-100 dark:text-white mb-2">Magic.link Email Wallet</h3>
                     <p className="text-gray-100 dark:text-white/70 text-sm leading-relaxed mb-4">
-                      Create a real Flow wallet with your email address. Managed by Flow Port, perfect for beginners.
+                      Create a real Flow wallet with your email address. No seed phrases needed, perfect for beginners.
                     </p>
                     <Button
                       onClick={() => handleAuthentication('flowport')}
@@ -396,8 +397,8 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
                         <p className="text-blue-300 font-medium text-sm">Real Flow Wallet</p>
                         <p className="text-blue-200 text-sm mt-1">
                           {authMode === 'signup' 
-                            ? "We'll create a real Flow wallet for you via Flow Port. You can receive actual FLOW/USDC payments."
-                            : "Sign in to access your existing Flow Port wallet and dashboard."
+                            ? "We'll create a real Flow wallet for you via Magic.link. You can receive actual FLOW/USDC payments."
+                            : "Sign in to access your existing Magic.link wallet and dashboard."
                           }
                         </p>
                       </div>

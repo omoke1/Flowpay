@@ -36,32 +36,9 @@ export interface FlowPortUser {
 
 export class WalletService {
   /**
-   * Authenticate user with Flow Port (email-based registration)
+   * Note: Flow Port authentication has been replaced with Magic.link
+   * Use MagicService.authenticateWithEmail() instead
    */
-  static async authenticateWithFlowPort(): Promise<FlowPortUser | null> {
-    try {
-      if (typeof window === "undefined") return null;
-      
-      // FCL should already be initialized by FlowProvider
-      // Authenticate with Flow Port
-      const user = await fcl.authenticate();
-      
-      if (user && user.addr) {
-        return {
-          address: user.addr,
-          email: (user as any).email || '',
-          name: (user as any).name || '',
-          avatar: (user as any).avatar || '',
-          verified: (user as any).verified || false
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error("Flow Port authentication error:", error);
-      return null;
-    }
-  }
 
   /**
    * Authenticate user with external wallet (existing flow)
