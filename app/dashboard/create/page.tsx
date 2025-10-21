@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { loggedIn, address, walletUser, logOut } = useFlowUser();
   const { success, error } = useNotification();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -54,12 +54,19 @@ export default function CreatePaymentLinkPage() {
         return;
       }
 
+      // Determine merchant ID based on wallet type
+      const merchantId = walletUser?.wallet_type === 'managed' 
+        ? walletUser.id  // Use user ID for managed wallets (email registration)
+        : address;       // Use wallet address for external wallets
+
+      console.log("Creating payment link with merchantId:", merchantId, "walletType:", walletUser?.wallet_type);
+
       // Create payment link via API
       const response = await fetch("/api/payment-links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          merchantId: address,
+          merchantId: merchantId,
           productName: formData.productName,
           description: formData.description,
           amount: formData.amount,

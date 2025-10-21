@@ -283,6 +283,33 @@ export class WalletService {
   }
 
   /**
+   * Get user by ID (for managed wallets)
+   */
+  static async getUserById(userId: string): Promise<WalletUser | null> {
+    try {
+      if (!supabase) {
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user by ID:", error);
+        return null;
+      }
+
+      return data as WalletUser;
+    } catch (error) {
+      console.error("Error in getUserById:", error);
+      return null;
+    }
+  }
+
+  /**
    * Disconnect user (logout)
    */
   static async disconnect(): Promise<void> {

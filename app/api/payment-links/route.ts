@@ -74,12 +74,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use WalletService to get or create user
-    const userData = await WalletService.getOrCreateUser(merchantId);
+    // Handle both user IDs (for managed wallets) and wallet addresses (for external wallets)
+    let userData;
+    
+    // Check if merchantId is a UUID (user ID) or wallet address
+    const isUserId = merchantId.includes('-') || merchantId.length === 36; // UUID format
+    
+    if (isUserId) {
+      // For managed wallets, get user by ID
+      console.log("Looking up user by ID:", merchantId);
+      userData = await WalletService.getUserById(merchantId);
+    } else {
+      // For external wallets, get user by wallet address
+      console.log("Looking up user by wallet address:", merchantId);
+      userData = await WalletService.getOrCreateUser(merchantId);
+    }
+    
     if (!userData) {
       return NextResponse.json(
-        { error: "Failed to get or create user" },
-        { status: 500 }
+        { error: "User not found" },
+        { status: 404 }
       );
     }
 
@@ -148,18 +162,42 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // First get the user record to get the user ID
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("wallet_address", merchantId)
-      .single();
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+    // Handle both user IDs (for managed wallets) and wallet addresses (for external wallets)
+    let user;
+    
+    // Check if merchantId is a UUID (user ID) or wallet address
+    const isUserId = merchantId.includes('-') || merchantId.length === 36; // UUID format
+    
+    if (isUserId) {
+      // For managed wallets, get user by ID
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", merchantId)
+        .single();
+      
+      if (userError || !userData) {
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 }
+        );
+      }
+      user = userData;
+    } else {
+      // For external wallets, get user by wallet address
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("wallet_address", merchantId)
+        .single();
+      
+      if (userError || !userData) {
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 }
+        );
+      }
+      user = userData;
     }
 
     // Delete all payment links for this merchant
@@ -222,8 +260,22 @@ export async function GET(request: NextRequest) {
 
     console.log("GET /api/payment-links - Looking up user for merchantId:", merchantId);
     
-    // Use WalletService to get user
-    const userData = await WalletService.getUserByWalletAddress(merchantId);
+    // Handle both user IDs (for managed wallets) and wallet addresses (for external wallets)
+    let userData;
+    
+    // Check if merchantId is a UUID (user ID) or wallet address
+    const isUserId = merchantId.includes('-') || merchantId.length === 36; // UUID format
+    
+    if (isUserId) {
+      // For managed wallets, get user by ID
+      console.log("GET /api/payment-links - Looking up user by ID:", merchantId);
+      userData = await WalletService.getUserById(merchantId);
+    } else {
+      // For external wallets, get user by wallet address
+      console.log("GET /api/payment-links - Looking up user by wallet address:", merchantId);
+      userData = await WalletService.getUserByWalletAddress(merchantId);
+    }
+    
     console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
     
     if (!userData) {
