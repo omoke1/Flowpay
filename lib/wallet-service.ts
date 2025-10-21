@@ -87,8 +87,11 @@ export class WalletService {
         throw new Error(`Database not configured. ${status.error}. Please set up Supabase environment variables.`);
       }
 
+      // At this point, supabase is guaranteed to be non-null due to isDatabaseConfigured() check
+      const supabaseClient = supabase!;
+
       // First, try to find existing user by wallet address
-      const { data: existingUser, error: fetchError } = await supabase
+      const { data: existingUser, error: fetchError } = await supabaseClient
         .from("users")
         .select("*")
         .eq("wallet_address", walletAddress)
@@ -99,7 +102,7 @@ export class WalletService {
       }
 
       // If user doesn't exist, create new user
-      const { data: newUser, error: createError } = await supabase
+      const { data: newUser, error: createError } = await supabaseClient
         .from("users")
         .insert({
           wallet_address: walletAddress,
