@@ -44,11 +44,11 @@ export const initializeFCL = () => {
   // Mark as initialized immediately to prevent race conditions
   (window as any).__fclInitialized = true;
   
-  // Check if FCL is already configured to prevent WalletConnect plugin errors
+  // Check if FCL has the required discovery.wallet configuration
   try {
     const currentConfig = fcl.config();
-    if (currentConfig && Object.keys(currentConfig).length > 0) {
-      console.log("FCL already configured, skipping configuration...");
+    if (currentConfig && currentConfig["discovery.wallet"]) {
+      console.log("FCL already configured with discovery.wallet, skipping configuration...");
       return;
     }
   } catch (e) {
