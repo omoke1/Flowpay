@@ -16,6 +16,16 @@ export interface WalletUser {
   updated_at: string;
 }
 
+export interface CreateUserData {
+  email?: string;
+  wallet_type?: 'external' | 'managed';
+  flow_port_user_id?: string;
+  display_name?: string;
+  avatar_url?: string;
+  is_verified?: boolean;
+  password?: string; // For creating new users with password
+}
+
 export interface FlowPortUser {
   address: string;
   email?: string;
@@ -125,7 +135,7 @@ export class WalletService {
    */
   static async getOrCreateUser(
     walletAddress: string, 
-    userData?: Partial<WalletUser>
+    userData?: CreateUserData
   ): Promise<WalletUser | null> {
     try {
       if (!isDatabaseConfigured()) {
