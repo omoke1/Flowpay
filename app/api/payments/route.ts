@@ -261,6 +261,7 @@ export async function GET(request: NextRequest) {
             }
 
     // Fetch payments for merchant
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
     const { data, error } = await supabaseClient
       .from("payments")
       .select(`
