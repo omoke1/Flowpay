@@ -33,24 +33,31 @@ export function validateContractAddress(address: string): boolean {
 
 // Global configuration lock to prevent multiple FCL initializations
 let fclConfiguring = false;
+let fclConfigured = false;
+
+// Global FCL configuration state that persists across module reloads
+if (typeof window !== "undefined") {
+  (window as any).__fclConfiguring = false;
+  (window as any).__fclConfigured = false;
+}
 
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = async () => {
   if (typeof window === "undefined") return;
   
-  // Prevent multiple simultaneous configurations
-  if (fclConfiguring) {
-    console.log("FCL configuration already in progress, waiting...");
-    // Wait for configuration to complete
-    while (fclConfiguring) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
+  // Use global window flags that persist across module reloads
+  if ((window as any).__fclConfigured || (window as any).__fclInitialized) {
+    console.log("FCL already configured, skipping...");
     return;
   }
   
-  // Use a more robust global flag that persists across module reloads
-  if ((window as any).__fclInitialized) {
-    console.log("FCL already initialized, skipping...");
+  // Prevent multiple simultaneous configurations
+  if ((window as any).__fclConfiguring || fclConfiguring) {
+    console.log("FCL configuration already in progress, waiting...");
+    // Wait for configuration to complete
+    while ((window as any).__fclConfiguring || fclConfiguring) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
     return;
   }
   
@@ -66,10 +73,32 @@ export const initializeFCL = async () => {
     // FCL not configured yet, proceed with configuration
   }
   
-  // Set configuration lock
+  // Set configuration lock using global window flags
   fclConfiguring = true;
+  (window as any).__fclConfiguring = true;
+  
+  // Double-check that FCL hasn't been configured elsewhere
+  if (fclConfigured || (window as any).__fclConfigured) {
+    console.log("FCL already configured, skipping...");
+    fclConfiguring = false;
+    (window as any).__fclConfiguring = false;
+    return;
+  }
   
   try {
+    // Final check - if FCL is already configured, don't configure again
+    try {
+      const existingConfig = fcl.config();
+      if (existingConfig && Object.keys(existingConfig).length > 0) {
+        console.log("FCL already configured, skipping configuration...");
+        (window as any).__fclInitialized = true;
+        fclConfigured = true;
+        return;
+      }
+    } catch (e) {
+      // FCL not configured yet, proceed
+    }
+
     // Build complete configuration object ONCE to prevent WalletConnect plugin errors
     const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
     
@@ -114,6 +143,8 @@ export const initializeFCL = async () => {
     
     console.log("FCL initialized successfully with complete configuration");
     (window as any).__fclInitialized = true;
+    (window as any).__fclConfigured = true;
+    fclConfigured = true;
   } catch (error) {
     console.error("FCL initialization failed:", error);
     // Don't try fallback configuration to avoid multiple plugin initializations
@@ -121,6 +152,7 @@ export const initializeFCL = async () => {
   } finally {
     // Always release the configuration lock
     fclConfiguring = false;
+    (window as any).__fclConfiguring = false;
   }
 };
 
