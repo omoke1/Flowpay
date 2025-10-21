@@ -72,6 +72,7 @@ export async function PATCH(
     }
 
     // Update payment link status in Supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
     const { data, error } = await supabaseClient
       .from("payment_links")
       .update({ status })
