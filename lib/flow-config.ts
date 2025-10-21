@@ -31,18 +31,21 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
-// Singleton flag to ensure FCL is only initialized once
+// Module-level singleton flag
 let fclInitialized = false;
 
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = () => {
   if (typeof window === "undefined") return;
   
-  // Prevent multiple initializations using a global flag
-  if ((window as any).__fclInitialized) {
+  // Prevent multiple initializations using module-level flag
+  if (fclInitialized) {
     console.log("FCL already initialized, skipping...");
     return;
   }
+  
+  // Mark as initialized immediately to prevent race conditions
+  fclInitialized = true;
   
   try {
     // Use the official FCL configuration pattern from Flow documentation
@@ -77,8 +80,6 @@ export const initializeFCL = () => {
       "0xFungibleToken": "0x9a0766d93b6608b7"
     });
     
-    fclInitialized = true;
-    (window as any).__fclInitialized = true;
     console.log("FCL initialized successfully");
   } catch (error) {
     console.warn("FCL configuration warning (non-critical):", error);
@@ -93,8 +94,6 @@ export const initializeFCL = () => {
         "app.detail.title": "FlowPay",
         "app.detail.icon": "https://useflowpay.xyz/logo.svg"
       });
-      fclInitialized = true;
-      (window as any).__fclInitialized = true;
       console.log("FCL initialized with fallback configuration");
     } catch (fallbackError) {
       console.error("FCL initialization failed completely:", fallbackError);
