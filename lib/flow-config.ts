@@ -31,21 +31,29 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
-// Module-level singleton flag
-let fclInitialized = false;
-
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = () => {
   if (typeof window === "undefined") return;
   
-  // Prevent multiple initializations using module-level flag
-  if (fclInitialized) {
+  // Use a more robust global flag that persists across module reloads
+  if ((window as any).__fclInitialized) {
     console.log("FCL already initialized, skipping...");
     return;
   }
   
   // Mark as initialized immediately to prevent race conditions
-  fclInitialized = true;
+  (window as any).__fclInitialized = true;
+  
+  // Check if FCL is already configured to prevent WalletConnect plugin errors
+  try {
+    const currentConfig = fcl.config();
+    if (currentConfig && Object.keys(currentConfig).length > 0) {
+      console.log("FCL already configured, skipping configuration...");
+      return;
+    }
+  } catch (e) {
+    // FCL not configured yet, proceed with configuration
+  }
   
   try {
     // Use the official FCL configuration pattern from Flow documentation
@@ -61,7 +69,10 @@ export const initializeFCL = () => {
       
       // WalletConnect configuration (required for wallet discovery)
       // Get your project ID from: https://cloud.walletconnect.com/
-      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
+      "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || (() => {
+        console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
+        return "demo-project-id";
+      })(),
       
       // App details for wallet discovery
       "app.detail.title": "FlowPay",
@@ -90,7 +101,10 @@ export const initializeFCL = () => {
         "accessNode.api": "https://rest-testnet.onflow.org",
         "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
         "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/api/testnet/authn",
-        "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
+        "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || (() => {
+          console.error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set! Please get a real project ID from https://cloud.walletconnect.com/");
+          return "demo-project-id";
+        })(),
         "app.detail.title": "FlowPay",
         "app.detail.icon": "https://useflowpay.xyz/logo.svg"
       });
