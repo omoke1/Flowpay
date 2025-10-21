@@ -124,7 +124,7 @@ export function RegistrationModal({ isOpen, onClose, onSuccess }: RegistrationMo
       const magicUser = await MagicService.authenticateWithEmail(email);
       
       if (!magicUser) {
-        throw new Error('Magic.link authentication failed. Please check your email for the magic link.');
+        throw new Error('Magic.link authentication failed. Please check your Magic.link dashboard configuration and ensure your domain is approved.');
       }
 
       console.log("Magic.link user authenticated:", magicUser);
