@@ -129,6 +129,7 @@ async function handleOrderFailed(orderData: TransakWebhookPayload['webhookData']
     }
 
     // Update payment status to failed
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
     const { error } = await supabaseClient
       .from('payments')
       .update({
