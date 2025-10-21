@@ -15,13 +15,16 @@ if (typeof window !== "undefined" && !((window as any).__fclConfigured)) {
       "discovery.wallet.method": "IFRAME/RPC",
       "walletconnect.projectId": walletConnectProjectId,
       "app.detail.title": "FlowPay",
-      "app.detail.icon": "https://useflowpay.xyz/logo.svg",
+      "app.detail.icon": "https://www.useflowpay.xyz/logo.svg",
       "app.detail.description": "Professional payment platform for Flow blockchain",
       "app.detail.url": "https://www.useflowpay.xyz",
       "service.OpenID.scopes": "email",
       "fcl.limit": 1000,
       "0xFlowToken": "0x7e60df042a9c0868",
-      "0xFungibleToken": "0x9a0766d93b6608b7"
+      "0xFungibleToken": "0x9a0766d93b6608b7",
+      // Add explicit wallet discovery configuration to fix "no topics" issue
+      "discovery.wallet.method.default": "IFRAME/RPC",
+      "discovery.wallet.method.include": ["IFRAME/RPC", "POP/RPC", "TAB/RPC"]
     });
     
     (window as any).__fclConfigured = true;
@@ -74,6 +77,14 @@ export const initializeFCL = async () => {
       console.log("FCL configuration verified. discovery.wallet:", discoveryWallet);
     } else {
       console.warn("FCL configuration issue: discovery.wallet not set");
+    }
+    
+    // Debug wallet discovery
+    try {
+      const discoveryAuthn = await fcl.config.get("discovery.authn.endpoint");
+      console.log("Discovery authn endpoint:", discoveryAuthn);
+    } catch (e) {
+      console.warn("Could not get discovery authn endpoint:", e);
     }
   } catch (e) {
     console.error("Failed to verify FCL configuration:", e);
