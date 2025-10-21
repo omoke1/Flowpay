@@ -31,35 +31,25 @@ export function validateContractAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{16}$/.test(address);
 }
 
-// Global configuration lock to prevent multiple FCL initializations
-let fclConfiguring = false;
-let fclConfigured = false;
-
 // Global FCL configuration state that persists across module reloads
 if (typeof window !== "undefined") {
   (window as any).__fclConfiguring = false;
   (window as any).__fclConfigured = false;
+  (window as any).__fclConfigAttempted = false;
 }
 
 // FCL Configuration function (to be called once on client-side)
 export const initializeFCL = async () => {
   if (typeof window === "undefined") return;
   
-  // Use global window flags that persist across module reloads
-  if ((window as any).__fclConfigured || (window as any).__fclInitialized) {
-    console.log("FCL already configured, skipping...");
+  // NUCLEAR OPTION: If FCL configuration has been attempted before, NEVER try again
+  if ((window as any).__fclConfigAttempted) {
+    console.log("FCL configuration already attempted, skipping permanently...");
     return;
   }
   
-  // Prevent multiple simultaneous configurations
-  if ((window as any).__fclConfiguring || fclConfiguring) {
-    console.log("FCL configuration already in progress, waiting...");
-    // Wait for configuration to complete
-    while ((window as any).__fclConfiguring || fclConfiguring) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    return;
-  }
+  // Mark that we're attempting configuration
+  (window as any).__fclConfigAttempted = true;
   
   // Check if FCL is already configured to prevent WalletConnect plugin errors
   try {
@@ -73,32 +63,7 @@ export const initializeFCL = async () => {
     // FCL not configured yet, proceed with configuration
   }
   
-  // Set configuration lock using global window flags
-  fclConfiguring = true;
-  (window as any).__fclConfiguring = true;
-  
-  // Double-check that FCL hasn't been configured elsewhere
-  if (fclConfigured || (window as any).__fclConfigured) {
-    console.log("FCL already configured, skipping...");
-    fclConfiguring = false;
-    (window as any).__fclConfiguring = false;
-    return;
-  }
-  
   try {
-    // Final check - if FCL is already configured, don't configure again
-    try {
-      const discoveryWallet = await fcl.config.get("discovery.wallet");
-      if (discoveryWallet) {
-        console.log("FCL already configured with discovery.wallet, skipping configuration...");
-        (window as any).__fclInitialized = true;
-        (window as any).__fclConfigured = true;
-        fclConfigured = true;
-        return;
-      }
-    } catch (e) {
-      // FCL not configured yet, proceed
-    }
 
     // Build complete configuration object ONCE to prevent WalletConnect plugin errors
     const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
@@ -153,15 +118,12 @@ export const initializeFCL = async () => {
     console.log("FCL initialized successfully with complete configuration");
     (window as any).__fclInitialized = true;
     (window as any).__fclConfigured = true;
-    fclConfigured = true;
   } catch (error) {
     console.error("FCL initialization failed:", error);
     // Don't try fallback configuration to avoid multiple plugin initializations
     throw error;
   } finally {
-    // Always release the configuration lock
-    fclConfiguring = false;
-    (window as any).__fclConfiguring = false;
+    // Configuration attempt completed
   }
 };
 
