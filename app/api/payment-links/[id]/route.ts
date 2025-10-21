@@ -119,6 +119,7 @@ export async function DELETE(
     }
     
     // Delete payment link from Supabase
+    const supabaseClient = supabase!; // We know supabase is not null due to the check above
     const { data, error } = await supabaseClient
       .from("payment_links")
       .delete()
