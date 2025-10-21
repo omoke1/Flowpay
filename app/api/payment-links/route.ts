@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Use WalletService to get or create user
-            const userData = await WalletService.getOrCreateUser(merchantId);
-            if (!userData) {
-              return NextResponse.json(
-                { error: "Failed to get or create user" },
-                { status: 500 }
-              );
-            }
+    const userData = await WalletService.getOrCreateUser(merchantId);
+    if (!userData) {
+      return NextResponse.json(
+        { error: "Failed to get or create user" },
+        { status: 500 }
+      );
+    }
 
     // Insert payment link into Supabase
     const { data, error } = await supabase
@@ -184,7 +184,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get("merchantId");
 
+    console.log("GET /api/payment-links - merchantId:", merchantId);
+
     if (!merchantId) {
+      console.log("GET /api/payment-links - Missing merchantId");
       return NextResponse.json(
         { error: "Merchant ID required" },
         { status: 400 }
@@ -193,20 +196,28 @@ export async function GET(request: NextRequest) {
 
     // Check if Supabase is configured
     if (!supabase) {
+      console.log("GET /api/payment-links - Supabase not configured");
       return NextResponse.json(
         { error: "Database not configured. Please set up Supabase." },
         { status: 500 }
       );
     }
 
+    console.log("GET /api/payment-links - Looking up user for merchantId:", merchantId);
+    
     // Use WalletService to get user
-            const userData = await WalletService.getUserByWalletAddress(merchantId);
-            if (!userData) {
-              return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
-              );
-            }
+    const userData = await WalletService.getUserByWalletAddress(merchantId);
+    console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
+    
+    if (!userData) {
+      console.log("GET /api/payment-links - User not found for merchantId:", merchantId);
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    console.log("GET /api/payment-links - Fetching payment links for user ID:", userData.id);
 
     // Fetch payment links for merchant
     const { data, error } = await supabase
@@ -216,16 +227,17 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("GET /api/payment-links - Supabase error:", error);
       return NextResponse.json(
         { error: "Failed to fetch payment links" },
         { status: 500 }
       );
     }
 
+    console.log("GET /api/payment-links - Success, found", data?.length || 0, "payment links");
     return NextResponse.json({ paymentLinks: data });
   } catch (error) {
-    console.error("Error fetching payment links:", error);
+    console.error("GET /api/payment-links - Error fetching payment links:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
