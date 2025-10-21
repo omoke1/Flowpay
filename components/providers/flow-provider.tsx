@@ -35,7 +35,7 @@ export function FlowProvider({ children }: { children: React.ReactNode }) {
     const init = async () => {
       try {
         // Initialize FCL with proper configuration
-        initializeFCL();
+        await initializeFCL();
         setInitialized(true);
 
         // Check if user is already authenticated (without triggering new connection)

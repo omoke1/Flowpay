@@ -32,7 +32,7 @@ export function validateContractAddress(address: string): boolean {
 }
 
 // FCL Configuration function (to be called once on client-side)
-export const initializeFCL = () => {
+export const initializeFCL = async () => {
   if (typeof window === "undefined") return;
   
   // Use a more robust global flag that persists across module reloads
@@ -46,7 +46,7 @@ export const initializeFCL = () => {
   
   // Check if FCL has the required discovery.wallet configuration
   try {
-    const discoveryWallet = fcl.config.get("discovery.wallet");
+    const discoveryWallet = await fcl.config.get("discovery.wallet");
     if (discoveryWallet) {
       console.log("FCL already configured with discovery.wallet, skipping configuration...");
       return;
