@@ -9,6 +9,7 @@ A professional payment platform built on the Flow blockchain, enabling businesse
 - **Real-time Dashboard** - Track payments, analytics, and revenue
 - **Mobile Responsive** - Works seamlessly on all devices
 - **User Authentication** - Flow wallet integration with email registration
+- **Password Security** - Secure email sign-in with bcrypt password hashing
 - **Notification System** - Real-time payment confirmations
 - **Settings Management** - API keys, webhooks, and preferences
 
@@ -19,7 +20,60 @@ A professional payment platform built on the Flow blockchain, enabling businesse
 - **Backend**: Supabase (PostgreSQL, Auth, Storage)
 - **Payments**: Flow blockchain, Transak integration
 - **Email**: Resend API
+- **Security**: bcryptjs password hashing, CSRF protection
 - **Deployment**: Vercel-ready
+
+## 📁 Project Structure
+
+```
+flowpay/
+├── app/                          # Next.js App Router
+│   ├── api/                      # API Routes
+│   │   ├── payment-links/        # Payment link management
+│   │   ├── payments/             # Payment processing
+│   │   ├── transak/              # Transak integration
+│   │   └── settings/             # Settings management
+│   ├── dashboard/                # Dashboard pages
+│   │   ├── analytics/            # Analytics dashboard
+│   │   ├── create/               # Create payment links
+│   │   ├── customers/            # Customer management
+│   │   ├── links/                # Payment links list
+│   │   ├── payments/             # Payments list
+│   │   └── settings/             # User settings
+│   ├── checkout/                 # Checkout pages
+│   ├── pay/                      # Payment pages
+│   ├── globals.css               # Global styles
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Landing page
+├── components/                   # React Components
+│   ├── auth/                     # Authentication components
+│   ├── checkout/                 # Checkout components
+│   ├── dashboard/                # Dashboard components
+│   ├── onboarding/               # Onboarding components
+│   ├── providers/                # Context providers
+│   ├── shared/                   # Shared components
+│   └── ui/                       # UI components
+├── lib/                          # Utility libraries
+│   ├── hooks/                    # Custom React hooks
+│   ├── flow-config.ts            # Flow blockchain configuration
+│   ├── flow-transactions.ts      # Flow transaction utilities
+│   ├── rate-limit.ts             # Rate limiting
+│   ├── resend.ts                 # Email service
+│   ├── supabase.ts               # Database client
+│   ├── transak.ts                # Transak integration
+│   ├── utils.ts                  # Utility functions
+│   ├── validation.ts             # Input validation
+│   └── wallet-service.ts         # Wallet management
+├── public/                       # Static assets
+│   └── logo.svg                  # App logo
+├── .env.template                 # Environment variables template
+├── .gitignore                    # Git ignore rules
+├── next.config.js                # Next.js configuration
+├── package.json                  # Dependencies
+├── tailwind.config.js            # Tailwind CSS config
+├── tsconfig.json                 # TypeScript config
+└── README.md                     # This file
+```
 
 ## 🏃‍♂️ Quick Start
 
@@ -36,28 +90,23 @@ A professional payment platform built on the Flow blockchain, enabling businesse
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env.local
+   cp env.template .env.local
    ```
    
-   Configure your `.env.local`:
+   Configure your `.env.local` with the required values:
    ```env
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   # Database (Required)
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    
-   # Flow Blockchain
-   NEXT_PUBLIC_FLOW_NETWORK=testnet
+   # Flow Blockchain (Required)
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
-   
-   # Transak (Optional)
-   NEXT_PUBLIC_TRANSAK_API_KEY=your_transak_api_key
-   TRANSAK_API_SECRET=your_transak_secret
-   NEXT_PUBLIC_TRANSAK_ENV=STAGING
    
    # Email (Optional)
    RESEND_API_KEY=your_resend_api_key
+   NEXT_PUBLIC_FROM_EMAIL=noreply@useflowpay.xyz
    
-   # App
+   # App (Required)
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
 
@@ -107,10 +156,15 @@ A professional payment platform built on the Flow blockchain, enabling businesse
 
 ## 🔐 Security
 
-- Row Level Security (RLS) enabled on all tables
-- API key rotation and session management
-- Webhook signature verification
-- Input validation and sanitization
+- **Password Security**: bcryptjs hashing with 12 salt rounds
+- **Database Security**: Row Level Security (RLS) enabled on all tables
+- **API Protection**: Rate limiting and input validation
+- **Transaction Verification**: On-chain transaction verification
+- **CSRF Protection**: Same-origin policy and security headers
+- **XSS Protection**: DOMPurify sanitization for all inputs
+- **Webhook Security**: Payload validation and origin checking
+
+See [SECURITY.md](SECURITY.md) for detailed security documentation.
 
 ## 📄 License
 

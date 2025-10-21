@@ -115,3 +115,36 @@ jspm_packages/
 # Build artifacts
 *.tgz
 *.tar.gz
+
+# Security and sensitive files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+secrets/
+.secrets/
+private/
+.private/
+
+# API keys and credentials
+api-keys.json
+credentials.json
+service-account.json
+firebase-adminsdk-*.json
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Database dumps
+*.dump
+*.sql.gz
+*.sql.bz2
+
+# Local development
+.local/
+local/
