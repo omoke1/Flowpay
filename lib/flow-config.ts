@@ -17,7 +17,7 @@ if (typeof window !== "undefined" && !((window as any).__fclConfigured)) {
       "app.detail.title": "FlowPay",
       "app.detail.icon": "https://useflowpay.xyz/logo.svg",
       "app.detail.description": "Professional payment platform for Flow blockchain",
-      "app.detail.url": "https://useflowpay.xyz",
+      "app.detail.url": "https://www.useflowpay.xyz",
       "service.OpenID.scopes": "email",
       "fcl.limit": 1000,
       "0xFlowToken": "0x7e60df042a9c0868",
