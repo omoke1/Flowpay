@@ -108,7 +108,7 @@ export default function CreatePaymentLinkPage() {
       }, 2000);
     } catch (error: any) {
       console.error("Error creating payment link:", error);
-      error(
+      showError(
         "Failed to Create Link",
         error.message || "Something went wrong. Please try again."
       );

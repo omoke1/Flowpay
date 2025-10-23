@@ -1,48 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, isDatabaseConfigured, getDatabaseStatus } from "@/lib/supabase";
 import { SimpleUserService } from "@/lib/simple-user-service";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { validateRequestBody, paymentLinkSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("POST /api/payment-links - Starting payment link creation - v2");
     
-    // Rate limiting check
-    const rateLimitResult = await checkRateLimit(request, "paymentLinks");
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          limit: rateLimitResult.limit,
-          remaining: rateLimitResult.remaining,
-          reset: rateLimitResult.reset,
-        },
-        { 
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
-            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
-            "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
-          }
-        }
-      );
-    }
-
     const body = await request.json();
     
-    // Validate and sanitize input
-    const validation = validateRequestBody(body, paymentLinkSchema);
-    if (!validation.success) {
-      return NextResponse.json(
-        { 
-          error: "Invalid input data", 
-          details: validation.details 
-        },
-        { status: 400 }
-      );
-    }
-
+    // Basic validation without external dependencies
     const { 
       merchantId, 
       productName, 
@@ -52,7 +18,15 @@ export async function POST(request: NextRequest) {
       redirectUrl,
       acceptCrypto,
       acceptFiat
-    } = validation.data;
+    } = body;
+
+    // Basic validation
+    if (!merchantId || !productName || !amount || !token) {
+      return NextResponse.json(
+        { error: "Missing required fields: merchantId, productName, amount, token" },
+        { status: 400 }
+      );
+    }
 
     // Validate at least one payment method is enabled
     if (!acceptCrypto && !acceptFiat) {
