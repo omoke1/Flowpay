@@ -21,11 +21,15 @@ export function FlowProviderProduction({ children }: { children: ReactNode }) {
 
   const isConnected = !!user && (user.loggedIn || user.addr);
 
-  // Configure Flow on component mount
+  // Configure Flow on component mount - MAINNET ONLY
   useEffect(() => {
-    const network = process.env.NEXT_PUBLIC_FLOW_NETWORK || 'mainnet';
+    // Force mainnet for production - ignore environment variable
+    const network = 'mainnet';
     
-    if (network === 'mainnet') {
+    console.log(`🚀 FlowPay configured for ${network} network (forced mainnet for production)`);
+    
+    // Always use mainnet configuration
+    if (true) { // Always true to force mainnet
       fcl.config({
         'accessNode.api': 'https://rest-mainnet.onflow.org',
         'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
@@ -39,8 +43,13 @@ export function FlowProviderProduction({ children }: { children: ReactNode }) {
           'https://fcl-discovery.onflow.org/authn'
         ],
         'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+        // Force mainnet - no fallback to testnet
+        'discovery.wallet.method.include.services.timeout': 10000,
       });
+      console.log('✅ FlowPay configured for MAINNET (production)');
     } else {
+      // Only allow testnet if explicitly set
+      console.warn('⚠️ Testnet configuration detected - this should only be used for development');
       fcl.config({
         'accessNode.api': 'https://rest-testnet.onflow.org',
         'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
@@ -54,7 +63,9 @@ export function FlowProviderProduction({ children }: { children: ReactNode }) {
           'https://fcl-discovery.onflow.org/testnet/authn'
         ],
         'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+        'discovery.wallet.method.include.services.timeout': 10000,
       });
+      console.log('⚠️ FlowPay configured for TESTNET (development only)');
     }
 
     // Subscribe to user changes

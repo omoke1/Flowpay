@@ -5,51 +5,7 @@ import { config } from '@onflow/fcl';
 
 // Flow network configuration
 const FLOW_CONFIG = {
-  // Mainnet configuration (more stable than testnet)
-  mainnet: {
-    'accessNode.api': 'https://rest-mainnet.onflow.org',
-    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
-    'discovery.authn.endpoint': 'https://fcl-discovery.onflow.org/authn',
-    'app.detail.title': 'FlowPay',
-    'app.detail.icon': 'https://www.useflowpay.xyz/logo.svg',
-    'app.detail.url': 'https://www.useflowpay.xyz',
-    'discovery.wallet.method.default': 'IFRAME/RPC',
-    'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
-    'discovery.wallet.method.include.services': [
-      'https://fcl-discovery.onflow.org/authn',
-      'https://fcl-discovery.onflow.org/testnet/authn'
-    ],
-    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
-    // Add fallback configuration
-    'discovery.wallet.method.include.services.fallback': [
-      'https://fcl-discovery.onflow.org/authn',
-      'https://fcl-discovery.onflow.org/testnet/authn'
-    ],
-    'discovery.wallet.method.include.services.timeout': 15000,
-  },
-  // Testnet configuration for development (less stable)
-  testnet: {
-    'accessNode.api': 'https://rest-testnet.onflow.org',
-    'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
-    'discovery.authn.endpoint': 'https://fcl-discovery.onflow.org/testnet/authn',
-    'app.detail.title': 'FlowPay',
-    'app.detail.icon': 'https://www.useflowpay.xyz/logo.svg',
-    'app.detail.url': 'https://www.useflowpay.xyz',
-    'discovery.wallet.method.default': 'IFRAME/RPC',
-    'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
-    'discovery.wallet.method.include.services': [
-      'https://fcl-discovery.onflow.org/testnet/authn',
-      'https://fcl-discovery.onflow.org/authn'
-    ],
-    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
-    // Add fallback configuration
-    'discovery.wallet.method.include.services.fallback': [
-      'https://fcl-discovery.onflow.org/testnet/authn',
-      'https://fcl-discovery.onflow.org/authn'
-    ],
-    'discovery.wallet.method.include.services.timeout': 15000,
-  },
-  // Mainnet configuration for production
+  // Mainnet configuration (production - more stable)
   mainnet: {
     'accessNode.api': 'https://rest-mainnet.onflow.org',
     'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
@@ -61,8 +17,21 @@ const FLOW_CONFIG = {
     'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
     'discovery.wallet.method.include.services': ['https://fcl-discovery.onflow.org/authn'],
     'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
-    // Add fallback configuration
-    'discovery.wallet.method.include.services.fallback': ['https://fcl-discovery.onflow.org/authn'],
+    // No fallback to testnet - mainnet only
+    'discovery.wallet.method.include.services.timeout': 10000,
+  },
+  // Testnet configuration for development (less stable)
+  testnet: {
+    'accessNode.api': 'https://rest-testnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
+    'discovery.authn.endpoint': 'https://fcl-discovery.onflow.org/testnet/authn',
+    'app.detail.title': 'FlowPay',
+    'app.detail.icon': 'https://www.useflowpay.xyz/logo.svg',
+    'app.detail.url': 'https://www.useflowpay.xyz',
+    'discovery.wallet.method.default': 'IFRAME/RPC',
+    'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
+    'discovery.wallet.method.include.services': ['https://fcl-discovery.onflow.org/testnet/authn'],
+    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
     'discovery.wallet.method.include.services.timeout': 10000,
   }
 };

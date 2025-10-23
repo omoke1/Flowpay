@@ -58,14 +58,16 @@ export async function checkFlowNetworkStatus() {
   
   let recommendations = [];
   if (!testnetHealthy && mainnetHealthy) {
-    recommendations.push('✅ Mainnet is working well - consider using mainnet for better stability');
+    recommendations.push('✅ Mainnet is working well - using mainnet for production stability');
     recommendations.push('❌ Testnet services are down - this is common with Flow testnet');
   } else if (!mainnetHealthy && testnetHealthy) {
-    recommendations.push('✅ Testnet is working - good for development');
-    recommendations.push('❌ Mainnet services are down - unusual but possible');
+    recommendations.push('⚠️ Mainnet services are down - but staying on mainnet for production');
+    recommendations.push('✅ Testnet is working - but mainnet is preferred for production');
   } else if (!allHealthy) {
     recommendations.push('❌ Both networks have issues - Flow services may be experiencing outages');
     recommendations.push('💡 Try using the fallback wallet connection method');
+  } else {
+    recommendations.push('✅ All services are healthy - using mainnet for production');
   }
   
   if (!allHealthy) {
@@ -76,7 +78,7 @@ export async function checkFlowNetworkStatus() {
 
   return {
     allHealthy,
-    network: mainnetHealthy ? 'mainnet' : 'testnet',
+    network: 'mainnet', // Always prefer mainnet for production
     services: status,
     recommendations
   };
