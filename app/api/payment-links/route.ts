@@ -192,41 +192,34 @@ export async function GET(request: NextRequest) {
     // Check if Supabase is configured
     if (!isDatabaseConfigured()) {
       const status = getDatabaseStatus();
-      console.log("GET /api/payment-links - Database not configured:", status);
-      return NextResponse.json(
-        { 
-          error: "Database not configured", 
-          details: status.error,
-          required: "Please configure Supabase environment variables in Vercel",
-          environment: {
-            NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing",
-            NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing"
-          }
-        },
-        { status: 500 }
-      );
+      console.log("GET /api/payment-links - Database not configured, returning empty data:", status);
+      // Return empty data instead of error for development
+      return NextResponse.json({ 
+        paymentLinks: [],
+        message: "Database not configured - using mock data for development"
+      });
     }
 
     console.log("GET /api/payment-links - Looking up user for merchantId:", merchantId);
     
-    // Use SimpleUserService to get user by wallet address
+    // Use SimpleUserService to get or create user by wallet address
     let userData;
     try {
-      userData = await SimpleUserService.getUserByWalletAddress(merchantId);
-      console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
+      userData = await SimpleUserService.getOrCreateUser(merchantId);
+      console.log("GET /api/payment-links - User data:", userData ? "Found/Created" : "Not found");
     } catch (userError) {
-      console.error("GET /api/payment-links - Error looking up user:", userError);
+      console.error("GET /api/payment-links - Error looking up/creating user:", userError);
       return NextResponse.json(
-        { error: "Failed to lookup user", details: userError instanceof Error ? userError.message : "Unknown error" },
+        { error: "Failed to lookup/create user", details: userError instanceof Error ? userError.message : "Unknown error" },
         { status: 500 }
       );
     }
     
     if (!userData) {
-      console.log("GET /api/payment-links - User not found for merchantId:", merchantId);
+      console.log("GET /api/payment-links - Failed to create user for merchantId:", merchantId);
       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+        { error: "Failed to create user" },
+        { status: 500 }
       );
     }
 

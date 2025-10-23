@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, Wallet, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useFlowProduction } from "@/components/providers/flow-provider-production";
+import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
 
 interface SimpleCryptoPayProps {
   paymentLinkId: string;
@@ -24,7 +24,7 @@ export function SimpleCryptoPay({
   onSuccess,
   onError,
 }: SimpleCryptoPayProps) {
-  const { isConnected, user, connectWallet } = useFlowProduction();
+  const { isConnected, user, connectWallet } = useFlowMinimal();
   const [loading, setLoading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string | null>(null);

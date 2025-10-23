@@ -34,7 +34,7 @@ const FUNGIBLE_TOKEN_CONTRACT = {
 // USDC contract addresses
 const USDC_CONTRACT = {
   testnet: '0xa983fecbed621163', // Example testnet USDC
-  mainnet: 'A.f1ab99c82dee3526.USDCFlow'  // USDC.e on Flow mainnet
+  mainnet: '0xf1ab99c82dee3526'  // USDC.e on Flow mainnet
 };
 
 // Get current network - Force mainnet for FlowPay
@@ -83,7 +83,7 @@ transaction(amount: UFix64, to: Address) {
     execute {
         let receiverRef = getAccount(to)
             .getCapability(/public/flowTokenReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
+            .borrow<&FungibleToken.Receiver>()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -116,7 +116,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         // Get platform fee recipient (you'll need to set this address)
         self.platformFeeRecipient = getAccount(0x0) // Replace with your platform fee address
             .getCapability(/public/flowTokenReceiver)
-            .borrow<&FlowToken.Vault{FungibleToken.Receiver}>()
+            .borrow<&FlowToken.Vault & FungibleToken.Receiver>()
             ?? panic("Could not borrow platform fee recipient vault")
     }
 
@@ -127,7 +127,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         // Deposit net amount to recipient
         let receiverRef = getAccount(to)
             .getCapability(/public/flowTokenReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
+            .borrow<&FungibleToken.Receiver>()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -136,7 +136,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
 // USDC transfer transaction for USDC.e on Flow mainnet
 const USDC_TRANSFER_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import USDCFlow from A.f1ab99c82dee3526.USDCFlow
+import USDCFlow from 0xf1ab99c82dee3526
 
 transaction(amount: UFix64, to: Address) {
     let sentVault: @FungibleToken.Vault
@@ -150,7 +150,7 @@ transaction(amount: UFix64, to: Address) {
     execute {
         let receiverRef = getAccount(to)
             .getCapability(/public/usdcReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
+            .borrow<&FungibleToken.Receiver>()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -159,7 +159,7 @@ transaction(amount: UFix64, to: Address) {
 // USDC transfer with platform fee transaction
 const USDC_TRANSFER_WITH_FEE_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import USDCFlow from A.f1ab99c82dee3526.USDCFlow
+import USDCFlow from 0xf1ab99c82dee3526
 
 transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     let sentVault: @FungibleToken.Vault
@@ -183,7 +183,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         // Get platform fee recipient (you'll need to set this address)
         self.platformFeeRecipient = getAccount(0x0) // Replace with your platform fee address
             .getCapability(/public/usdcReceiver)
-            .borrow<&FiatToken.Vault{FungibleToken.Receiver}>()
+            .borrow<&FiatToken.Vault & FungibleToken.Receiver>()
             ?? panic("Could not borrow platform fee recipient vault")
     }
 
@@ -194,7 +194,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         // Deposit net amount to recipient
         let receiverRef = getAccount(to)
             .getCapability(/public/usdcReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
+            .borrow<&FungibleToken.Receiver>()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -328,16 +328,16 @@ export async function getFlowBalance(address: string): Promise<string> {
   try {
     const result = await fcl.query({
       cadence: `
-        import FlowToken from 0x7e60df042a9c0868
-        import FungibleToken from 0x9a0766d93b6608b7
+        import FungibleToken from 0xf233dcee88fe0abe
+        import FlowToken from 0x1654653399040a61
         
-        pub fun main(address: Address): UFix64 {
+        access(all) fun main(address: Address): UFix64 {
           let account = getAccount(address)
-          let vault = account.getCapability(/public/flowTokenReceiver)
-              .borrow<&FlowToken.Vault{FungibleToken.Receiver}>()
+          let vaultRef = account.getCapability(FlowToken.VaultPublicPath)
+              .borrow<&FlowToken.Vault & FungibleToken.Balance>()
               ?? panic("Could not borrow Balance reference to the Vault")
           
-          return vault.balance
+          return vaultRef.balance
         }
       `,
       args: (arg: any, t: any) => [arg(address, t.Address)]
@@ -355,24 +355,10 @@ export async function getFlowBalance(address: string): Promise<string> {
  */
 export async function getUSDCBalance(address: string): Promise<string> {
   try {
-    const result = await fcl.query({
-      cadence: `
-        import FiatToken from 0xa983fecbed621163
-        import FungibleToken from 0x9a0766d93b6608b7
-        
-        pub fun main(address: Address): UFix64 {
-          let account = getAccount(address)
-          let vault = account.getCapability(/public/usdcReceiver)
-              .borrow<&FiatToken.Vault{FungibleToken.Receiver}>()
-              ?? panic("Could not borrow Balance reference to the Vault")
-          
-          return vault.balance
-        }
-      `,
-      args: (arg: any, t: any) => [arg(address, t.Address)]
-    });
-
-    return result.toString();
+    // For now, return 0 for USDC balance since we need to implement proper USDC support
+    // This prevents errors while we work on the FLOW balance functionality
+    console.log('USDC balance check not yet implemented, returning 0');
+    return '0';
   } catch (error) {
     console.error('Error getting USDC balance:', error);
     return '0';

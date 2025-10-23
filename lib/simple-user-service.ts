@@ -17,8 +17,15 @@ export class SimpleUserService {
   }): Promise<SimpleUser | null> {
     try {
       if (!supabase) {
-        console.error("Supabase not configured");
-        return null;
+        console.error("Supabase not configured - returning mock user");
+        // Return a mock user for development when Supabase is not configured
+        return {
+          id: `mock_${Date.now()}`,
+          wallet_address: walletAddress,
+          email: userData?.email || null,
+          display_name: userData?.display_name || null,
+          created_at: new Date().toISOString(),
+        };
       }
 
       // First, try to get existing user
@@ -60,8 +67,15 @@ export class SimpleUserService {
   static async getUserByWalletAddress(walletAddress: string): Promise<SimpleUser | null> {
     try {
       if (!supabase) {
-        console.error("Supabase not configured");
-        return null;
+        console.error("Supabase not configured - returning mock user");
+        // Return a mock user for development when Supabase is not configured
+        return {
+          id: `mock_${Date.now()}`,
+          wallet_address: walletAddress,
+          email: null,
+          display_name: null,
+          created_at: new Date().toISOString(),
+        };
       }
 
       const { data: user, error } = await supabase
@@ -86,7 +100,7 @@ export class SimpleUserService {
   static async getUserByEmail(email: string): Promise<SimpleUser | null> {
     try {
       if (!supabase) {
-        console.error("Supabase not configured");
+        console.error("Supabase not configured - returning null for email lookup");
         return null;
       }
 

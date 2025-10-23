@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useFlowProduction } from "@/components/providers/flow-provider-production";
+import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from "lucide-react";
@@ -13,7 +13,7 @@ interface RegistrationModalProps {
 }
 
 export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: RegistrationModalProps) {
-  const { connectWallet, loading, error, isConnected, user } = useFlowProduction();
+  const { connectWallet, isLoading, error, isConnected, user } = useFlowMinimal();
   const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
   const [selectedMethod, setSelectedMethod] = useState<'external' | 'email' | null>(null);
   const [email, setEmail] = useState('');
@@ -136,7 +136,7 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
               <Button
                 onClick={handleConnectWallet}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={loading}
+                disabled={isLoading}
               >
                 <Wallet className="w-4 h-4 mr-2" />
                 Connect External Wallet
@@ -146,7 +146,7 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
                 onClick={handleEmailRegistration}
                 variant="outline"
                 className="w-full border-zinc-100/10 dark:border-white/20 text-gray-100 dark:text-white hover:bg-black/[0.06] dark:hover:bg-white/10"
-                disabled={loading}
+                disabled={isLoading}
               >
                 <Mail className="w-4 h-4 mr-2" />
                 Create Email Wallet
@@ -213,9 +213,9 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
                 <Button
                   onClick={() => handleEmailFormSubmit(email, name)}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={!email || !name || loading}
+                  disabled={!email || !name || isLoading}
                 >
-                  {loading ? (
+                  {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     'Create Account'

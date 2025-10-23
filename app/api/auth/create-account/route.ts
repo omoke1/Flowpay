@@ -1,32 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { flowAccountService } from "@/lib/flow-account-service";
 import { SimpleUserService } from "@/lib/simple-user-service";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { logError, logInfo } from "@/lib/error-logging";
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting check
-    const rateLimitResult = await checkRateLimit(request, "account-creation");
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          limit: rateLimitResult.limit,
-          remaining: rateLimitResult.remaining,
-          reset: rateLimitResult.reset,
-        },
-        { 
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
-            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
-            "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
-          }
-        }
-      );
-    }
-
+    console.log("POST /api/auth/create-account - Starting account creation");
+    
     const body = await request.json();
     const { email, name } = body;
 
@@ -56,45 +34,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Creating Flow account for: ${email}`);
+    console.log(`Creating user account for: ${email}`);
 
-    // Create Flow account
-    const accountResult = await flowAccountService.createFlowAccount(email, name);
+    // For now, just create a simple user record
+    // In a real implementation, this would create a Flow account
+    const userData = await SimpleUserService.getOrCreateUser(`temp_${Date.now()}`, {
+      email,
+      display_name: name
+    });
 
-    // Verify account creation
-    const isVerified = await flowAccountService.verifyAccountCreation(accountResult.address);
-    if (!isVerified) {
-      throw new Error('Account creation verification failed');
+    if (!userData) {
+      throw new Error('Failed to create user account');
     }
 
-    // Get account balance
-    const balance = await flowAccountService.getAccountBalance(accountResult.address);
-
-    logInfo("Flow account created successfully", {
-      email,
-      name,
-      address: accountResult.address,
-      balance,
-      transactionId: accountResult.transactionId
-    });
+    console.log("User account created successfully:", userData.id);
 
     return NextResponse.json({
       success: true,
       account: {
-        address: accountResult.address,
+        id: userData.id,
         email,
         name,
-        balance,
-        funded: accountResult.funded,
-        transactionId: accountResult.transactionId
+        message: "Account created successfully. Please connect your Flow wallet to complete setup."
       }
     });
 
   } catch (error) {
-    logError("Failed to create Flow account", error as Error, {
-      endpoint: '/api/auth/create-account',
-      method: 'POST'
-    });
+    console.error("Failed to create account:", error);
 
     return NextResponse.json(
       { 

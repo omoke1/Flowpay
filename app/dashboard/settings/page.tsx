@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowProduction } from "@/components/providers/flow-provider-production";
+import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
 import { useNotification } from "@/components/providers/notification-provider";
 import { getUserAddress } from "@/lib/utils";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
@@ -22,7 +22,7 @@ import {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowProduction();
+  const { isConnected, user, disconnectWallet } = useFlowMinimal();
   const { success, error, warning } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

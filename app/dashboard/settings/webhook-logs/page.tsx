@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowProduction } from "@/components/providers/flow-provider-production";
+import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
@@ -18,7 +18,7 @@ interface WebhookLog {
 
 export default function WebhookLogsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowProduction();
+  const { isConnected, user, disconnectWallet } = useFlowMinimal();
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<WebhookLog[]>([]);
 

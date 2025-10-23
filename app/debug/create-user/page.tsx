@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFlowProduction } from '@/components/providers/flow-provider-production';
+import { useFlowMinimal } from '@/components/providers/flow-provider-minimal';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function CreateUserPage() {
-  const { user, isConnected } = useFlowProduction();
+  const { user, isConnected } = useFlowMinimal();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);

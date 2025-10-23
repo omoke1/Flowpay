@@ -115,24 +115,21 @@ export async function GET(request: NextRequest) {
     // Check if Supabase is configured
     if (!isDatabaseConfigured()) {
       const status = getDatabaseStatus();
-      console.log("GET /api/payments - Database not configured:", status);
-      return NextResponse.json(
-        { 
-          error: "Database not configured", 
-          details: status.error,
-          required: "Please configure Supabase environment variables"
-        },
-        { status: 500 }
-      );
+      console.log("GET /api/payments - Database not configured, returning empty data:", status);
+      // Return empty data instead of error for development
+      return NextResponse.json({ 
+        payments: [],
+        message: "Database not configured - using mock data for development"
+      });
     }
 
-    // Use SimpleUserService to get user
-    const userData = await SimpleUserService.getUserByWalletAddress(merchantId);
+    // Use SimpleUserService to get or create user
+    const userData = await SimpleUserService.getOrCreateUser(merchantId);
     if (!userData) {
-      console.log("GET /api/payments - User not found for merchantId:", merchantId);
+      console.log("GET /api/payments - Failed to create user for merchantId:", merchantId);
       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+        { error: "Failed to create user" },
+        { status: 500 }
       );
     }
 

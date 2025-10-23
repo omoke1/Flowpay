@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useFlowProduction } from "@/components/providers/flow-provider-production";
+import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
 import { SimpleRegistrationModal } from "@/components/auth/simple-registration-modal";
 import { useState } from "react";
 
 export default function HomePage() {
-  const { isConnected, user, connectWallet, loading, error } = useFlowProduction();
+  const { isConnected, user, connectWallet, isLoading, error } = useFlowMinimal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
@@ -32,10 +32,10 @@ export default function HomePage() {
               ) : (
                 <button
                   onClick={() => setShowRegistrationModal(true)}
-                  disabled={loading}
+                  disabled={isLoading}
                   className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-white/10 hover:bg-white/20 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Connecting..." : "Get started"}
+                  {isLoading ? "Connecting..." : "Get started"}
                 </button>
               )}
               <button
@@ -101,13 +101,13 @@ export default function HomePage() {
             ) : (
               <button
                 onClick={() => setShowRegistrationModal(true)}
-                disabled={loading}
+                disabled={isLoading}
                 className="inline-flex items-center gap-2 transition-all transform hover:scale-105 hover:bg-blue-700 text-base font-medium bg-gradient-to-r from-white/10 to-gray-400/70 rounded-lg px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-                {loading ? "Connecting..." : "Get Started"}
+                {isLoading ? "Connecting..." : "Get Started"}
               </button>
             )}
             <Link
@@ -270,9 +270,9 @@ export default function HomePage() {
               <span className="text-white">Flowpay</span>
             </div>
             <div className="flex gap-6 text-sm text-white/60">
-              <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="#" className="hover:text-white transition-colors">Support</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <Link href="/support" className="hover:text-white transition-colors">Support</Link>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/10 text-center text-sm text-white/60">
