@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Wallet, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFlowProduction } from "@/components/providers/flow-provider-production";
@@ -27,6 +27,30 @@ export function SimpleCryptoPay({
   const { isConnected, user, connectWallet } = useFlowProduction();
   const [loading, setLoading] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState<string | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+
+  // Load wallet balance when user connects
+  useEffect(() => {
+    const loadBalance = async () => {
+      if (isConnected && user?.addr) {
+        setBalanceLoading(true);
+        try {
+          const { getFlowBalance, getUSDCBalance } = await import("@/lib/flow-transactions");
+          const balance = token === 'USDC' 
+            ? await getUSDCBalance(user.addr)
+            : await getFlowBalance(user.addr);
+          setWalletBalance(balance);
+        } catch (error) {
+          console.error('Error loading wallet balance:', error);
+        } finally {
+          setBalanceLoading(false);
+        }
+      }
+    };
+
+    loadBalance();
+  }, [isConnected, user?.addr, token]);
 
   const handlePayment = async () => {
     if (!isConnected || !user || !user.addr) {
@@ -40,7 +64,37 @@ export function SimpleCryptoPay({
       console.log(`Processing real payment: ${amount} ${token} to ${merchantAddress}`);
       
       // Import Flow transaction functions
-      const { sendFlowTokens, sendUSDCTokens } = await import("@/lib/flow-transactions");
+      const { sendFlowTokens, sendUSDCTokens, getFlowBalance, getUSDCBalance, verifyMainnetConnection } = await import("@/lib/flow-transactions");
+      
+      // CRITICAL: Verify we're on mainnet before processing
+      console.log(`Verifying mainnet connection...`);
+      const isMainnet = await verifyMainnetConnection();
+      if (!isMainnet) {
+        throw new Error('CRITICAL SECURITY ERROR: Not connected to Flow mainnet! Transactions are disabled for security.');
+      }
+      
+      // CRITICAL: Check wallet balance before attempting transaction
+      console.log(`Checking wallet balance for ${user.addr}...`);
+      
+      let walletBalance: string;
+      let requiredAmount: number;
+      
+      if (token === 'USDC') {
+        walletBalance = await getUSDCBalance(user.addr);
+        requiredAmount = parseFloat(amount);
+        console.log(`USDC Balance: ${walletBalance}, Required: ${requiredAmount}`);
+      } else {
+        walletBalance = await getFlowBalance(user.addr);
+        requiredAmount = parseFloat(amount);
+        console.log(`FLOW Balance: ${walletBalance}, Required: ${requiredAmount}`);
+      }
+      
+      // Validate sufficient balance
+      if (parseFloat(walletBalance) < requiredAmount) {
+        throw new Error(`Insufficient ${token} balance. You have ${walletBalance} ${token}, but need ${requiredAmount} ${token}.`);
+      }
+      
+      console.log(`✅ Sufficient balance confirmed: ${walletBalance} ${token} >= ${requiredAmount} ${token}`);
       
       // Execute real blockchain transaction
       let txHash: string;
@@ -152,16 +206,35 @@ export function SimpleCryptoPay({
               {amount} {token}
             </span>
           </div>
+          
+          {/* Wallet Balance Display */}
+          <div className="flex items-center justify-between p-3 bg-black/50 border border-white/10 rounded-lg">
+            <span className="text-sm text-gray-400">Your Balance:</span>
+            <span className="text-sm font-medium text-white">
+              {balanceLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : walletBalance !== null ? (
+                `${walletBalance} ${token}`
+              ) : (
+                'Loading...'
+              )}
+            </span>
+          </div>
 
           <Button
             onClick={handlePayment}
             className="w-full bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-semibold"
-            disabled={loading}
+            disabled={loading || (walletBalance !== null && parseFloat(walletBalance) < parseFloat(amount))}
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Processing Payment...
+              </>
+            ) : (walletBalance !== null && parseFloat(walletBalance) < parseFloat(amount)) ? (
+              <>
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Insufficient {token} Balance
               </>
             ) : (
               <>

@@ -98,7 +98,7 @@ export function PaymentMethodSelector({ onSelectMethod, productName, amount }: P
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Speed:</span>
-                <span className="font-medium text-amber-500">1-3 days</span>
+                <span className="font-medium text-amber-500">Instantly</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Status:</span>

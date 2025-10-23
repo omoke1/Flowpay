@@ -43,6 +43,29 @@ const getNetwork = () => {
   return 'mainnet';
 };
 
+// Verify we're on mainnet
+export async function verifyMainnetConnection(): Promise<boolean> {
+  try {
+    const config = fcl.config();
+    const accessNode = config.get('accessNode.api');
+    console.log(`Current access node: ${accessNode}`);
+    
+    // Check if we're using mainnet access node
+    const isMainnet = accessNode === 'https://rest-mainnet.onflow.org';
+    
+    if (!isMainnet) {
+      console.error('❌ CRITICAL: Not connected to Flow mainnet! Current node:', accessNode);
+      return false;
+    }
+    
+    console.log('✅ Confirmed: Connected to Flow mainnet');
+    return true;
+  } catch (error) {
+    console.error('Error verifying mainnet connection:', error);
+    return false;
+  }
+}
+
 // Flow Token transfer transaction
 const FLOW_TRANSFER_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
