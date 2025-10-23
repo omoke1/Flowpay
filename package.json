@@ -15,7 +15,10 @@
     "security:fix": "npm audit fix",
     "test:security": "echo 'Security tests not implemented yet'",
     "test:rate-limit": "echo 'Rate limiting tests not implemented yet'",
-    "test:validation": "echo 'Validation tests not implemented yet'"
+    "test:validation": "echo 'Validation tests not implemented yet'",
+    "deploy:contracts": "chmod +x scripts/deploy-contracts.sh && ./scripts/deploy-contracts.sh",
+    "verify:contracts": "node scripts/verify-deployment.js",
+    "deploy:all": "npm run deploy:contracts && npm run verify:contracts"
   },
   "keywords": [],
   "author": "",
