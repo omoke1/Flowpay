@@ -154,42 +154,54 @@ export function EnhancedCheckout({
             {/* Payment Method Selection */}
             <div className="space-y-4">
               <Label className="text-white font-medium">Payment Method</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant={selectedPaymentMethod === 'saved' ? 'default' : 'outline'}
-                  onClick={() => setSelectedPaymentMethod('saved')}
-                  disabled
-                  className="h-12 flex flex-col items-center justify-center gap-2 bg-transparent border-white/10 text-gray-500 cursor-not-allowed opacity-50"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span className="text-xs">Saved</span>
-                  <span className="text-xs text-gray-500">Coming Soon</span>
-                </Button>
-                
-                <Button
-                  variant={selectedPaymentMethod === 'card' ? 'default' : 'outline'}
-                  onClick={() => setSelectedPaymentMethod('card')}
-                  disabled
-                  className="h-12 flex flex-col items-center justify-center gap-2 bg-transparent border-white/10 text-gray-500 cursor-not-allowed opacity-50"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span className="text-xs">Card</span>
-                  <span className="text-xs text-gray-500">Coming Soon</span>
-                </Button>
-                
-                <Button
-                  variant={selectedPaymentMethod === 'crypto' ? 'default' : 'outline'}
-                  onClick={() => setSelectedPaymentMethod('crypto')}
-                  className={`h-12 flex flex-col items-center justify-center gap-2 ${
-                    selectedPaymentMethod === 'crypto' 
-                      ? 'bg-[#97F11D] text-black' 
-                      : 'bg-transparent border-[#97F11D]/50 text-[#97F11D] hover:bg-[#97F11D]/10'
+              <div className="grid grid-cols-3 gap-3">
+                {/* Saved Payment - Disabled */}
+                <div
+                  className={`h-16 flex flex-col items-center justify-center gap-1 rounded-lg border-2 cursor-not-allowed opacity-50 transition-all duration-200 ${
+                    selectedPaymentMethod === 'saved' 
+                      ? 'border-gray-500 bg-gray-800/20' 
+                      : 'border-white/10 bg-black/30'
                   }`}
+                  onClick={() => {
+                    // Show coming soon message
+                    onPaymentError('Saved payment methods are coming soon!');
+                  }}
+                >
+                  <CreditCard className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-500">SAVED</span>
+                  <span className="text-xs text-gray-500">COMING SOON</span>
+                </div>
+                
+                {/* Card Payment - Disabled */}
+                <div
+                  className={`h-16 flex flex-col items-center justify-center gap-1 rounded-lg border-2 cursor-not-allowed opacity-50 transition-all duration-200 ${
+                    selectedPaymentMethod === 'card' 
+                      ? 'border-gray-500 bg-gray-800/20' 
+                      : 'border-white/10 bg-black/30'
+                  }`}
+                  onClick={() => {
+                    // Show coming soon message
+                    onPaymentError('Card payments are coming soon!');
+                  }}
+                >
+                  <CreditCard className="w-4 h-4 text-gray-500" />
+                  <span className="text-xs font-medium text-gray-500">CARD</span>
+                  <span className="text-xs text-gray-500">COMING SOON</span>
+                </div>
+                
+                {/* Crypto Payment - Active */}
+                <div
+                  className={`h-16 flex flex-col items-center justify-center gap-1 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
+                    selectedPaymentMethod === 'crypto' 
+                      ? 'border-[#97F11D] bg-[#97F11D] text-black' 
+                      : 'border-[#97F11D]/50 bg-black/30 text-[#97F11D] hover:bg-[#97F11D]/10'
+                  }`}
+                  onClick={() => setSelectedPaymentMethod('crypto')}
                 >
                   <Coins className="w-4 h-4" />
-                  <span className="text-xs font-semibold">Crypto</span>
-                  <span className="text-xs text-[#97F11D]">Flow Blockchain</span>
-                </Button>
+                  <span className="text-xs font-bold">CRYPTO</span>
+                  <span className="text-xs">BLOCKCHAIN</span>
+                </div>
               </div>
             </div>
 
