@@ -10,8 +10,9 @@ import { PaymentMethodSelector } from "@/components/checkout/PaymentMethodSelect
 import { SimpleCryptoPay } from "@/components/checkout/SimpleCryptoPay";
 import { FiatPay } from "@/components/checkout/FiatPay";
 import { PaymentConfirmation } from "@/components/checkout/PaymentConfirmation";
+import { EnhancedCheckout } from "@/components/checkout/EnhancedCheckout";
 
-type CheckoutStep = 'select' | 'payment' | 'confirmation';
+type CheckoutStep = 'select' | 'enhanced' | 'payment' | 'confirmation';
 type PaymentMethod = 'crypto' | 'fiat' | null;
 
 interface PaymentLinkData {
@@ -76,7 +77,7 @@ export default function CheckoutPage() {
 
   const handleMethodSelect = (method: 'crypto' | 'fiat') => {
     setSelectedMethod(method);
-    setStep('payment');
+    setStep('enhanced');
   };
 
   const handlePaymentSuccess = (reference: string) => {
@@ -106,6 +107,10 @@ export default function CheckoutPage() {
     setStep('select');
     setSelectedMethod(null);
     setError(null);
+  };
+
+  const handleEnhancedCheckoutComplete = () => {
+    setStep('payment');
   };
 
   if (loading) {
@@ -153,13 +158,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen gradient-bg py-4 sm:py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className={`mx-auto ${step === 'enhanced' ? 'max-w-7xl' : 'max-w-2xl'}`}>
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             {step !== 'select' && step !== 'confirmation' && (
               <button
-                onClick={handleBackToSelect}
+                onClick={step === 'enhanced' ? handleBackToSelect : () => setStep('enhanced')}
                 className="p-2 sm:p-3 hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-white/10"
               >
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
@@ -182,14 +187,18 @@ export default function CheckoutPage() {
                 step === 'select' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
               <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                step === 'enhanced' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
+              }`} />
+              <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                 step === 'payment' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
               <div className={`flex-1 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                 step === 'confirmation' ? 'bg-[#97F11D] shadow-lg shadow-[#97F11D]/30' : 'bg-white/20'
               }`} />
             </div>
-                    <div className="flex justify-between mt-2 sm:mt-3 text-xs text-gray-500">
+            <div className="flex justify-between mt-2 sm:mt-3 text-xs text-gray-500">
               <span className={step === 'select' ? 'text-[#97F11D] font-medium' : ''}>Select Method</span>
+              <span className={step === 'enhanced' ? 'text-[#97F11D] font-medium' : ''}>Billing</span>
               <span className={step === 'payment' ? 'text-[#97F11D] font-medium' : ''}>Payment</span>
               <span className={step === 'confirmation' ? 'text-[#97F11D] font-medium' : ''}>Complete</span>
             </div>
@@ -239,14 +248,23 @@ export default function CheckoutPage() {
           </div>
 
           {/* Step Content */}
-          <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10">
-            {step === 'select' && (
-              <PaymentMethodSelector
-                onSelectMethod={handleMethodSelect}
-                productName={paymentData.product_name}
-                amount={paymentData.amount}
-              />
-            )}
+          {step === 'enhanced' ? (
+            <EnhancedCheckout
+              productName={paymentData.product_name}
+              amount={paymentData.amount}
+              token={paymentData.token}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+            />
+          ) : (
+            <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10">
+              {step === 'select' && (
+                <PaymentMethodSelector
+                  onSelectMethod={handleMethodSelect}
+                  productName={paymentData.product_name}
+                  amount={paymentData.amount}
+                />
+              )}
 
             {step === 'payment' && selectedMethod === 'fiat' && (
               <FiatPay
@@ -272,20 +290,21 @@ export default function CheckoutPage() {
               />
             )}
 
-            {step === 'confirmation' && (
-              <PaymentConfirmation
-                paymentMethod={selectedMethod || 'crypto'}
-                transactionReference={transactionReference}
-                amount={`$${paymentData.amount} USD`}
-                productName={paymentData.product_name}
-                merchantName={paymentData.users?.display_name}
-                redirectUrl={paymentData.redirect_url}
-              />
-            )}
-          </div>
+              {step === 'confirmation' && (
+                <PaymentConfirmation
+                  paymentMethod={selectedMethod || 'crypto'}
+                  transactionReference={transactionReference}
+                  amount={`$${paymentData.amount} USD`}
+                  productName={paymentData.product_name}
+                  merchantName={paymentData.users?.display_name}
+                  redirectUrl={paymentData.redirect_url}
+                />
+              )}
+            </div>
+          )}
 
           {/* Security Notice */}
-          {step !== 'confirmation' && (
+          {step !== 'confirmation' && step !== 'enhanced' && (
             <div className="glass p-3 sm:p-4 rounded-xl border border-white/10 text-center">
                       <div className="flex items-center justify-center gap-2 text-gray-500 text-xs sm:text-sm">
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 text-[#97F11D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
