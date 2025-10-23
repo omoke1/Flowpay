@@ -109,8 +109,14 @@ export default function CheckoutPage() {
     setError(null);
   };
 
-  const handleEnhancedCheckoutComplete = () => {
-    setStep('payment');
+  const handleEnhancedCheckoutComplete = (reference: string) => {
+    if (reference === 'crypto_ready') {
+      // Proceed to actual crypto payment
+      setStep('payment');
+    } else {
+      // Handle other cases
+      setStep('payment');
+    }
   };
 
   if (loading) {
@@ -253,7 +259,7 @@ export default function CheckoutPage() {
               productName={paymentData.product_name}
               amount={paymentData.amount}
               token={paymentData.token}
-              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentSuccess={handleEnhancedCheckoutComplete}
               onPaymentError={handlePaymentError}
             />
           ) : (

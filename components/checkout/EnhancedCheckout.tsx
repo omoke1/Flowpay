@@ -64,13 +64,14 @@ export function EnhancedCheckout({
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate transaction reference
-      const reference = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      onPaymentSuccess(reference);
+      if (selectedPaymentMethod === 'crypto') {
+        // For crypto payments, proceed to actual Flow blockchain payment
+        // This will trigger the real payment flow
+        onPaymentSuccess('crypto_ready');
+      } else {
+        // For fiat payments, show coming soon
+        onPaymentError('Fiat payments are coming soon! Please use crypto payment for now.');
+      }
     } catch (error) {
       onPaymentError('Payment failed. Please try again.');
     } finally {
@@ -97,27 +98,23 @@ export function EnhancedCheckout({
                 <Button
                   variant={selectedPaymentMethod === 'saved' ? 'default' : 'outline'}
                   onClick={() => setSelectedPaymentMethod('saved')}
-                  className={`h-12 flex flex-col items-center justify-center gap-2 ${
-                    selectedPaymentMethod === 'saved' 
-                      ? 'bg-white text-black' 
-                      : 'bg-transparent border-white/20 text-white hover:bg-white/10'
-                  }`}
+                  disabled
+                  className="h-12 flex flex-col items-center justify-center gap-2 bg-transparent border-white/10 text-gray-500 cursor-not-allowed opacity-50"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span className="text-xs">Saved</span>
+                  <span className="text-xs text-gray-500">Coming Soon</span>
                 </Button>
                 
                 <Button
                   variant={selectedPaymentMethod === 'card' ? 'default' : 'outline'}
                   onClick={() => setSelectedPaymentMethod('card')}
-                  className={`h-12 flex flex-col items-center justify-center gap-2 ${
-                    selectedPaymentMethod === 'card' 
-                      ? 'bg-white text-black' 
-                      : 'bg-transparent border-white/20 text-white hover:bg-white/10'
-                  }`}
+                  disabled
+                  className="h-12 flex flex-col items-center justify-center gap-2 bg-transparent border-white/10 text-gray-500 cursor-not-allowed opacity-50"
                 >
                   <CreditCard className="w-4 h-4" />
                   <span className="text-xs">Card</span>
+                  <span className="text-xs text-gray-500">Coming Soon</span>
                 </Button>
                 
                 <Button
@@ -125,12 +122,13 @@ export function EnhancedCheckout({
                   onClick={() => setSelectedPaymentMethod('crypto')}
                   className={`h-12 flex flex-col items-center justify-center gap-2 ${
                     selectedPaymentMethod === 'crypto' 
-                      ? 'bg-white text-black' 
-                      : 'bg-transparent border-white/20 text-white hover:bg-white/10'
+                      ? 'bg-[#97F11D] text-black' 
+                      : 'bg-transparent border-[#97F11D]/50 text-[#97F11D] hover:bg-[#97F11D]/10'
                   }`}
                 >
                   <Coins className="w-4 h-4" />
-                  <span className="text-xs">Crypto</span>
+                  <span className="text-xs font-semibold">Crypto</span>
+                  <span className="text-xs text-[#97F11D]">Flow Blockchain</span>
                 </Button>
               </div>
             </div>
@@ -140,13 +138,35 @@ export function EnhancedCheckout({
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-4 bg-[#97F11D]/10 rounded-lg border border-[#97F11D]/20">
                   <div className="w-8 h-8 bg-[#97F11D]/20 rounded-full flex items-center justify-center">
-                    <ArrowRight className="w-4 h-4 text-[#97F11D]" />
+                    <Coins className="w-4 h-4 text-[#97F11D]" />
                   </div>
                   <div>
-                    <p className="text-white font-medium">Pay with Stablecoins</p>
+                    <p className="text-white font-medium">Pay with Flow Blockchain</p>
                     <p className="text-gray-400 text-sm">
-                      After submission, you will be redirected to securely complete next steps.
+                      Secure payment using FLOW tokens or USDC on Flow mainnet.
                     </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="w-6 h-6 bg-[#97F11D]/20 rounded-full flex items-center justify-center">
+                      <span className="text-[#97F11D] text-xs font-bold">F</span>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">FLOW</p>
+                      <p className="text-gray-400 text-xs">Native token</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center">
+                      <span className="text-blue-400 text-xs font-bold">U</span>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">USDC</p>
+                      <p className="text-gray-400 text-xs">Stablecoin</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -321,24 +341,25 @@ export function EnhancedCheckout({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">V</span>
+                  <div className="w-8 h-8 bg-[#97F11D]/20 rounded-full flex items-center justify-center">
+                    <Coins className="w-4 h-4 text-[#97F11D]" />
                   </div>
                   <div>
                     <p className="text-white font-medium">{productName}</p>
-                    <p className="text-gray-400 text-sm">Digital Product</p>
+                    <p className="text-gray-400 text-sm">FlowPay Digital Product</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-[#97F11D] font-semibold">${amount}</p>
+                  <p className="text-gray-400 text-xs">USD</p>
                 </div>
               </div>
 
               {/* Auto-renewal Option */}
               <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
                 <div>
-                  <p className="text-white font-medium">Autorenew for $13.00 every year</p>
-                  <p className="text-gray-400 text-sm">Save 20% with annual billing</p>
+                  <p className="text-white font-medium">FlowPay Pro Subscription</p>
+                  <p className="text-gray-400 text-sm">Enhanced features and priority support</p>
                 </div>
                 <button
                   onClick={() => setAutoRenew(!autoRenew)}
@@ -352,14 +373,19 @@ export function EnhancedCheckout({
                 </button>
               </div>
 
-              {/* Additional Item */}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">V</span>
+              {/* FlowPay Features */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Check className="w-4 h-4 text-[#97F11D]" />
+                  <span>Flow mainnet transactions</span>
                 </div>
-                <div>
-                  <p className="text-white font-medium">Vent's projects</p>
-                  <p className="text-gray-400 text-sm">Additional service</p>
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Check className="w-4 h-4 text-[#97F11D]" />
+                  <span>Real-time payment tracking</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Check className="w-4 h-4 text-[#97F11D]" />
+                  <span>Secure blockchain payments</span>
                 </div>
               </div>
             </div>
@@ -374,13 +400,17 @@ export function EnhancedCheckout({
 
             {/* Security Features */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <div className="flex items-center gap-2 text-[#97F11D] text-sm">
                 <Shield className="w-4 h-4" />
-                <span>Secured by Flow Blockchain</span>
+                <span>Secured by Flow Mainnet</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <Lock className="w-4 h-4" />
                 <span>256-bit SSL encryption</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <Coins className="w-4 h-4" />
+                <span>Decentralized payments</span>
               </div>
             </div>
 
@@ -397,8 +427,8 @@ export function EnhancedCheckout({
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Wallet className="w-5 h-5" />
-                  Buy Now
+                  <Coins className="w-5 h-5" />
+                  Pay with Flow
                 </div>
               )}
             </Button>
@@ -406,7 +436,7 @@ export function EnhancedCheckout({
             {/* Security Notice */}
             <div className="text-center">
               <p className="text-gray-400 text-xs">
-                Your payment information is encrypted and secure
+                Powered by Flow mainnet • Secure blockchain payments
               </p>
             </div>
           </CardContent>
