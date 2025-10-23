@@ -7,7 +7,7 @@ This is the main secret key used for webhook signature verification.
 
 ```bash
 # Generate a secure random secret (32+ characters)
-WEBHOOK_SECRET=whsec_1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+WEBHOOK_SECRET=whsec_your_secure_random_string_here
 ```
 
 **How to generate:**

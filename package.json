@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "setup-supabase": "node scripts/setup-supabase.js",
+    "test-database": "node scripts/test-database.js",
     "security:audit": "npm audit --audit-level=moderate",
     "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",

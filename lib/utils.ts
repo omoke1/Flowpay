@@ -28,3 +28,12 @@ export function generatePaymentUrl(linkId: string): string {
   return `${baseUrl}/pay/${linkId}`;
 }
 
+export function getUserAddress(user: any): string | null {
+  // This function is used by dashboard pages to get the current user's address
+  // Get the address from the Flow provider user object
+  if (user && user.addr) {
+    return user.addr;
+  }
+  return null;
+}
+

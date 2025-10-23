@@ -5,7 +5,29 @@ import { config } from '@onflow/fcl';
 
 // Flow network configuration
 const FLOW_CONFIG = {
-  // Testnet configuration for development
+  // Mainnet configuration (more stable than testnet)
+  mainnet: {
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'discovery.authn.endpoint': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'FlowPay',
+    'app.detail.icon': 'https://www.useflowpay.xyz/logo.svg',
+    'app.detail.url': 'https://www.useflowpay.xyz',
+    'discovery.wallet.method.default': 'IFRAME/RPC',
+    'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
+    'discovery.wallet.method.include.services': [
+      'https://fcl-discovery.onflow.org/authn',
+      'https://fcl-discovery.onflow.org/testnet/authn'
+    ],
+    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+    // Add fallback configuration
+    'discovery.wallet.method.include.services.fallback': [
+      'https://fcl-discovery.onflow.org/authn',
+      'https://fcl-discovery.onflow.org/testnet/authn'
+    ],
+    'discovery.wallet.method.include.services.timeout': 15000,
+  },
+  // Testnet configuration for development (less stable)
   testnet: {
     'accessNode.api': 'https://rest-testnet.onflow.org',
     'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
@@ -54,8 +76,12 @@ export function initializeFlowConfig() {
     return;
   }
   
-  const network = process.env.NODE_ENV === 'production' ? 'mainnet' : 'testnet';
+  // Use mainnet by default (more stable than testnet)
+  // Testnet is often down, so we default to mainnet for better reliability
+  const network = process.env.NEXT_PUBLIC_FLOW_NETWORK || 'mainnet';
   const flowConfig = FLOW_CONFIG[network];
+  
+  console.log(`ℹ️  Note: Testnet is often unstable. Using ${network} for better reliability.`);
   
   // Check if WalletConnect project ID is set
   if (!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID === 'your_walletconnect_project_id') {

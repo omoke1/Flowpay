@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { useFlowProduction } from "@/components/providers/flow-provider-production";
 import { useNotification } from "@/components/providers/notification-provider";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -12,11 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getUserAddress } from "@/lib/flow-utils";
+import { getUserAddress } from "@/lib/utils";
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowOfficial();
+  const { isConnected, user, disconnectWallet } = useFlowProduction();
   const { success, error } = useNotification();
   const [loading, setLoading] = useState(false);
 

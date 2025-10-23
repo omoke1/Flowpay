@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { useFlowProduction } from "@/components/providers/flow-provider-production";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from "lucide-react";
@@ -13,7 +13,7 @@ interface RegistrationModalProps {
 }
 
 export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: RegistrationModalProps) {
-  const { connectWallet, loading, error, isConnected, user } = useFlowOfficial();
+  const { connectWallet, loading, error, isConnected, user } = useFlowProduction();
   const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
   const [selectedMethod, setSelectedMethod] = useState<'external' | 'email' | null>(null);
   const [email, setEmail] = useState('');

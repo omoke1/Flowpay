@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { useFlowProduction } from "@/components/providers/flow-provider-production";
 import { useNotification } from "@/components/providers/notification-provider";
-import { getUserAddress } from "@/lib/flow-utils";
+import { getUserAddress } from "@/lib/utils";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { 
@@ -22,7 +22,7 @@ import {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowOfficial();
+  const { isConnected, user, disconnectWallet } = useFlowProduction();
   const { success, error, warning } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

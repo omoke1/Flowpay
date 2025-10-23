@@ -29,10 +29,12 @@ A professional payment platform built on the Flow blockchain, enabling businesse
 flowpay/
 ├── app/                          # Next.js App Router
 │   ├── api/                      # API Routes
+│   │   ├── admin/                # Admin authentication & management
+│   │   ├── auth/                 # User authentication
 │   │   ├── payment-links/        # Payment link management
 │   │   ├── payments/             # Payment processing
-│   │   ├── transak/              # Transak integration
-│   │   └── settings/             # Settings management
+│   │   ├── settings/             # Settings management
+│   │   └── transak/              # Transak integration
 │   ├── dashboard/                # Dashboard pages
 │   │   ├── analytics/            # Analytics dashboard
 │   │   ├── create/               # Create payment links
@@ -41,6 +43,7 @@ flowpay/
 │   │   ├── payments/             # Payments list
 │   │   └── settings/             # User settings
 │   ├── checkout/                 # Checkout pages
+│   ├── debug/                    # Debug pages
 │   ├── pay/                      # Payment pages
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout
@@ -49,29 +52,47 @@ flowpay/
 │   ├── auth/                     # Authentication components
 │   ├── checkout/                 # Checkout components
 │   ├── dashboard/                # Dashboard components
+│   ├── debug/                    # Debug components
 │   ├── onboarding/               # Onboarding components
 │   ├── providers/                # Context providers
 │   ├── shared/                   # Shared components
 │   └── ui/                       # UI components
 ├── lib/                          # Utility libraries
 │   ├── hooks/                    # Custom React hooks
-│   ├── flow-config.ts            # Flow blockchain configuration
+│   ├── flow-account-service.ts   # Flow account management
+│   ├── flow-config-official.ts   # Flow blockchain configuration
 │   ├── flow-transactions.ts      # Flow transaction utilities
+│   ├── network-status.ts         # Network status checking
 │   ├── rate-limit.ts             # Rate limiting
+│   ├── real-settings-service.ts  # Settings management
 │   ├── resend.ts                 # Email service
+│   ├── simple-user-service.ts    # User management
 │   ├── supabase.ts               # Database client
 │   ├── transak.ts                # Transak integration
 │   ├── utils.ts                  # Utility functions
 │   ├── validation.ts             # Input validation
-│   └── wallet-service.ts         # Wallet management
+│   └── webhook-delivery.ts       # Webhook management
+├── scripts/                      # Utility scripts
+│   ├── check-schema.js           # Database schema checker
+│   ├── security-check.js         # Security audit script
+│   ├── setup-database.sql        # Database setup
+│   ├── setup-supabase.js         # Supabase setup
+│   └── test-database.js           # Database testing
 ├── public/                       # Static assets
 │   └── logo.svg                  # App logo
+├── docs/                         # Documentation
+│   ├── README.md                 # Main documentation
+│   ├── SECURITY_GUIDE.md         # Security best practices
+│   ├── SUPABASE_PRODUCTION_SETUP.md # Database setup
+│   ├── WEBHOOK_SETUP_GUIDE.md    # Webhook configuration
+│   ├── ADMIN_SECURITY_SETUP.md   # Admin setup
+│   └── PRODUCTION_READY.md       # Production deployment
 ├── .env.template                 # Environment variables template
 ├── .gitignore                    # Git ignore rules
 ├── next.config.js                # Next.js configuration
 ├── package.json                  # Dependencies
 ├── tailwind.config.js            # Tailwind CSS config
-├── tsconfig.json                 # TypeScript config
+└── tsconfig.json                 # TypeScript config
 └── README.md                     # This file
 ```
 

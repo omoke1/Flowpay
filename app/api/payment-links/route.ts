@@ -219,7 +219,7 @@ export async function GET(request: NextRequest) {
         { 
           error: "Database not configured", 
           details: status.error,
-          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables"
+          required: "Please configure Supabase environment variables"
         },
         { status: 500 }
       );

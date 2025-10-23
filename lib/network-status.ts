@@ -1,13 +1,19 @@
 // Network status checker for Flow services
 export async function checkFlowNetworkStatus() {
-  const services = [
-    'https://rest-testnet.onflow.org',
-    'https://fcl-discovery.onflow.org/testnet/authn',
+  const mainnetServices = [
+    'https://rest-mainnet.onflow.org',
     'https://fcl-discovery.onflow.org/authn'
   ];
+  
+  const testnetServices = [
+    'https://rest-testnet.onflow.org',
+    'https://fcl-discovery.onflow.org/testnet/authn'
+  ];
+  
+  const allServices = [...mainnetServices, ...testnetServices];
 
   const results = await Promise.allSettled(
-    services.map(async (url) => {
+    allServices.map(async (url) => {
       try {
         const response = await fetch(url, { 
           method: 'GET',
@@ -31,22 +37,48 @@ export async function checkFlowNetworkStatus() {
   );
 
   const status = results.map((result, index) => ({
-    service: services[index],
+    service: allServices[index],
     result: result.status === 'fulfilled' ? result.value : { error: 'Failed to check' }
   }));
 
   console.log('Flow Network Status Check:', status);
   
+  // Check mainnet vs testnet health
+  const mainnetHealthy = mainnetServices.every(url => {
+    const serviceStatus = status.find(s => s.service === url);
+    return serviceStatus?.result.ok;
+  });
+  
+  const testnetHealthy = testnetServices.every(url => {
+    const serviceStatus = status.find(s => s.service === url);
+    return serviceStatus?.result.ok;
+  });
+  
   const allHealthy = status.every(s => s.result.ok);
+  
+  let recommendations = [];
+  if (!testnetHealthy && mainnetHealthy) {
+    recommendations.push('✅ Mainnet is working well - consider using mainnet for better stability');
+    recommendations.push('❌ Testnet services are down - this is common with Flow testnet');
+  } else if (!mainnetHealthy && testnetHealthy) {
+    recommendations.push('✅ Testnet is working - good for development');
+    recommendations.push('❌ Mainnet services are down - unusual but possible');
+  } else if (!allHealthy) {
+    recommendations.push('❌ Both networks have issues - Flow services may be experiencing outages');
+    recommendations.push('💡 Try using the fallback wallet connection method');
+  }
   
   if (!allHealthy) {
     console.warn('⚠️ Some Flow services are not responding properly');
     console.warn('This may cause wallet connection issues');
+    recommendations.forEach(rec => console.log(rec));
   }
 
   return {
     allHealthy,
-    services: status
+    network: mainnetHealthy ? 'mainnet' : 'testnet',
+    services: status,
+    recommendations
   };
 }
 
@@ -56,5 +88,6 @@ export function initializeNetworkCheck() {
     checkFlowNetworkStatus();
   }
 }
+
 
 

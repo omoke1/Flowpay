@@ -242,20 +242,20 @@ export default function CheckoutPage() {
           <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10">
             {step === 'select' && (
               <PaymentMethodSelector
-                acceptCrypto={paymentData.accept_crypto}
-                acceptFiat={paymentData.accept_fiat}
-                selectedMethod={selectedMethod}
-                onSelect={handleMethodSelect}
+                onSelectMethod={handleMethodSelect}
+                productName={paymentData.product_name}
+                amount={paymentData.amount}
               />
             )}
 
             {step === 'payment' && selectedMethod === 'fiat' && (
               <FiatPay
                 paymentLinkId={paymentData.id}
-                merchantWalletAddress={paymentData.merchant_wallet_address || paymentData.users?.wallet_address || ''}
+                merchantAddress={paymentData.merchant_wallet_address || paymentData.users?.wallet_address || ''}
                 amount={paymentData.amount}
+                token={paymentData.token}
                 productName={paymentData.product_name}
-                onSuccess={(orderData) => handlePaymentSuccess(orderData.status?.id || orderData.orderReference)}
+                onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
               />
             )}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, isDatabaseConfigured, getDatabaseStatus } from "@/lib/supabase";
 import { sendCustomerReceipt, sendMerchantNotification } from "@/lib/resend";
 import { SimpleUserService } from "@/lib/simple-user-service";
 import { realSettingsService } from "@/lib/real-settings-service";
@@ -290,21 +290,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if Supabase is configured
-    if (!supabase) {
+    if (!isDatabaseConfigured()) {
+      const status = getDatabaseStatus();
+      console.log("GET /api/payments - Database not configured:", status);
       return NextResponse.json(
-        { error: "Database not configured. Please set up Supabase." },
+        { 
+          error: "Database not configured", 
+          details: status.error,
+          required: "Please configure Supabase environment variables"
+        },
         { status: 500 }
       );
     }
 
     // Use WalletService to get user
-            const userData = await SimpleUserService.getUserByWalletAddress(merchantId);
-            if (!userData) {
-              return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
-              );
-            }
+    const userData = await SimpleUserService.getUserByWalletAddress(merchantId);
+    if (!userData) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
 
     // Fetch payments for merchant
     const supabaseClient = supabase!; // We know supabase is not null due to the check above

@@ -7,13 +7,19 @@ initializeFlowConfig();
 // Flow Token contract addresses
 const FLOW_TOKEN_CONTRACT = {
   testnet: '0x7e60df042a9c0868',
-  mainnet: '0x1654653399040a61'
+  mainnet: '0x1654653399040a61'  // FlowToken on mainnet
 };
 
-// USDC contract addresses (example - you'll need to verify these)
+// FungibleToken contract addresses
+const FUNGIBLE_TOKEN_CONTRACT = {
+  testnet: '0x9a0766d93b6608b7',
+  mainnet: '0x9a0766d93b6608b7'  // FungibleToken on mainnet (same address)
+};
+
+// USDC contract addresses
 const USDC_CONTRACT = {
   testnet: '0xa983fecbed621163', // Example testnet USDC
-  mainnet: '0x3c5959b568896393'  // Example mainnet USDC
+  mainnet: '0x3c5959b568896393'  // USDC on mainnet
 };
 
 // Get current network
@@ -24,7 +30,7 @@ const getNetwork = () => {
 // Flow Token transfer transaction
 const FLOW_TRANSFER_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import FlowToken from 0x7e60df042a9c0868
+import FlowToken from 0x1654653399040a61
 
 transaction(amount: UFix64, to: Address) {
     let sentVault: @FungibleToken.Vault
@@ -47,7 +53,7 @@ transaction(amount: UFix64, to: Address) {
 // Flow Token transfer with platform fee transaction
 const FLOW_TRANSFER_WITH_FEE_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import FlowToken from 0x7e60df042a9c0868
+import FlowToken from 0x1654653399040a61
 
 transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     let sentVault: @FungibleToken.Vault

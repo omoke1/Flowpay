@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { NetworkSwitcher } from '@/components/debug/network-switcher';
 
 export default function SimpleStatusPage() {
   const [status, setStatus] = useState<any>(null);
@@ -76,6 +77,11 @@ export default function SimpleStatusPage() {
         <h1 className="text-3xl font-bold text-gray-100 dark:text-white mb-8">
           Flow Network Status
         </h1>
+
+        {/* Network Switcher */}
+        <div className="mb-6">
+          <NetworkSwitcher />
+        </div>
 
         {/* Overall Status */}
         <div className="bg-black/[0.06] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 rounded-lg p-6 mb-6">

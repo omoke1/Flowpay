@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { useFlowProduction } from "@/components/providers/flow-provider-production";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -11,11 +11,11 @@ import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
 import { WelcomeBanner } from "@/components/onboarding/welcome-banner";
 import { useTourState } from "@/lib/hooks/use-tour-state";
 import { formatAmount, formatAddress } from "@/lib/utils";
-import { getUserAddress } from "@/lib/flow-utils";
+import { getUserAddress } from "@/lib/utils";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowOfficial();
+  const { isConnected, user, disconnectWallet } = useFlowProduction();
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);

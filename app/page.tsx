@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { useFlowProduction } from "@/components/providers/flow-provider-production";
 import { SimpleRegistrationModal } from "@/components/auth/simple-registration-modal";
 import { useState } from "react";
 
 export default function HomePage() {
-  const { isConnected, user, connectWallet, loading, error } = useFlowOfficial();
+  const { isConnected, user, connectWallet, loading, error } = useFlowProduction();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
