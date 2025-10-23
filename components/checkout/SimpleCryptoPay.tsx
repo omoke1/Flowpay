@@ -86,24 +86,24 @@ export function SimpleCryptoPay({
   if (txHash) {
     return (
       <div className="text-center space-y-4">
-        <CheckCircle className="w-12 h-12 text-green-600 mx-auto" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Payment Successful!
+        <CheckCircle className="w-12 h-12 text-[#97F11D] mx-auto" />
+        <h3 className="text-lg font-semibold text-white">
+          FlowPay Payment Successful!
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-400">
           Transaction Hash: {txHash.slice(0, 8)}...{txHash.slice(-8)}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-500">
+        <p className="text-xs text-gray-500">
           View on Flowscan: <a 
-            href={`https://testnet.flowscan.org/transaction/${txHash}`} 
+            href={`https://flowscan.org/transaction/${txHash}`} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-400 underline"
+            className="text-[#97F11D] hover:text-[#97F11D]/80 underline"
           >
             {txHash}
           </a>
         </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-400">
           You will be redirected shortly...
         </p>
       </div>
@@ -113,10 +113,10 @@ export function SimpleCryptoPay({
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Pay with Flow
+        <h3 className="text-lg font-semibold text-white mb-2">
+          Pay with FlowPay
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-gray-400">
           {amount} {token} for {productName}
         </p>
       </div>
@@ -124,38 +124,38 @@ export function SimpleCryptoPay({
       {!isConnected ? (
         <Button
           onClick={connectWallet}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="w-full bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-semibold"
           disabled={loading}
         >
           <Wallet className="w-4 h-4 mr-2" />
-          Connect Flow Wallet
+          Connect FlowPay Wallet
         </Button>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <span className="text-sm text-gray-600 dark:text-gray-400">From:</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between p-3 bg-black/50 border border-white/10 rounded-lg">
+            <span className="text-sm text-gray-400">From:</span>
+            <span className="text-sm font-medium text-white">
               {user?.addr ? `${user.addr.slice(0, 6)}...${user.addr.slice(-4)}` : 'Not connected'}
             </span>
           </div>
           
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <span className="text-sm text-gray-600 dark:text-gray-400">To:</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between p-3 bg-black/50 border border-white/10 rounded-lg">
+            <span className="text-sm text-gray-400">To:</span>
+            <span className="text-sm font-medium text-white">
               {merchantAddress.slice(0, 6)}...{merchantAddress.slice(-4)}
             </span>
           </div>
           
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Amount:</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between p-3 bg-black/50 border border-white/10 rounded-lg">
+            <span className="text-sm text-gray-400">Amount:</span>
+            <span className="text-sm font-medium text-[#97F11D]">
               {amount} {token}
             </span>
           </div>
 
           <Button
             onClick={handlePayment}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            className="w-full bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-semibold"
             disabled={loading}
           >
             {loading ? (
@@ -166,7 +166,7 @@ export function SimpleCryptoPay({
             ) : (
               <>
                 <Wallet className="w-4 h-4 mr-2" />
-                Pay {amount} {token}
+                PAY {amount} {token}
               </>
             )}
           </Button>

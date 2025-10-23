@@ -1,8 +1,23 @@
 import * as fcl from '@onflow/fcl';
 import { initializeFlowConfig } from './flow-config-official';
 
-// Initialize Flow configuration
+// Initialize Flow configuration - Force mainnet
 initializeFlowConfig();
+
+// Force mainnet configuration for FlowPay
+fcl.config({
+  'accessNode.api': 'https://rest-mainnet.onflow.org',
+  'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+  'discovery.authn.endpoint': 'https://fcl-discovery.onflow.org/authn',
+  'app.detail.title': 'FlowPay',
+  'app.detail.icon': 'https://www.useflowpay.xyz/logo.svg',
+  'app.detail.url': 'https://www.useflowpay.xyz',
+  'discovery.wallet.method.default': 'IFRAME/RPC',
+  'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
+  'discovery.wallet.method.include.services': ['https://fcl-discovery.onflow.org/authn'],
+  'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+  'discovery.wallet.method.include.services.timeout': 10000,
+});
 
 // Flow Token contract addresses
 const FLOW_TOKEN_CONTRACT = {
@@ -19,12 +34,13 @@ const FUNGIBLE_TOKEN_CONTRACT = {
 // USDC contract addresses
 const USDC_CONTRACT = {
   testnet: '0xa983fecbed621163', // Example testnet USDC
-  mainnet: '0x3c5959b568896393'  // USDC on mainnet
+  mainnet: 'A.f1ab99c82dee3526.USDCFlow'  // USDC.e on Flow mainnet
 };
 
-// Get current network
+// Get current network - Force mainnet for FlowPay
 const getNetwork = () => {
-  return process.env.NODE_ENV === 'production' ? 'mainnet' : 'testnet';
+  // Always use mainnet for FlowPay production
+  return 'mainnet';
 };
 
 // Flow Token transfer transaction
@@ -94,16 +110,16 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     }
 }`;
 
-// USDC transfer transaction (example - adjust based on actual USDC contract)
+// USDC transfer transaction for USDC.e on Flow mainnet
 const USDC_TRANSFER_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import FiatToken from 0xa983fecbed621163
+import USDCFlow from A.f1ab99c82dee3526.USDCFlow
 
 transaction(amount: UFix64, to: Address) {
     let sentVault: @FungibleToken.Vault
 
     prepare(signer: AuthAccount) {
-        let vaultRef = signer.borrow<&FiatToken.Vault>(from: /storage/usdcVault)
+        let vaultRef = signer.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         self.sentVault <- vaultRef.withdraw(amount: amount)
     }
@@ -120,15 +136,15 @@ transaction(amount: UFix64, to: Address) {
 // USDC transfer with platform fee transaction
 const USDC_TRANSFER_WITH_FEE_TRANSACTION = `
 import FungibleToken from 0x9a0766d93b6608b7
-import FiatToken from 0xa983fecbed621163
+import USDCFlow from A.f1ab99c82dee3526.USDCFlow
 
 transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     let sentVault: @FungibleToken.Vault
     let platformFeeVault: @FungibleToken.Vault
-    let platformFeeRecipient: &FiatToken.Vault
+    let platformFeeRecipient: &USDCFlow.Vault
 
     prepare(signer: AuthAccount) {
-        let vaultRef = signer.borrow<&FiatToken.Vault>(from: /storage/usdcVault)
+        let vaultRef = signer.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         
         // Calculate platform fee
