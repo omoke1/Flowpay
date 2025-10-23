@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { settingsService } from "@/lib/settings-service";
+import { realSettingsService } from "@/lib/real-settings-service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const logs = settingsService.getWebhookLogs(walletAddress);
+    const logs = await realSettingsService.getWebhookLogs(walletAddress);
     return NextResponse.json({ logs });
   } catch (error) {
     console.error("Error fetching webhook logs:", error);

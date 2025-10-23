@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { useNotification } from "@/components/providers/notification-provider";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -12,12 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { getUserAddress } from "@/lib/flow-utils";
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
-  const { loggedIn, address, walletUser, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const { success, error } = useNotification();
   const [loading, setLoading] = useState(false);
+
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
   const [formData, setFormData] = useState({
     productName: "",
     description: "",
@@ -28,7 +32,7 @@ export default function CreatePaymentLinkPage() {
     acceptFiat: true,
   });
 
-  if (!loggedIn) {
+  if (!isConnected) {
     return (
       <div className="min-h-screen gradient-bg flex items-center justify-center">
         <div className="text-center">
@@ -54,11 +58,10 @@ export default function CreatePaymentLinkPage() {
         return;
       }
 
-      // Use the real wallet address for both managed and external wallets
-      // Managed wallets now have REAL Flow addresses from Magic.link
-      const merchantId = address; // Always use the real wallet address
+      // Use the wallet address as merchant ID
+      const merchantId = userAddress; // Use the connected wallet address
 
-      console.log("Creating payment link with merchantId:", merchantId, "walletType:", walletUser?.wallet_type);
+      console.log("Creating payment link with merchantId:", merchantId);
 
       // Create payment link via API
       const response = await fetch("/api/payment-links", {
@@ -120,7 +123,7 @@ export default function CreatePaymentLinkPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="links" onLogout={logOut} />
+      <DashboardSidebar activeItem="links" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -129,8 +132,8 @@ export default function CreatePaymentLinkPage() {
           title="Create Payment Link" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => {}}
-          address={address}
-          onLogout={logOut}
+          address={userAddress}
+          onLogout={disconnectWallet}
         />
 
         {/* Modal Backdrop */}

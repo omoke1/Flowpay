@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { settingsService } from "@/lib/settings-service";
+import { realSettingsService } from "@/lib/real-settings-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await settingsService.revokeSessions(walletAddress);
+    await realSettingsService.revokeSessions(walletAddress);
     
     return NextResponse.json({ 
       success: true, 

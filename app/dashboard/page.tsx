@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -11,10 +11,11 @@ import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
 import { WelcomeBanner } from "@/components/onboarding/welcome-banner";
 import { useTourState } from "@/lib/hooks/use-tour-state";
 import { formatAmount, formatAddress } from "@/lib/utils";
+import { getUserAddress } from "@/lib/flow-utils";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -22,15 +23,31 @@ export default function DashboardPage() {
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const { hasCompletedTour, showTour, startTour, skipTour, markTourCompleted } = useTourState();
 
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
+  
+  // Debug logging
+  console.log("Dashboard - isConnected:", isConnected);
+  console.log("Dashboard - user:", user);
+  console.log("Dashboard - userAddress:", userAddress);
+
   const fetchData = async () => {
     try {
+      console.log("Dashboard fetchData - user:", user);
+      console.log("Dashboard fetchData - userAddress:", userAddress);
+      
+      if (!userAddress) {
+        console.error("No user address found");
+        return;
+      }
+      
       // Fetch payment links
-      const linksResponse = await fetch(`/api/payment-links?merchantId=${address}`);
+      const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
       const linksData = await linksResponse.json();
       setPaymentLinks(linksData.paymentLinks || []);
 
       // Fetch payments
-      const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
+      const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
       const paymentsData = await paymentsResponse.json();
       setPayments(paymentsData.payments || []);
     } catch (error) {
@@ -41,42 +58,43 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
 
-    fetchData();
-    
-    // Check if this is a new user (no payment links or payments) and hasn't completed tour
-    const checkNewUser = async () => {
-      const linksResponse = await fetch(`/api/payment-links?merchantId=${address}`);
-      const linksData = await linksResponse.json();
-      const links = linksData.paymentLinks || [];
+    // Only fetch data if we have a valid user address
+    if (userAddress) {
+      fetchData();
       
-      const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
-      const paymentsData = await paymentsResponse.json();
-      const payments = paymentsData.payments || [];
+      // Check if this is a new user (no payment links or payments) and hasn't completed tour
+      const checkNewUser = async () => {
+        const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
+        const linksData = await linksResponse.json();
+        const links = linksData.paymentLinks || [];
+        
+        const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
+        const paymentsData = await paymentsResponse.json();
+        const payments = paymentsData.payments || [];
+        
+        // Show welcome banner only for truly new users who have never seen the tour
+        if (links.length === 0 && payments.length === 0 && hasCompletedTour === false) {
+          setShowWelcomeBanner(true);
+        }
+      };
       
-      // Show welcome banner only for truly new users who have never seen the tour
-      if (links.length === 0 && payments.length === 0 && hasCompletedTour === false) {
-        setShowWelcomeBanner(true);
-      }
-    };
-    
-    if (address) {
       checkNewUser();
     }
-  }, [loggedIn, address, router, hasCompletedTour]);
+  }, [isConnected, userAddress, router, hasCompletedTour]);
 
   const stats = {
     totalRevenue: payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0),
     activeLinks: paymentLinks.filter(l => l.status === 'active').length,
-    customers: new Set(payments.map(p => p.payer_address)).size,
+    customers: new Set(payments.map(p => p.payer_user?.address)).size,
     avgPaymentTime: payments.length > 0 ? "3.2s" : "0s",
   };
 
-  if (loading) {
+  if (loading || (isConnected && !userAddress)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-950 text-white">
         <p>Loading dashboard...</p>
@@ -90,7 +108,7 @@ export default function DashboardPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="dashboard" onLogout={logOut} />
+      <DashboardSidebar activeItem="dashboard" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -99,8 +117,8 @@ export default function DashboardPage() {
           title="Dashboard" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
-          onLogout={logOut}
+          address={userAddress}
+          onLogout={disconnectWallet}
         />
 
         {/* Content Wrapper */}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { 
@@ -13,31 +13,49 @@ import {
   Check, 
   Clock 
 } from "lucide-react";
+import { getUserAddress } from "@/lib/flow-utils";
 
 export default function CustomersPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState<any[]>([]);
+
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
 
     const fetchCustomers = async () => {
       try {
+        if (!userAddress) {
+          console.error("No user address found");
+          return;
+        }
         // Fetch customers from payments data
-        const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
+        const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
         const paymentsData = await paymentsResponse.json();
         const payments = paymentsData.payments || [];
+        
+        console.log("Payments data:", payments);
+        console.log("Number of payments:", payments.length);
         
         // Group payments by customer (payer_address)
         const customerMap = new Map();
         payments.forEach((payment: any) => {
+          console.log("Processing payment:", payment);
           const customerId = payment.payer_address;
+          console.log("Customer ID:", customerId);
+          if (!customerId) {
+            console.log("Skipping payment without customer address");
+            return; // Skip payments without customer address
+          }
+          
           if (!customerMap.has(customerId)) {
             customerMap.set(customerId, {
               id: customerId,
@@ -63,7 +81,10 @@ export default function CustomersPage() {
           }
         });
         
-        setCustomers(Array.from(customerMap.values()));
+        const customersArray = Array.from(customerMap.values());
+        console.log("Final customers:", customersArray);
+        console.log("Number of customers:", customersArray.length);
+        setCustomers(customersArray);
       } catch (error) {
         console.error("Error fetching customers:", error);
       } finally {
@@ -72,7 +93,7 @@ export default function CustomersPage() {
     };
 
     fetchCustomers();
-  }, [loggedIn, address, router]);
+  }, [isConnected, userAddress, router]);
 
   const filteredCustomers = customers.filter(customer => {
     if (!searchQuery) return true;
@@ -109,7 +130,7 @@ export default function CustomersPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="customers" onLogout={logOut} />
+      <DashboardSidebar activeItem="customers" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -118,7 +139,7 @@ export default function CustomersPage() {
           title="Customers" 
           onSearch={setSearchQuery} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
+          address={userAddress}
         />
 
         {/* Content Wrapper */}
@@ -232,7 +253,20 @@ export default function CustomersPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100/10 dark:divide-white/10 bg-black dark:bg-[#0D0D0D]">
-                    {filteredCustomers.map((customer) => (
+                    {filteredCustomers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-3 py-8 text-center text-gray-400 dark:text-gray-500">
+                          <div className="flex flex-col items-center gap-2">
+                            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                            </svg>
+                            <p>No customers yet</p>
+                            <p className="text-sm">Customers will appear here when they make payments</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredCustomers.map((customer) => (
                       <tr key={customer.id} className="hover:bg-zinc-950 dark:hover:bg-white/[0.03]">
                         <td className="px-3 py-3 text-gray-100 dark:text-white">{customer.name}</td>
                         <td className="px-3 py-3 text-gray-300 dark:text-gray-300">{customer.handle}</td>
@@ -242,8 +276,8 @@ export default function CustomersPage() {
                         <td className="px-3 py-3">
                           <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
                             customer.status === 'active' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20'
+                              : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20'
                           }`}>
                             {customer.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
                             {customer.status === 'active' ? 'Active' : 'Pending'}
@@ -268,14 +302,26 @@ export default function CustomersPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
               
               {/* Mobile Cards */}
               <div className="lg:hidden">
-                {filteredCustomers.map((customer) => (
+                {filteredCustomers.length === 0 ? (
+                  <div className="p-8 text-center text-gray-400 dark:text-gray-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                      <p>No customers yet</p>
+                      <p className="text-sm">Customers will appear here when they make payments</p>
+                    </div>
+                  </div>
+                ) : (
+                  filteredCustomers.map((customer) => (
                   <div key={customer.id} className="p-4 border-b border-zinc-100/10 dark:border-white/10 last:border-b-0">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -287,8 +333,8 @@ export default function CustomersPage() {
                       </div>
                       <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
                         customer.status === 'active' 
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20'
+                          : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20'
                       }`}>
                         {customer.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
                         {customer.status === 'active' ? 'Active' : 'Pending'}
@@ -314,7 +360,8 @@ export default function CustomersPage() {
                       </button>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
               <div className="flex items-center justify-between px-3 py-3 bg-black dark:bg-[#0D0D0D] border-t border-zinc-100/10 dark:border-white/10 text-sm">
                 <div className="text-gray-400 dark:text-gray-400">Showing 1–10 of {filteredCustomers.length}</div>

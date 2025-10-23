@@ -7,7 +7,7 @@ import { useNotification } from "@/components/providers/notification-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PaymentMethodSelector } from "@/components/checkout/PaymentMethodSelector";
-import { CryptoPay } from "@/components/checkout/CryptoPay";
+import { SimpleCryptoPay } from "@/components/checkout/SimpleCryptoPay";
 import { FiatPay } from "@/components/checkout/FiatPay";
 import { PaymentConfirmation } from "@/components/checkout/PaymentConfirmation";
 
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
             )}
 
             {step === 'payment' && selectedMethod === 'crypto' && (
-              <CryptoPay
+                <SimpleCryptoPay
                 paymentLinkId={paymentData.id}
                 merchantAddress={paymentData.merchant_wallet_address || paymentData.users?.wallet_address || ''}
                 amount={paymentData.amount}

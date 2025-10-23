@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase, isDatabaseConfigured, getDatabaseStatus } from "@/lib/supabase";
-import { WalletService } from "@/lib/wallet-service";
+import { SimpleUserService } from "@/lib/simple-user-service";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { validateRequestBody, paymentLinkSchema } from "@/lib/validation";
 
@@ -76,9 +76,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use WalletService to get or create user by wallet address
-    // Both managed and external wallets now have real Flow addresses
-    const userData = await WalletService.getOrCreateUser(merchantId);
+    // Use SimpleUserService to get or create user by wallet address
+    const userData = await SimpleUserService.getOrCreateUser(merchantId);
     if (!userData) {
       return NextResponse.json(
         { error: "Failed to get or create user" },
@@ -115,7 +114,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       paymentLink: data,
-      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pay/${data.id}`,
+      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/pay/${data.id}`,
     });
   } catch (error) {
     console.error("Error creating payment link:", error);
@@ -228,11 +227,10 @@ export async function GET(request: NextRequest) {
 
     console.log("GET /api/payment-links - Looking up user for merchantId:", merchantId);
     
-    // Use WalletService to get user by wallet address
-    // Both managed and external wallets now have real Flow addresses
+    // Use SimpleUserService to get user by wallet address
     let userData;
     try {
-      userData = await WalletService.getUserByWalletAddress(merchantId);
+      userData = await SimpleUserService.getUserByWalletAddress(merchantId);
       console.log("GET /api/payment-links - User data:", userData ? "Found" : "Not found");
     } catch (userError) {
       console.error("GET /api/payment-links - Error looking up user:", userError);

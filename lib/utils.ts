@@ -24,7 +24,7 @@ export function copyToClipboard(text: string): Promise<void> {
 }
 
 export function generatePaymentUrl(linkId: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002';
   return `${baseUrl}/pay/${linkId}`;
 }
 

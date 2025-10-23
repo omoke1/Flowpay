@@ -2,43 +2,75 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { formatAmount, formatAddress } from "@/lib/utils";
+import { getUserAddress } from "@/lib/flow-utils";
 import { 
   Plus, 
   Copy, 
   Pause, 
   Play, 
-  Trash2, 
-  Check, 
-  PauseCircle,
-  ExternalLink 
+  Trash2,
+  ExternalLink,
+  Check,
+  X,
+  Clock
 } from "lucide-react";
 
 export default function LinksPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
 
+  // Status helper functions (matching dashboard styling)
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Check className="h-3.5 w-3.5" />;
+      case "paused":
+        return <X className="h-3.5 w-3.5" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20";
+      case "paused":
+        return "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20";
+      default:
+        return "bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500/20";
+    }
+  };
+
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
+
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
 
     const fetchLinks = async () => {
       try {
+        if (!userAddress) {
+          console.error("No user address found");
+          return;
+        }
         // Fetch payment links
-        const linksResponse = await fetch(`/api/payment-links?merchantId=${address}`);
+        const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
         const linksData = await linksResponse.json();
         setPaymentLinks(linksData.paymentLinks || []);
         
         // Fetch payments to calculate total earned
-        const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
+        const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
         const paymentsData = await paymentsResponse.json();
         setPayments(paymentsData.payments || []);
       } catch (error) {
@@ -49,7 +81,7 @@ export default function LinksPage() {
     };
 
     fetchLinks();
-  }, [loggedIn, address, router]);
+  }, [isConnected, userAddress, router]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -86,7 +118,7 @@ export default function LinksPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="links" onLogout={logOut} />
+      <DashboardSidebar activeItem="links" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -95,7 +127,7 @@ export default function LinksPage() {
           title="Payment Links" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
+          address={userAddress}
         />
 
         {/* Content Wrapper */}
@@ -197,12 +229,8 @@ export default function LinksPage() {
                         <td className="px-3 py-3 text-gray-300 dark:text-gray-300">{link.token}</td>
                         <td className="px-3 py-3 text-gray-100 dark:text-white">${link.amount}</td>
                         <td className="px-3 py-3">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
-                            link.status === 'active' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                              : 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
-                          }`}>
-                            {link.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <PauseCircle className="h-3.5 w-3.5" />}
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${getStatusColor(link.status)}`}>
+                            {getStatusIcon(link.status)}
                             {link.status === 'active' ? 'Active' : 'Paused'}
                           </span>
                         </td>
@@ -249,12 +277,8 @@ export default function LinksPage() {
                         <h3 className="font-medium text-gray-100 dark:text-white">{link.product_name}</h3>
                         <p className="text-sm text-gray-300 dark:text-gray-300">${link.amount} {link.token}</p>
                       </div>
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${
-                        link.status === 'active' 
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-yellow-500/10 text-yellow-300 border-yellow-500/20'
-                      }`}>
-                        {link.status === 'active' ? <Check className="h-3.5 w-3.5" /> : <PauseCircle className="h-3.5 w-3.5" />}
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${getStatusColor(link.status)}`}>
+                        {getStatusIcon(link.status)}
                         {link.status === 'active' ? 'Active' : 'Paused'}
                       </span>
                     </div>

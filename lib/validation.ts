@@ -49,7 +49,8 @@ export function sanitizeUrl(input: string): string | null {
  */
 export function validateFlowAddress(address: string): boolean {
   if (typeof address !== 'string') return false;
-  return /^0x[a-fA-F0-9]{16}$/.test(address);
+  // Flow addresses can be 16 or 40 characters after 0x
+  return /^0x[a-fA-F0-9]{16}$/.test(address) || /^0x[a-fA-F0-9]{40}$/.test(address);
 }
 
 /**

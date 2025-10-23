@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { FlowProvider } from "@/components/providers/flow-provider";
+import { FlowProviderOfficial } from "@/components/providers/flow-provider-official";
 import { NotificationProvider } from "@/components/providers/notification-provider";
 
 export const metadata: Metadata = {
@@ -22,11 +22,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning={true}>
-        <FlowProvider>
+        <FlowProviderOfficial>
           <NotificationProvider>
             {children}
           </NotificationProvider>
-        </FlowProvider>
+        </FlowProviderOfficial>
       </body>
     </html>
   );

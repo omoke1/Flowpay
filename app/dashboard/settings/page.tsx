@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { useNotification } from "@/components/providers/notification-provider";
+import { getUserAddress } from "@/lib/flow-utils";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { 
@@ -21,7 +22,7 @@ import {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const { success, error, warning } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -38,17 +39,22 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState("");
   const [message, setMessage] = useState("");
 
+  // Get user userAddress using utility function
+  const userAddress = getUserAddress(user);
+
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
-    fetchSettings();
-  }, [loggedIn, router, address]);
+    if (userAddress) {
+      fetchSettings();
+    }
+  }, [isConnected, userAddress, router]);
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch(`/api/settings?walletAddress=${address}`);
+      const response = await fetch(`/api/settings?walletAddress=${userAddress}`);
       const data = await response.json();
             if (data.settings) {
               setSettings({
@@ -89,7 +95,7 @@ export default function SettingsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          walletAddress: address,
+          walletAddress: userAddress,
           updates: {
             name: settings.name,
             email: settings.email,
@@ -137,7 +143,7 @@ export default function SettingsPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            walletAddress: address,
+            walletAddress: userAddress,
           }),
         });
 
@@ -184,7 +190,7 @@ export default function SettingsPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            walletAddress: address,
+            walletAddress: userAddress,
           }),
         });
 
@@ -200,7 +206,7 @@ export default function SettingsPage() {
           setTimeout(() => setMessage(""), 3000);
           // Optionally log out the user
           setTimeout(() => {
-            logOut();
+            disconnectWallet();
           }, 2000);
         } else {
           error(
@@ -229,12 +235,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-black dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="settings" onLogout={logOut} />
+      <DashboardSidebar activeItem="settings" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -243,8 +249,8 @@ export default function SettingsPage() {
           title="Settings" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
-          onLogout={logOut}
+          address={userAddress}
+          onLogout={disconnectWallet}
         />
 
         {/* Content Wrapper */}
@@ -261,14 +267,14 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Profile */}
-            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="lg:col-span-2 rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Profile</div>
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="text-sm">
                   <span className="block text-gray-600 dark:text-gray-400 mb-1">Name</span>
                   <input 
                     type="text" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
+                    className="w-full rounded-lg bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
                     value={settings.name}
                     onChange={(e) => setSettings({...settings, name: e.target.value})}
                   />
@@ -277,7 +283,7 @@ export default function SettingsPage() {
                   <span className="block text-gray-600 dark:text-gray-400 mb-1">Email</span>
                   <input 
                     type="email" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
+                    className="w-full rounded-lg bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40" 
                     value={settings.email}
                     onChange={(e) => setSettings({...settings, email: e.target.value})}
                   />
@@ -296,7 +302,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Preferences */}
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Preferences</div>
               <div className="mt-3 space-y-3 text-sm">
                 <label className="flex items-center justify-between gap-2">
@@ -332,7 +338,7 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* API & Webhooks */}
-            <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="lg:col-span-2 rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">API & Webhooks</div>
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="text-sm">
@@ -342,7 +348,7 @@ export default function SettingsPage() {
                       type="text" 
                       readOnly 
                       value={settings.publicKey} 
-                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
+                      className="w-full rounded-lg bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
                     />
                     <button 
                       onClick={() => copyToClipboard(settings.publicKey, 'public')}
@@ -359,7 +365,7 @@ export default function SettingsPage() {
                       type={showSecretKey ? "text" : "password"} 
                       readOnly 
                       value={settings.secretKey} 
-                      className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
+                      className="w-full rounded-lg bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2" 
                     />
                     <button 
                       onClick={() => setShowSecretKey(!showSecretKey)}
@@ -374,7 +380,7 @@ export default function SettingsPage() {
                   <input 
                     type="url" 
                     placeholder="https://your-domain.com/webhooks/flowpay" 
-                    className="w-full rounded-lg bg-white dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40"
+                    className="w-full rounded-lg bg-black/[0.03] dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40"
                     value={settings.webhookUrl}
                     onChange={(e) => setSettings({...settings, webhookUrl: e.target.value})}
                   />
@@ -392,7 +398,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Danger Zone */}
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="text-sm font-medium text-gray-900 dark:text-white">Danger zone</div>
               <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">Rotate API keys and revoke sessions.</p>
               <div className="mt-3 space-y-2">

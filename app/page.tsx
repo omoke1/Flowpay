@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useFlowUser } from "@/components/providers/flow-provider";
-import { RegistrationModal } from "@/components/auth/registration-modal";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
+import { SimpleRegistrationModal } from "@/components/auth/simple-registration-modal";
 import { useState } from "react";
 
 export default function HomePage() {
-  const { loggedIn, logIn, address, loading, error, initialized } = useFlowUser();
+  const { isConnected, user, connectWallet, loading, error } = useFlowOfficial();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
@@ -22,7 +22,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center gap-3 opacity-0 animate-fade-in">
-              {loggedIn ? (
+              {isConnected ? (
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#97F11D]/90 border-[#97F11D]"
@@ -32,7 +32,7 @@ export default function HomePage() {
               ) : (
                 <button
                   onClick={() => setShowRegistrationModal(true)}
-                  disabled={loading || !initialized}
+                  disabled={loading}
                   className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-white/10 hover:bg-white/20 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Connecting..." : "Get started"}
@@ -88,7 +88,7 @@ export default function HomePage() {
           )}
 
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4 opacity-0 animate-slide-up delay-700">
-            {loggedIn ? (
+            {isConnected ? (
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 transition-all transform hover:scale-105 text-base font-medium bg-gradient-to-r from-[#97F11D] to-[#707070] text-black rounded-lg px-8 py-4"
@@ -101,7 +101,7 @@ export default function HomePage() {
             ) : (
               <button
                 onClick={() => setShowRegistrationModal(true)}
-                disabled={loading || !initialized}
+                disabled={loading}
                 className="inline-flex items-center gap-2 transition-all transform hover:scale-105 hover:bg-blue-700 text-base font-medium bg-gradient-to-r from-white/10 to-gray-400/70 rounded-lg px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,7 +282,7 @@ export default function HomePage() {
       </footer>
 
       {/* Registration Modal */}
-      <RegistrationModal
+        <SimpleRegistrationModal
         isOpen={showRegistrationModal}
         onClose={() => setShowRegistrationModal(false)}
         onSuccess={() => {

@@ -2,30 +2,38 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { getUserAddress } from "@/lib/flow-utils";
 
 export default function AnalyticsPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<any>({});
 
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
+
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
 
     const fetchAnalytics = async () => {
       try {
+        if (!userAddress) {
+          console.error("No user address found");
+          return;
+        }
         // Fetch real analytics data from payments
-        const paymentsResponse = await fetch(`/api/payments?merchantId=${address}`);
+        const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
         const paymentsData = await paymentsResponse.json();
         const payments = paymentsData.payments || [];
         
-        const linksResponse = await fetch(`/api/payment-links?merchantId=${address}`);
+        const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
         const linksData = await linksResponse.json();
         const links = linksData.paymentLinks || [];
         
@@ -101,7 +109,7 @@ export default function AnalyticsPage() {
     };
 
     fetchAnalytics();
-  }, [loggedIn, address, router]);
+  }, [isConnected, userAddress, router]);
 
   if (loading) {
     return (
@@ -117,7 +125,7 @@ export default function AnalyticsPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="analytics" onLogout={logOut} />
+      <DashboardSidebar activeItem="analytics" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -126,7 +134,7 @@ export default function AnalyticsPage() {
           title="Analytics" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
+          address={userAddress}
         />
 
         {/* Content Wrapper */}
@@ -138,29 +146,29 @@ export default function AnalyticsPage() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-700 dark:text-gray-300">Gross Volume</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">${analytics.grossVolume?.toLocaleString() || '0'}</div>
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Total revenue</div>
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+              <div className="text-sm text-gray-100 dark:text-white">Gross Volume</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">${analytics.grossVolume?.toLocaleString() || '0'}</div>
+              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Total revenue</div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-700 dark:text-gray-300">Successful Payments</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{analytics.successfulPayments || 0}</div>
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Completed transactions</div>
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+              <div className="text-sm text-gray-100 dark:text-white">Successful Payments</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">{analytics.successfulPayments || 0}</div>
+              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Completed transactions</div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-700 dark:text-gray-300">Refund Rate</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{analytics.refundRate?.toFixed(1) || '0.0'}%</div>
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Refund percentage</div>
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+              <div className="text-sm text-gray-100 dark:text-white">Refund Rate</div>
+              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">{analytics.refundRate?.toFixed(1) || '0.0'}%</div>
+              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Refund percentage</div>
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">Daily volume</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Last 14 days</div>
+                <div className="text-sm text-gray-100 dark:text-white">Daily volume</div>
+                <div className="text-xs text-gray-400 dark:text-gray-400">Last 14 days</div>
               </div>
               <div className="mt-4">
                 {analytics.dailyVolume && analytics.dailyVolume.length > 0 ? (
@@ -206,10 +214,10 @@ export default function AnalyticsPage() {
                 )}
               </div>
             </div>
-            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">Top tokens</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Share of volume</div>
+                <div className="text-sm text-gray-100 dark:text-white">Top tokens</div>
+                <div className="text-xs text-gray-400 dark:text-gray-400">Share of volume</div>
               </div>
               <div className="mt-4 space-y-3">
                 {analytics.topTokens && analytics.topTokens.length > 0 ? (
@@ -232,14 +240,14 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Top Links */}
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-zinc-100/10 dark:border-white/10 p-4">
-            <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">Top payment links</div>
+          <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="text-sm text-gray-100 dark:text-white mb-2">Top payment links</div>
             {analytics.topLinks && analytics.topLinks.length > 0 ? (
               <ul className="space-y-2 text-sm">
                 {analytics.topLinks.map((link: any, index: number) => (
                   <li key={index} className="flex items-center justify-between">
-                    <span className="text-gray-700 dark:text-gray-300">{link.name}</span>
-                    <span className="text-gray-900 dark:text-white">${link.amount.toLocaleString()}</span>
+                    <span className="text-gray-100 dark:text-white">{link.name}</span>
+                    <span className="text-gray-100 dark:text-white">${link.amount.toLocaleString()}</span>
                   </li>
                 ))}
               </ul>

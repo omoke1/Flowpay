@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, X, Clock } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -24,26 +25,26 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
   const getStatusIcon = (status: Payment["status"]) => {
     switch (status) {
       case "completed":
-        return "✅";
+        return <Check className="h-3.5 w-3.5" />;
       case "failed":
-        return "❌";
+        return <X className="h-3.5 w-3.5" />;
       case "pending":
-        return "🕓";
+        return <Clock className="h-3.5 w-3.5" />;
       default:
-        return "❓";
+        return null;
     }
   };
 
   const getStatusColor = (status: Payment["status"]) => {
     switch (status) {
       case "completed":
-        return "text-[#97F11D]";
+        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border-emerald-500/20";
       case "failed":
-        return "text-red-400";
+        return "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20";
       case "pending":
-        return "text-yellow-400";
+        return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 border-yellow-500/20";
       default:
-        return "text-gray-400";
+        return "bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500/20";
     }
   };
 
@@ -205,7 +206,7 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
                   <span className="text-gray-300">{payment.token}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`flex items-center gap-2 ${getStatusColor(payment.status)}`}>
+                  <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border ${getStatusColor(payment.status)}`}>
                     {getStatusIcon(payment.status)}
                     <span className="capitalize">{payment.status}</span>
                   </span>

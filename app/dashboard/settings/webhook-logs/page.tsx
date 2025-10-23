@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
@@ -18,12 +18,12 @@ interface WebhookLog {
 
 export default function WebhookLogsPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState<WebhookLog[]>([]);
 
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
@@ -70,7 +70,7 @@ export default function WebhookLogsPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="settings" onLogout={logOut} />
+      <DashboardSidebar activeItem="settings" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -80,7 +80,7 @@ export default function WebhookLogsPage() {
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
           address={address}
-          onLogout={logOut}
+          onLogout={disconnectWallet}
         />
 
         {/* Content Wrapper */}

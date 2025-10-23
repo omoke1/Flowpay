@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { settingsService } from "@/lib/settings-service";
+import { realSettingsService } from "@/lib/real-settings-service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,12 +13,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const settings = await settingsService.getUserSettings(walletAddress);
+    console.log("Fetching settings for wallet:", walletAddress);
+    const settings = await realSettingsService.getUserSettings(walletAddress);
+    console.log("Settings fetched successfully:", settings ? "Found" : "Not found");
     return NextResponse.json({ settings });
   } catch (error) {
     console.error("Error fetching settings:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : 'Unknown'
+    });
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -36,7 +43,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedSettings = await settingsService.updateUserSettings(walletAddress, updates);
+    const updatedSettings = await realSettingsService.updateUserSettings(walletAddress, updates);
     return NextResponse.json({ 
       success: true, 
       settings: updatedSettings,

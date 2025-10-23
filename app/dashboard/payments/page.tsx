@@ -2,30 +2,50 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowUser } from "@/components/providers/flow-provider";
+import { useFlowOfficial } from "@/components/providers/flow-provider-official";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { PaymentsTable } from "@/components/dashboard/payments-table";
 import { formatAmount, formatAddress } from "@/lib/utils";
+import { getUserAddress } from "@/lib/flow-utils";
 
 export default function PaymentsPage() {
   const router = useRouter();
-  const { loggedIn, address, logOut } = useFlowUser();
+  const { isConnected, user, disconnectWallet } = useFlowOfficial();
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Get user address using utility function
+  const userAddress = getUserAddress(user);
+
   useEffect(() => {
-    if (!loggedIn) {
+    if (!isConnected) {
       router.push("/");
       return;
     }
 
     const fetchPayments = async () => {
       try {
-        const response = await fetch(`/api/payments?merchantId=${address}`);
+        if (!userAddress) {
+          console.error("No user address found");
+          return;
+        }
+        const response = await fetch(`/api/payments?merchantId=${userAddress}`);
         const data = await response.json();
-        setPayments(data.payments || []);
+        
+        // Transform payments data to match Payment interface
+        const transformedPayments = (data.payments || []).map((payment: any) => ({
+          id: payment.id,
+          customer: payment.payer_address ? formatAddress(payment.payer_address) : 'Unknown',
+          amount: payment.amount,
+          token: payment.token,
+          status: payment.status,
+          date: payment.paid_at || payment.created_at,
+          hash: payment.tx_hash // Map tx_hash to hash for the table
+        }));
+        
+        setPayments(transformedPayments);
       } catch (error) {
         console.error("Error fetching payments:", error);
       } finally {
@@ -34,14 +54,14 @@ export default function PaymentsPage() {
     };
 
     fetchPayments();
-  }, [loggedIn, address, router]);
+  }, [isConnected, userAddress, router]);
 
   const filteredPayments = payments.filter(payment => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
       payment.id?.toLowerCase().includes(query) ||
-      payment.payer_address?.toLowerCase().includes(query) ||
+      payment.payer_user?.address?.toLowerCase().includes(query) ||
       payment.token?.toLowerCase().includes(query) ||
       payment.payment_links?.product_name?.toLowerCase().includes(query)
     );
@@ -61,7 +81,7 @@ export default function PaymentsPage() {
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
       {/* Sidebar */}
-      <DashboardSidebar activeItem="payments" onLogout={logOut} />
+      <DashboardSidebar activeItem="payments" onLogout={disconnectWallet} />
 
       {/* Main */}
       <div className="lg:pl-60">
@@ -70,7 +90,7 @@ export default function PaymentsPage() {
           title="Payments" 
           onSearch={setSearchQuery} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
-          address={address}
+          address={userAddress}
         />
 
         {/* Content Wrapper */}
