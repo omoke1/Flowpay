@@ -36,7 +36,7 @@ export function WelcomeBanner({
 
   return (
     <div className="mb-6">
-      <Card className="bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10">
+      <Card className="bg-black border border-white/10">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
@@ -47,41 +47,41 @@ export function WelcomeBanner({
               </div>
               
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h2 className="text-xl font-semibold text-white mb-2">
                   Welcome to FlowPay! 🎉
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-gray-400 mb-4">
                   You're all set to start accepting payments. Let's get you started with your first payment link.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-blue-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Quick Setup</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Get started in minutes</p>
+                      <p className="text-sm font-medium text-white">Quick Setup</p>
+                      <p className="text-xs text-gray-400">Get started in minutes</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                      <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                      <Shield className="w-4 h-4 text-green-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Secure Payments</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Blockchain-powered</p>
+                      <p className="text-sm font-medium text-white">Secure Payments</p>
+                      <p className="text-xs text-gray-400">Blockchain-powered</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                      <Gift className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                      <Gift className="w-4 h-4 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">Multiple Methods</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Crypto + Cards</p>
+                      <p className="text-sm font-medium text-white">Multiple Methods</p>
+                      <p className="text-xs text-gray-400">Crypto + Cards</p>
                     </div>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export function WelcomeBanner({
                   <Button
                     variant="outline"
                     onClick={onStartTour}
-                    className="border-gray-300 dark:border-gray-600"
+                    className="border-white/20 text-white hover:bg-white/10"
                   >
                     Take a Tour
                   </Button>

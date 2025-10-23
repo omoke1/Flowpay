@@ -114,11 +114,11 @@ export function DashboardHeader({
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="inline-flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 border border-zinc-900/10 dark:border-white/10"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=80&auto=format&fit=crop" 
-                className="h-7 w-7 rounded-full object-cover" 
-                alt="user" 
-              />
+              <div className="h-7 w-7 rounded-full bg-[#97F11D]/20 flex items-center justify-center">
+                <span className="text-[#97F11D] text-xs font-medium">
+                  {address ? address.slice(2, 4).toUpperCase() : "U"}
+                </span>
+              </div>
               <span className="hidden sm:block text-sm text-gray-800 dark:text-gray-200">
                 {address ? formatAddress(address) : "User"}
               </span>
