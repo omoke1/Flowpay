@@ -214,43 +214,20 @@ export default function CheckoutPage() {
         {/* Main Content */}
         <div className="space-y-4 sm:space-y-6">
           {/* Product Summary Card */}
-          <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10 card-glow">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div className="bg-black/80 p-3 rounded-lg border border-white/10">
+            <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">
+                <h2 className="text-base font-semibold text-white">
                   {paymentData.product_name}
                 </h2>
-                        {paymentData.description && (
-                          <p className="text-gray-500 text-sm leading-relaxed">
-                            {paymentData.description}
-                          </p>
-                        )}
               </div>
-              <div className="text-left sm:text-right">
-                <div className="text-2xl sm:text-3xl font-bold text-[#97F11D] mb-1">
+              <div className="text-right">
+                <div className="text-xl font-bold text-[#97F11D]">
                   ${paymentData.amount}
                 </div>
-                        <div className="text-gray-500 text-sm">USD</div>
+                <div className="text-gray-400 text-xs">USD</div>
               </div>
             </div>
-            
-            {paymentData.users?.display_name && (
-              <div className="pt-4 border-t border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#97F11D]/20 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#97F11D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <div>
-                            <div className="text-gray-500 text-xs">Merchant</div>
-                    <div className="text-white font-medium">
-                      {paymentData.users.display_name}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Step Content */}

@@ -39,29 +39,89 @@ export function EnhancedCheckout({
 }: EnhancedCheckoutProps) {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('crypto');
   const [billingInfo, setBillingInfo] = useState({
-    firstName: 'fredy',
-    lastName: 'omoke',
-    email: 'vebtcard.base@gmail.com',
-    company: 'Acme Inc.',
-    country: 'Nigeria',
-    address: '3 bassey avenue street',
+    firstName: '',
+    lastName: '',
+    email: '',
+    company: '',
+    country: '',
+    address: '',
     address2: '',
-    city: 'uyo',
-    state: 'Akwa Ibom',
-    zipCode: '521110',
-    phone: '+234'
+    city: '',
+    state: '',
+    zipCode: '',
+    phone: ''
   });
   const [autoRenew, setAutoRenew] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
     setBillingInfo(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Clear error when user starts typing
+    if (formErrors[field]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!billingInfo.firstName.trim()) {
+      errors.firstName = 'First name is required';
+    }
+    
+    if (!billingInfo.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+    }
+    
+    if (!billingInfo.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(billingInfo.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    if (!billingInfo.country.trim()) {
+      errors.country = 'Country is required';
+    }
+    
+    if (!billingInfo.address.trim()) {
+      errors.address = 'Address is required';
+    }
+    
+    if (!billingInfo.city.trim()) {
+      errors.city = 'City is required';
+    }
+    
+    if (!billingInfo.state.trim()) {
+      errors.state = 'State/Province is required';
+    }
+    
+    if (!billingInfo.zipCode.trim()) {
+      errors.zipCode = 'ZIP/Postal code is required';
+    }
+    
+    if (!billingInfo.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handlePayment = async () => {
+    // Validate form first
+    if (!validateForm()) {
+      onPaymentError('Please fill in all required fields correctly.');
+      return;
+    }
+
     setIsProcessing(true);
     try {
       if (selectedPaymentMethod === 'crypto') {
@@ -176,37 +236,52 @@ export function EnhancedCheckout({
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-white">First Name</Label>
+                  <Label htmlFor="firstName" className="text-white">First Name *</Label>
                   <Input
                     id="firstName"
                     value={billingInfo.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 ${
+                      formErrors.firstName ? 'border-red-500' : ''
+                    }`}
                     placeholder="Enter first name"
                   />
+                  {formErrors.firstName && (
+                    <p className="text-red-400 text-xs">{formErrors.firstName}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-white">Last Name</Label>
+                  <Label htmlFor="lastName" className="text-white">Last Name *</Label>
                   <Input
                     id="lastName"
                     value={billingInfo.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 ${
+                      formErrors.lastName ? 'border-red-500' : ''
+                    }`}
                     placeholder="Enter last name"
                   />
+                  {formErrors.lastName && (
+                    <p className="text-red-400 text-xs">{formErrors.lastName}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-white">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={billingInfo.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="bg-black/50 border-white/20 text-white placeholder-gray-500"
+                  className={`bg-black/50 border-white/20 text-white placeholder-gray-500 ${
+                    formErrors.email ? 'border-red-500' : ''
+                  }`}
                   placeholder="Enter email address"
                 />
+                {formErrors.email && (
+                  <p className="text-red-400 text-xs">{formErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -221,13 +296,15 @@ export function EnhancedCheckout({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country" className="text-white">Country</Label>
+                <Label htmlFor="country" className="text-white">Country *</Label>
                 <div className="relative">
                   <Input
                     id="country"
                     value={billingInfo.country}
                     onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500 pr-8"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 pr-8 ${
+                      formErrors.country ? 'border-red-500' : ''
+                    }`}
                     placeholder="Select country"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -236,17 +313,22 @@ export function EnhancedCheckout({
                     </svg>
                   </div>
                 </div>
+                {formErrors.country && (
+                  <p className="text-red-400 text-xs">{formErrors.country}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-white">Billing Address</Label>
+                <Label htmlFor="address" className="text-white">Billing Address *</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     id="address"
                     value={billingInfo.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500 pl-10 pr-8"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 pl-10 pr-8 ${
+                      formErrors.address ? 'border-red-500' : ''
+                    }`}
                     placeholder="Enter billing address"
                   />
                   <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white">
@@ -255,6 +337,9 @@ export function EnhancedCheckout({
                     </svg>
                   </button>
                 </div>
+                {formErrors.address && (
+                  <p className="text-red-400 text-xs">{formErrors.address}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -270,23 +355,30 @@ export function EnhancedCheckout({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-white">City</Label>
+                  <Label htmlFor="city" className="text-white">City *</Label>
                   <Input
                     id="city"
                     value={billingInfo.city}
                     onChange={(e) => handleInputChange('city', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 ${
+                      formErrors.city ? 'border-red-500' : ''
+                    }`}
                     placeholder="Enter city"
                   />
+                  {formErrors.city && (
+                    <p className="text-red-400 text-xs">{formErrors.city}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state" className="text-white">State/Province/Region</Label>
+                  <Label htmlFor="state" className="text-white">State/Province/Region *</Label>
                   <div className="relative">
                     <Input
                       id="state"
                       value={billingInfo.state}
                       onChange={(e) => handleInputChange('state', e.target.value)}
-                      className="bg-black/50 border-white/20 text-white placeholder-gray-500 pr-8"
+                      className={`bg-black/50 border-white/20 text-white placeholder-gray-500 pr-8 ${
+                        formErrors.state ? 'border-red-500' : ''
+                      }`}
                       placeholder="Select state"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -295,34 +387,47 @@ export function EnhancedCheckout({
                       </svg>
                     </div>
                   </div>
+                  {formErrors.state && (
+                    <p className="text-red-400 text-xs">{formErrors.state}</p>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="zipCode" className="text-white">ZIP / Postal Code</Label>
+                  <Label htmlFor="zipCode" className="text-white">ZIP / Postal Code *</Label>
                   <Input
                     id="zipCode"
                     value={billingInfo.zipCode}
                     onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-gray-500"
+                    className={`bg-black/50 border-white/20 text-white placeholder-gray-500 ${
+                      formErrors.zipCode ? 'border-red-500' : ''
+                    }`}
                     placeholder="Enter ZIP code"
                   />
+                  {formErrors.zipCode && (
+                    <p className="text-red-400 text-xs">{formErrors.zipCode}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-white">Phone</Label>
+                  <Label htmlFor="phone" className="text-white">Phone *</Label>
                   <div className="flex">
                     <div className="flex items-center px-3 bg-black/50 border border-r-0 border-white/20 rounded-l-md">
-                      <span className="text-white text-sm">🇳🇬</span>
+                      <span className="text-white text-sm">🇺🇸</span>
                     </div>
                     <Input
                       id="phone"
                       value={billingInfo.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="bg-black/50 border-white/20 text-white placeholder-gray-500 rounded-l-none"
+                      className={`bg-black/50 border-white/20 text-white placeholder-gray-500 rounded-l-none ${
+                        formErrors.phone ? 'border-red-500' : ''
+                      }`}
                       placeholder="Enter phone number"
                     />
                   </div>
+                  {formErrors.phone && (
+                    <p className="text-red-400 text-xs">{formErrors.phone}</p>
+                  )}
                 </div>
               </div>
             </div>
