@@ -109,7 +109,7 @@ export function WelcomeBanner({
             
             <button
               onClick={handleDismiss}
-              className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="flex-shrink-0 text-gray-400 hover:text-gray-300"
             >
               <X className="w-5 h-5" />
             </button>
