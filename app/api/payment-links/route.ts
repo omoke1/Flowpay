@@ -70,7 +70,11 @@ export async function POST(request: NextRequest) {
         { 
           error: "Database not configured", 
           details: status.error,
-          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables"
+          required: "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel environment variables",
+          environment: {
+            NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing",
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing"
+          }
         },
         { status: 500 }
       );
@@ -219,7 +223,11 @@ export async function GET(request: NextRequest) {
         { 
           error: "Database not configured", 
           details: status.error,
-          required: "Please configure Supabase environment variables"
+          required: "Please configure Supabase environment variables in Vercel",
+          environment: {
+            NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "Set" : "Missing",
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Missing"
+          }
         },
         { status: 500 }
       );
