@@ -84,8 +84,8 @@ import FlowToken from 0x1654653399040a61
 transaction(amount: UFix64, to: Address) {
     let sentVault: @{FungibleToken.Vault}
 
-    prepare(signer: auth(Storage) &Account) {
-        let vaultRef = signer.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
+    prepare(signer: auth(BorrowValue) &Account) {
+        let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         self.sentVault <- vaultRef.withdraw(amount: amount)
     }
@@ -109,8 +109,8 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     let platformFeeVault: @{FungibleToken.Vault}
     let platformFeeRecipient: &{FungibleToken.Receiver}
 
-    prepare(signer: auth(Storage) &Account) {
-        let vaultRef = signer.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
+    prepare(signer: auth(BorrowValue) &Account) {
+        let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         
         // Calculate platform fee
@@ -151,8 +151,8 @@ import USDCFlow from 0xf1ab99c82dee3526
 transaction(amount: UFix64, to: Address) {
     let sentVault: @{FungibleToken.Vault}
 
-    prepare(signer: auth(Storage) &Account) {
-        let vaultRef = signer.storage.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
+    prepare(signer: auth(BorrowValue) &Account) {
+        let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &USDCFlow.Vault>(from: /storage/usdcVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         self.sentVault <- vaultRef.withdraw(amount: amount)
     }
@@ -176,8 +176,8 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     let platformFeeVault: @{FungibleToken.Vault}
     let platformFeeRecipient: &{FungibleToken.Receiver}
 
-    prepare(signer: auth(Storage) &Account) {
-        let vaultRef = signer.storage.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
+    prepare(signer: auth(BorrowValue) &Account) {
+        let vaultRef = signer.storage.borrow<auth(FungibleToken.Withdraw) &USDCFlow.Vault>(from: /storage/usdcVault)
             ?? panic("Could not borrow reference to the owner's Vault")
         
         // Calculate platform fee
