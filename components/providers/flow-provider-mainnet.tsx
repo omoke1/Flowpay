@@ -35,7 +35,9 @@ export function FlowProviderMainnet({ children }: { children: React.ReactNode })
           "accessNode.api": "https://rest-mainnet.onflow.org",
           "discovery.wallet": "https://fcl-discovery.onflow.org/authn",
           "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/authn",
-          "discovery.wallet.method": "POP/RPC",
+          "discovery.wallet.method": "IFRAME/RPC",
+          "discovery.wallet.method.default": "IFRAME/RPC",
+          "discovery.wallet.method.include": ["IFRAME/RPC", "POP/RPC", "TAB/RPC"],
           "fcl.limit": 9999,
           "flow.network": "mainnet",
           "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "flowpay-demo-project"
