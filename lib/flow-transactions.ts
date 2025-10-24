@@ -91,9 +91,14 @@ transaction(amount: UFix64, to: Address) {
     }
 
     execute {
-        let receiverRef = getAccount(to)
-            .capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-            .borrow()
+        let recipientAccount = getAccount(to)
+        let receiverCapability = recipientAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+        
+        if receiverCapability == nil {
+            panic("Recipient account does not have a Flow Token receiver capability. Please ensure the recipient has set up their Flow Token vault.")
+        }
+        
+        let receiverRef = receiverCapability.borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -135,9 +140,14 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         self.platformFeeRecipient.deposit(from: <-self.platformFeeVault)
         
         // Deposit net amount to recipient
-        let receiverRef = getAccount(to)
-            .capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
-            .borrow()
+        let recipientAccount = getAccount(to)
+        let receiverCapability = recipientAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+        
+        if receiverCapability == nil {
+            panic("Recipient account does not have a Flow Token receiver capability. Please ensure the recipient has set up their Flow Token vault.")
+        }
+        
+        let receiverRef = receiverCapability.borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -158,9 +168,14 @@ transaction(amount: UFix64, to: Address) {
     }
 
     execute {
-        let receiverRef = getAccount(to)
-            .capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
-            .borrow()
+        let recipientAccount = getAccount(to)
+        let receiverCapability = recipientAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
+        
+        if receiverCapability == nil {
+            panic("Recipient account does not have a USDC receiver capability. Please ensure the recipient has set up their USDC vault.")
+        }
+        
+        let receiverRef = receiverCapability.borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
@@ -202,9 +217,14 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         self.platformFeeRecipient.deposit(from: <-self.platformFeeVault)
         
         // Deposit net amount to recipient
-        let receiverRef = getAccount(to)
-            .capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
-            .borrow()
+        let recipientAccount = getAccount(to)
+        let receiverCapability = recipientAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
+        
+        if receiverCapability == nil {
+            panic("Recipient account does not have a USDC receiver capability. Please ensure the recipient has set up their USDC vault.")
+        }
+        
+        let receiverRef = receiverCapability.borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
