@@ -201,12 +201,18 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("GET /api/payment-links - Looking up user for merchantId:", merchantId);
+    console.log("GET /api/payment-links - MerchantId type:", typeof merchantId);
+    console.log("GET /api/payment-links - MerchantId length:", merchantId?.length);
     
     // Use SimpleUserService to get or create user by wallet address
     let userData;
     try {
       userData = await SimpleUserService.getOrCreateUser(merchantId);
       console.log("GET /api/payment-links - User data:", userData ? "Found/Created" : "Not found");
+      if (userData) {
+        console.log("GET /api/payment-links - User ID:", userData.id);
+        console.log("GET /api/payment-links - User wallet address:", userData.wallet_address);
+      }
     } catch (userError) {
       console.error("GET /api/payment-links - Error looking up/creating user:", userError);
       return NextResponse.json(

@@ -99,6 +99,15 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
           balance: '0' // Default balance for new accounts
         };
 
+        // Disconnect any existing wallet first to ensure clean state
+        if (typeof window !== 'undefined' && window.flow) {
+          try {
+            await window.flow.disconnect();
+          } catch (error) {
+            console.log("No existing wallet to disconnect");
+          }
+        }
+        
         // Set user state directly without wallet connection
         // This prevents the wallet connection flow that causes testnet switching
         setUserDirectly(flowUser);
