@@ -17,7 +17,9 @@ import {
   Check,
   ArrowRight,
   Shield,
-  Lock
+  Lock,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 interface EnhancedCheckoutProps {
@@ -54,6 +56,7 @@ export function EnhancedCheckout({
   const [autoRenew, setAutoRenew] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isBillingExpanded, setIsBillingExpanded] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setBillingInfo(prev => ({
@@ -73,12 +76,9 @@ export function EnhancedCheckout({
   const validateForm = () => {
     const errors: Record<string, string> = {};
     
+    // Always required fields
     if (!billingInfo.firstName.trim()) {
       errors.firstName = 'First name is required';
-    }
-    
-    if (!billingInfo.lastName.trim()) {
-      errors.lastName = 'Last name is required';
     }
     
     if (!billingInfo.email.trim()) {
@@ -87,28 +87,38 @@ export function EnhancedCheckout({
       errors.email = 'Please enter a valid email address';
     }
     
-    if (!billingInfo.country.trim()) {
-      errors.country = 'Country is required';
-    }
-    
-    if (!billingInfo.address.trim()) {
-      errors.address = 'Address is required';
-    }
-    
-    if (!billingInfo.city.trim()) {
-      errors.city = 'City is required';
-    }
-    
-    if (!billingInfo.state.trim()) {
-      errors.state = 'State/Province is required';
-    }
-    
-    if (!billingInfo.zipCode.trim()) {
-      errors.zipCode = 'ZIP/Postal code is required';
-    }
-    
-    if (!billingInfo.phone.trim()) {
-      errors.phone = 'Phone number is required';
+    // For crypto payments, only name and email are required
+    if (selectedPaymentMethod === 'crypto') {
+      // Only validate name and email for crypto payments
+    } else {
+      // For fiat payments, validate all fields
+      if (!billingInfo.lastName.trim()) {
+        errors.lastName = 'Last name is required';
+      }
+      
+      if (!billingInfo.country.trim()) {
+        errors.country = 'Country is required';
+      }
+      
+      if (!billingInfo.address.trim()) {
+        errors.address = 'Address is required';
+      }
+      
+      if (!billingInfo.city.trim()) {
+        errors.city = 'City is required';
+      }
+      
+      if (!billingInfo.state.trim()) {
+        errors.state = 'State/Province is required';
+      }
+      
+      if (!billingInfo.zipCode.trim()) {
+        errors.zipCode = 'ZIP/Postal code is required';
+      }
+      
+      if (!billingInfo.phone.trim()) {
+        errors.phone = 'Phone number is required';
+      }
     }
     
     setFormErrors(errors);
@@ -144,13 +154,26 @@ export function EnhancedCheckout({
       {/* Left Panel - Billing Information */}
       <div className="space-y-6">
         <Card className="bg-black/50 border border-white/10">
-          <CardHeader>
-            <CardTitle className="text-white text-xl">Billing Information</CardTitle>
-            <CardDescription className="text-gray-400">
-              Complete your payment details securely
-            </CardDescription>
+          <CardHeader 
+            className="cursor-pointer"
+            onClick={() => setIsBillingExpanded(!isBillingExpanded)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white text-xl">Billing Information</CardTitle>
+                <CardDescription className="text-gray-400">
+                  Complete your payment details securely
+                </CardDescription>
+              </div>
+              {isBillingExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-400" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          {isBillingExpanded && (
+            <CardContent className="space-y-6">
             {/* Payment Method Selection */}
             <div className="space-y-4">
               <Label className="text-white font-medium">Payment Method</Label>
@@ -263,7 +286,9 @@ export function EnhancedCheckout({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-white">Last Name *</Label>
+                  <Label htmlFor="lastName" className="text-white">
+                    Last Name {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                  </Label>
                   <Input
                     id="lastName"
                     value={billingInfo.lastName}
@@ -308,7 +333,9 @@ export function EnhancedCheckout({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="country" className="text-white">Country *</Label>
+                <Label htmlFor="country" className="text-white">
+                  Country {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                </Label>
                 <div className="relative">
                   <Input
                     id="country"
@@ -331,7 +358,9 @@ export function EnhancedCheckout({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-white">Billing Address *</Label>
+                <Label htmlFor="address" className="text-white">
+                  Billing Address {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
@@ -367,7 +396,9 @@ export function EnhancedCheckout({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-white">City *</Label>
+                  <Label htmlFor="city" className="text-white">
+                    City {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                  </Label>
                   <Input
                     id="city"
                     value={billingInfo.city}
@@ -382,7 +413,9 @@ export function EnhancedCheckout({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state" className="text-white">State/Province/Region *</Label>
+                  <Label htmlFor="state" className="text-white">
+                    State/Province/Region {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                  </Label>
                   <div className="relative">
                     <Input
                       id="state"
@@ -407,7 +440,9 @@ export function EnhancedCheckout({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="zipCode" className="text-white">ZIP / Postal Code *</Label>
+                  <Label htmlFor="zipCode" className="text-white">
+                    ZIP / Postal Code {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                  </Label>
                   <Input
                     id="zipCode"
                     value={billingInfo.zipCode}
@@ -422,7 +457,9 @@ export function EnhancedCheckout({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-white">Phone *</Label>
+                  <Label htmlFor="phone" className="text-white">
+                    Phone {selectedPaymentMethod !== 'crypto' ? '*' : ''}
+                  </Label>
                   <div className="flex">
                     <div className="flex items-center px-3 bg-black/50 border border-r-0 border-white/20 rounded-l-md">
                       <span className="text-white text-sm">🇺🇸</span>
@@ -443,7 +480,8 @@ export function EnhancedCheckout({
                 </div>
               </div>
             </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
 

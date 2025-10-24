@@ -93,14 +93,86 @@ export default function LinksPage() {
   };
 
   const toggleLinkStatus = async (linkId: string, currentStatus: string) => {
-    // This would call an API to update the link status
-    console.log(`Toggling link ${linkId} from ${currentStatus}`);
+    try {
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+      
+      console.log(`Toggling link ${linkId} from ${currentStatus} to ${newStatus}`);
+      
+      const response = await fetch(`/api/payment-links/${linkId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      console.log('Pause/Resume response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Pause/Resume error response:', errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to update payment link`);
+      }
+
+      const data = await response.json();
+      console.log('Pause/Resume success:', data);
+      
+      // Show success notification
+      alert(`Payment link has been ${newStatus === 'active' ? 'activated' : 'paused'} successfully`);
+      
+      // Refresh the links list
+      console.log('Refreshing payment links after status update...');
+      const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
+      const linksData = await linksResponse.json();
+      console.log('Refreshed links data:', linksData);
+      setPaymentLinks(linksData.paymentLinks || []);
+      
+    } catch (error: any) {
+      console.error('Error updating payment link status:', error);
+      alert(`Failed to update payment link: ${error instanceof Error ? error.message : 'Please try again.'}`);
+    }
   };
 
-  const deleteLink = async (linkId: string) => {
-    if (confirm('Are you sure you want to delete this payment link?')) {
-      // This would call an API to delete the link
-      console.log(`Deleting link ${linkId}`);
+  const deleteLink = async (linkId: string, linkName: string) => {
+    if (!confirm(`Are you sure you want to delete "${linkName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      console.log('Attempting to delete payment link:', linkId);
+      
+      const response = await fetch(`/api/payment-links/${linkId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Delete response status:', response.status);
+      console.log('Delete response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Delete error response:', errorData);
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to delete payment link`);
+      }
+
+      const data = await response.json();
+      console.log('Delete success:', data);
+      
+      // Show success notification
+      alert(`"${linkName}" has been permanently deleted`);
+      
+      // Refresh the links list
+      console.log('Refreshing payment links after deletion...');
+      const linksResponse = await fetch(`/api/payment-links?merchantId=${userAddress}`);
+      const linksData = await linksResponse.json();
+      console.log('Refreshed links data:', linksData);
+      setPaymentLinks(linksData.paymentLinks || []);
+      
+    } catch (error: any) {
+      console.error('Error deleting payment link:', error);
+      alert(`Failed to delete payment link: ${error instanceof Error ? error.message : 'Please try again.'}`);
     }
   };
 
@@ -254,7 +326,7 @@ export default function LinksPage() {
                               {link.status === 'active' ? 'Pause' : 'Resume'}
                             </button>
                             <button 
-                              onClick={() => deleteLink(link.id)}
+                              onClick={() => deleteLink(link.id, link.product_name)}
                               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-300 border border-zinc-100/10 dark:border-white/10 text-gray-200 dark:text-gray-200"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -301,7 +373,7 @@ export default function LinksPage() {
                         {link.status === 'active' ? 'Pause' : 'Resume'}
                       </button>
                       <button 
-                        onClick={() => deleteLink(link.id)}
+                        onClick={() => deleteLink(link.id, link.product_name)}
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-red-600/10 hover:text-red-300 border border-zinc-100/10 dark:border-white/10 text-gray-200 dark:text-gray-200 text-sm"
                       >
                         <Trash2 className="h-4 w-4" />

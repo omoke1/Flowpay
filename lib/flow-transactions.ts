@@ -82,7 +82,7 @@ import FungibleToken from 0xf233dcee88fe0abe
 import FlowToken from 0x1654653399040a61
 
 transaction(amount: UFix64, to: Address) {
-    let sentVault: @FungibleToken.Vault
+    let sentVault: @{FungibleToken.Vault}
 
     prepare(signer: AuthAccount) {
         let vaultRef = signer.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
@@ -92,7 +92,7 @@ transaction(amount: UFix64, to: Address) {
 
     execute {
         let receiverRef = getAccount(to)
-            .capabilities.get<&FungibleToken.Receiver>(/public/flowTokenReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
             .borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
@@ -105,9 +105,9 @@ import FungibleToken from 0xf233dcee88fe0abe
 import FlowToken from 0x1654653399040a61
 
 transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
-    let sentVault: @FungibleToken.Vault
-    let platformFeeVault: @FungibleToken.Vault
-    let platformFeeRecipient: &FungibleToken.Receiver
+    let sentVault: @{FungibleToken.Vault}
+    let platformFeeVault: @{FungibleToken.Vault}
+    let platformFeeRecipient: &{FungibleToken.Receiver}
 
     prepare(signer: AuthAccount) {
         let vaultRef = signer.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
@@ -125,7 +125,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         
         // Get platform fee recipient (FlowPay admin wallet)
         self.platformFeeRecipient = getAccount(0xc24ba3b801d0173f) // FlowPay admin wallet
-            .capabilities.get<&FungibleToken.Receiver>(/public/flowTokenReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
             .borrow()
             ?? panic("Could not borrow platform fee recipient vault")
     }
@@ -136,7 +136,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         
         // Deposit net amount to recipient
         let receiverRef = getAccount(to)
-            .capabilities.get<&FungibleToken.Receiver>(/public/flowTokenReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
             .borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
@@ -149,7 +149,7 @@ import FungibleToken from 0xf233dcee88fe0abe
 import USDCFlow from 0xf1ab99c82dee3526
 
 transaction(amount: UFix64, to: Address) {
-    let sentVault: @FungibleToken.Vault
+    let sentVault: @{FungibleToken.Vault}
 
     prepare(signer: AuthAccount) {
         let vaultRef = signer.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
@@ -159,7 +159,7 @@ transaction(amount: UFix64, to: Address) {
 
     execute {
         let receiverRef = getAccount(to)
-            .capabilities.get<&FungibleToken.Receiver>(/public/usdcReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
             .borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
@@ -172,9 +172,9 @@ import FungibleToken from 0xf233dcee88fe0abe
 import USDCFlow from 0xf1ab99c82dee3526
 
 transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
-    let sentVault: @FungibleToken.Vault
-    let platformFeeVault: @FungibleToken.Vault
-    let platformFeeRecipient: &FungibleToken.Receiver
+    let sentVault: @{FungibleToken.Vault}
+    let platformFeeVault: @{FungibleToken.Vault}
+    let platformFeeRecipient: &{FungibleToken.Receiver}
 
     prepare(signer: AuthAccount) {
         let vaultRef = signer.borrow<&USDCFlow.Vault>(from: /storage/usdcVault)
@@ -192,7 +192,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         
         // Get platform fee recipient (FlowPay admin wallet)
         self.platformFeeRecipient = getAccount(0xc24ba3b801d0173f) // FlowPay admin wallet
-            .capabilities.get<&FungibleToken.Receiver>(/public/usdcReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
             .borrow()
             ?? panic("Could not borrow platform fee recipient vault")
     }
@@ -203,7 +203,7 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
         
         // Deposit net amount to recipient
         let receiverRef = getAccount(to)
-            .capabilities.get<&FungibleToken.Receiver>(/public/usdcReceiver)
+            .capabilities.get<&{FungibleToken.Receiver}>(/public/usdcReceiver)
             .borrow()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
@@ -343,7 +343,7 @@ export async function getFlowBalance(address: string): Promise<string> {
         
         access(all) fun main(address: Address): UFix64 {
           let account = getAccount(address)
-          let vaultRef = account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+          let vaultRef = account.capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
               .borrow()
               ?? panic("Could not borrow FlowToken Vault reference")
           
