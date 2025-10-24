@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       paymentLink: data,
-      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/pay/${data.id}`,
+      checkoutUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://useflowpay.xyz'}/pay/${data.id}`,
     });
   } catch (error) {
     console.error("Error creating payment link:", error);

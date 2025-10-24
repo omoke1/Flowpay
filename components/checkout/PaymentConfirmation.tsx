@@ -36,7 +36,7 @@ export function PaymentConfirmation({
 
   const getExplorerUrl = () => {
     if (paymentMethod === 'crypto') {
-      return `https://testnet.flowscan.org/transaction/${transactionReference}`;
+      return `https://flowscan.org/transaction/${transactionReference}`;
     }
     return null;
   };

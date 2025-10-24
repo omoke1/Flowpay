@@ -651,7 +651,7 @@ export function DashboardTabs({
                       <td className="px-3 py-3 text-right pr-4">
                         <div className="inline-flex gap-2">
                           <button 
-                            onClick={() => copyToClipboard(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/pay/${link.id}`)}
+                            onClick={() => copyToClipboard(`${process.env.NEXT_PUBLIC_APP_URL || 'https://useflowpay.xyz'}/pay/${link.id}`)}
                             className="copy-btn inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-black/[0.03] dark:bg-white/5 hover:bg-black/[0.06] dark:hover:bg-white/10 border border-zinc-100/10 dark:border-white/10 text-gray-800 dark:text-gray-200"
                           >
                             <Copy className="h-4 w-4" />
