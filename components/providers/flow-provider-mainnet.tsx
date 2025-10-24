@@ -36,7 +36,8 @@ export function FlowProviderMainnet({ children }: { children: React.ReactNode })
           "discovery.wallet": "https://fcl-discovery.onflow.org/authn",
           "discovery.wallet.method": "POP/RPC",
           "fcl.limit": 9999,
-          "flow.network": "mainnet"
+          "flow.network": "mainnet",
+          "walletconnect.projectId": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "flowpay-demo-project"
         });
 
         console.log("FCL configured for mainnet");

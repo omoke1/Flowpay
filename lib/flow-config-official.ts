@@ -16,7 +16,7 @@ const FLOW_CONFIG = {
     'discovery.wallet.method.default': 'IFRAME/RPC',
     'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
     'discovery.wallet.method.include.services': ['https://fcl-discovery.onflow.org/authn'],
-    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'flowpay-demo-project',
     // No fallback to testnet - mainnet only
     'discovery.wallet.method.include.services.timeout': 10000,
   },
@@ -31,7 +31,7 @@ const FLOW_CONFIG = {
     'discovery.wallet.method.default': 'IFRAME/RPC',
     'discovery.wallet.method.include': ['IFRAME/RPC', 'POP/RPC', 'TAB/RPC'],
     'discovery.wallet.method.include.services': ['https://fcl-discovery.onflow.org/testnet/authn'],
-    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
+    'walletconnect.projectId': process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'flowpay-demo-project',
     'discovery.wallet.method.include.services.timeout': 10000,
   }
 };
