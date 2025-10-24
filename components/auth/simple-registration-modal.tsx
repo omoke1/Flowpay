@@ -13,7 +13,7 @@ interface RegistrationModalProps {
 }
 
 export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: RegistrationModalProps) {
-  const { connectWallet, isLoading, error, isConnected, user } = useFlowMinimal();
+  const { connectWallet, isLoading, error, isConnected, user, setUserDirectly } = useFlowMinimal();
   const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
   const [selectedMethod, setSelectedMethod] = useState<'external' | 'email' | null>(null);
   const [email, setEmail] = useState('');
@@ -87,24 +87,23 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
 
       console.log("Account created successfully:", result.account);
 
-      // Set the user in the Flow provider
+      // Create a user object that matches the Flow provider format
       if (result.account) {
-        // Create a user object that matches the Flow provider format
         const flowUser = {
-          addr: result.account.address,
+          addr: result.account.address || result.account.id, // Use the address from API
           loggedIn: true,
           email: result.account.email,
           name: result.account.name,
-          balance: result.account.balance
+          balance: '0' // Default balance for new accounts
         };
 
-        // Set user directly in the provider (we'll need to add this method)
-        // For now, we'll trigger a re-authentication
-        await connectWallet();
+        // Set user state directly without wallet connection
+        // This prevents the wallet connection flow that causes testnet switching
+        setUserDirectly(flowUser);
+        setRegistrationError(null);
+        setStep('success');
       }
 
-      setStep('success');
-      
       // Auto-close after success
       setTimeout(() => {
         onSuccess?.();
@@ -114,7 +113,8 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
       }, 2000);
     } catch (err) {
       console.error("Email registration failed:", err);
-      setStep('select');
+      setRegistrationError(err instanceof Error ? err.message : 'Registration failed');
+      setStep('email-form');
     }
   };
 

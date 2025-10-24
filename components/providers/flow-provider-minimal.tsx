@@ -10,6 +10,7 @@ interface FlowContextType {
   user: any;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => Promise<void>;
+  setUserDirectly: (userData: any) => void;
   error: string | null;
 }
 
@@ -25,7 +26,7 @@ export function FlowProviderMinimal({ children }: { children: React.ReactNode })
   // Minimal FCL configuration - only essential settings
   useEffect(() => {
     try {
-      // Force mainnet configuration with direct Blocto wallet (no CORS issues)
+      // Force mainnet configuration with strict mainnet enforcement
       fcl.config({
         "app.detail.title": "FlowPay",
         "app.detail.icon": "https://useflowpay.xyz/logo.svg",
@@ -35,7 +36,16 @@ export function FlowProviderMinimal({ children }: { children: React.ReactNode })
         "fcl.limit": 9999,
         "0xFlowToken": "0x1654653399040a61",
         "0xFungibleToken": "0xf233dcee88fe0abe",
-        "0xUSDCFlow": "0xf1ab99c82dee3526"
+        "0xUSDCFlow": "0xf1ab99c82dee3526",
+        // Force mainnet - prevent testnet fallback
+        "flow.network": "mainnet",
+        "fcl.mainnet": "https://rest-mainnet.onflow.org"
+      });
+
+      // Additional mainnet enforcement
+      fcl.config({
+        "discovery.wallet.include": ["https://fcl-discovery.onflow.org/authn"],
+        "discovery.wallet.method": "POP/RPC"
       });
 
       // Listen to authentication changes
@@ -75,12 +85,20 @@ export function FlowProviderMinimal({ children }: { children: React.ReactNode })
     }
   };
 
+  const setUserDirectly = (userData: any) => {
+    console.log("Setting user directly:", userData);
+    setUser(userData);
+    setIsConnected(true);
+    setError(null);
+  };
+
   const value: FlowContextType = {
     isConnected,
     isLoading,
     user,
     connectWallet,
     disconnectWallet,
+    setUserDirectly,
     error
   };
 

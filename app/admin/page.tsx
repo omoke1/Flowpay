@@ -1,202 +1,70 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Settings, 
-  Users, 
-  DollarSign, 
-  Activity,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  Shield,
-  Lock
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, DollarSign, Users, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 
 interface AdminStats {
-  totalUsers: number;
-  totalTransactions: number;
-  platformFeesCollected: number;
-  accountsCreated: number;
+  balance: string;
+  sufficient: boolean;
+  estimatedCost: number;
+  accountCount: number;
 }
 
-interface AdminConfig {
-  adminPayerAddress: string;
-  platformFeeRecipient: string;
-  platformFeeRate: number;
-  accountCreationCost: number;
-}
-
-export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
-  const [config, setConfig] = useState<AdminConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string>('');
 
-  useEffect(() => {
-    checkAdminAuth();
-  }, []);
-
-  const checkAdminAuth = async () => {
-    try {
-      setLoading(true);
-      
-      // Check if user is authenticated as admin
-      const response = await fetch('/api/admin/auth/check');
-      const result = await response.json();
-      
-      if (result.authenticated && result.isAdmin) {
-        setIsAuthenticated(true);
-        setWalletAddress(result.walletAddress);
-        fetchAdminData();
-      } else {
-        setIsAuthenticated(false);
-      }
-    } catch (err) {
-      setError('Failed to check admin authentication');
-      console.error('Admin auth check error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAdminLogin = async () => {
+  const loadAdminStats = async () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // This will trigger wallet connection for admin
-      const response = await fetch('/api/admin/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'connect' })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setIsAuthenticated(true);
-        setWalletAddress(result.walletAddress);
-        fetchAdminData();
-      } else {
-        setError(result.error || 'Admin authentication failed');
+
+      // Check admin balance
+      const balanceResponse = await fetch('/api/admin/balance');
+      const balanceData = await balanceResponse.json();
+
+      if (!balanceResponse.ok) {
+        throw new Error(balanceData.error || 'Failed to load admin stats');
       }
+
+      setStats(balanceData);
     } catch (err) {
-      setError('Admin login failed');
-      console.error('Admin login error:', err);
+      console.error('Error loading admin stats:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load admin stats');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAdminData = async () => {
-    try {
-      // Fetch admin statistics
-      const statsResponse = await fetch('/api/admin/stats');
-      const statsData = await statsResponse.json();
-      
-      // Fetch admin configuration
-      const configResponse = await fetch('/api/admin/config');
-      const configData = await configResponse.json();
-      
-      setStats(statsData);
-      setConfig(configData);
-    } catch (err) {
-      setError('Failed to load admin data');
-      console.error('Admin data fetch error:', err);
-    }
-  };
-
-  const updateConfig = async (newConfig: Partial<AdminConfig>) => {
-    try {
-      const response = await fetch('/api/admin/config', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newConfig)
-      });
-      
-      if (response.ok) {
-        setConfig(prev => prev ? { ...prev, ...newConfig } : null);
-      }
-    } catch (err) {
-      setError('Failed to update configuration');
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/admin/auth/logout', { method: 'POST' });
-      setIsAuthenticated(false);
-      setWalletAddress('');
-      setStats(null);
-      setConfig(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
+  useEffect(() => {
+    loadAdminStats();
+  }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black dark:bg-[#0D0D0D] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-          <p className="text-gray-100 dark:text-white">Checking admin access...</p>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#97F11D] mb-4" />
+          <p className="text-white">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-black dark:bg-[#0D0D0D] flex items-center justify-center p-6">
-        <Card className="w-full max-w-md bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-red-900/20 rounded-full flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 text-red-500" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-100 dark:text-white">
-              Admin Access Required
-            </CardTitle>
-            <CardDescription className="text-gray-100 dark:text-white/70">
-              Connect your admin wallet to access the FlowPay admin dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="p-4 bg-red-900/20 border border-red-500/20 rounded-lg flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-500" />
-                <span className="text-red-500 text-sm">{error}</span>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-gray-100 dark:text-white/70">
-                <Lock className="w-4 h-4" />
-                <span>Secure admin access with Flow wallet</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-100 dark:text-white/70">
-                <Shield className="w-4 h-4" />
-                <span>Only authorized admin wallets allowed</span>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleAdminLogin}
-              disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : (
-                <Shield className="w-4 h-4 mr-2" />
-              )}
-              Connect Admin Wallet
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Card className="w-full max-w-md bg-black border-white/10">
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="w-12 h-12 mx-auto text-red-500 mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Admin Dashboard Error</h2>
+            <p className="text-gray-400 mb-4">{error}</p>
+            <Button onClick={loadAdminStats} className="bg-[#97F11D] hover:bg-[#97F11D]/80 text-black">
+              Retry
             </Button>
           </CardContent>
         </Card>
@@ -205,192 +73,176 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black dark:bg-[#0D0D0D] p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-100 dark:text-white mb-2">
-              FlowPay Admin Dashboard
-            </h1>
-            <p className="text-gray-100 dark:text-white/70">
-              Manage platform settings, monitor transactions, and configure admin accounts
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm text-gray-100 dark:text-white/70">Admin Wallet</p>
-              <p className="text-sm font-mono text-gray-100 dark:text-white">
-                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-              </p>
-            </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="border-zinc-100/10 dark:border-white/20 text-gray-100 dark:text-white hover:bg-black/[0.06] dark:hover:bg-white/10"
-            >
-              Logout
-            </Button>
-          </div>
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Monitor admin wallet and account creation</p>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-lg flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-red-500" />
-            <span className="text-red-500">{error}</span>
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-100 dark:text-white">
-                  Total Users
-                </CardTitle>
-                <Users className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-100 dark:text-white">
-                  {stats.totalUsers}
-                </div>
-                <p className="text-xs text-gray-100 dark:text-white/70">
-                  Email + Wallet users
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-100 dark:text-white">
-                  Total Transactions
-                </CardTitle>
-                <Activity className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-100 dark:text-white">
-                  {stats.totalTransactions}
-                </div>
-                <p className="text-xs text-gray-100 dark:text-white/70">
-                  All time payments
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-100 dark:text-white">
-                  Platform Fees
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-yellow-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-100 dark:text-white">
-                  {stats.platformFeesCollected.toFixed(4)} FLOW
-                </div>
-                <p className="text-xs text-gray-100 dark:text-white/70">
-                  0.5% of all transactions
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-100 dark:text-white">
-                  Accounts Created
-                </CardTitle>
-                <CheckCircle className="h-4 w-4 text-purple-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-100 dark:text-white">
-                  {stats.accountsCreated}
-                </div>
-                <p className="text-xs text-gray-100 dark:text-white/70">
-                  Email-based accounts
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Admin Configuration */}
-        <div className="space-y-6">
-          <Card className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10">
-            <CardHeader>
-              <CardTitle className="text-gray-100 dark:text-white">Admin Configuration</CardTitle>
-              <CardDescription className="text-gray-100 dark:text-white/70">
-                Configure admin payer account and platform settings
-              </CardDescription>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Admin Balance */}
+          <Card className="bg-black border-white/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Admin Balance</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {config && (
-                <>
-                  <div className="space-y-2">
-                    <Label className="text-gray-100 dark:text-white">Admin Payer Address</Label>
-                    <Input
-                      value={config.adminPayerAddress}
-                      onChange={(e) => updateConfig({ adminPayerAddress: e.target.value })}
-                      className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white"
-                      placeholder="0x..."
-                    />
-                    <p className="text-xs text-gray-100 dark:text-white/70">
-                      Flow address that funds new email accounts
-                    </p>
-                  </div>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <Wallet className="w-4 h-4 text-[#97F11D]" />
+                <span className="text-2xl font-bold text-white">
+                  {stats?.balance || '0'} FLOW
+                </span>
+              </div>
+              <div className="mt-2">
+                {stats?.sufficient ? (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Sufficient
+                  </Badge>
+                ) : (
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    Insufficient
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-                  <div className="space-y-2">
-                    <Label className="text-gray-100 dark:text-white">Platform Fee Recipient</Label>
-                    <Input
-                      value={config.platformFeeRecipient}
-                      onChange={(e) => updateConfig({ platformFeeRecipient: e.target.value })}
-                      className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white"
-                      placeholder="0x..."
-                    />
-                    <p className="text-xs text-gray-100 dark:text-white/70">
-                      Address where 0.5% platform fees are sent
-                    </p>
-                  </div>
+          {/* Cost per Account */}
+          <Card className="bg-black border-white/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Cost per Account</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <DollarSign className="w-4 h-4 text-[#97F11D]" />
+                <span className="text-2xl font-bold text-white">
+                  {stats?.estimatedCost || '0.002'} FLOW
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Storage + Transaction
+              </p>
+            </CardContent>
+          </Card>
 
-                  <div className="space-y-2">
-                    <Label className="text-gray-100 dark:text-white">Platform Fee Rate</Label>
-                    <Input
-                      value={config.platformFeeRate}
-                      onChange={(e) => updateConfig({ platformFeeRate: parseFloat(e.target.value) })}
-                      className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white"
-                      type="number"
-                      step="0.001"
-                      min="0"
-                      max="1"
-                    />
-                    <p className="text-xs text-gray-100 dark:text-white/70">
-                      Current: {config.platformFeeRate * 100}% of all transactions
-                    </p>
-                  </div>
+          {/* Accounts Created */}
+          <Card className="bg-black border-white/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Accounts Created</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <Users className="w-4 h-4 text-[#97F11D]" />
+                <span className="text-2xl font-bold text-white">
+                  {stats?.accountCount || '0'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Total accounts
+              </p>
+            </CardContent>
+          </Card>
 
-                  <div className="space-y-2">
-                    <Label className="text-gray-100 dark:text-white">Account Creation Cost</Label>
-                    <Input
-                      value={config.accountCreationCost}
-                      onChange={(e) => updateConfig({ accountCreationCost: parseFloat(e.target.value) })}
-                      className="bg-black/[0.06] dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-white"
-                      type="number"
-                      step="0.001"
-                      min="0"
-                    />
-                    <p className="text-xs text-gray-100 dark:text-white/70">
-                      FLOW cost per new email account (0.011 FLOW recommended)
-                    </p>
-                  </div>
-                </>
-              )}
+          {/* Status */}
+          <Card className="bg-black border-white/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">System Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                {stats?.sufficient ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-lg font-semibold text-green-400">Ready</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-red-400" />
+                    <span className="text-lg font-semibold text-red-400">Needs Funding</span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Account creation
+              </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-black border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white">Admin Wallet Info</CardTitle>
+              <CardDescription className="text-gray-400">
+                Current admin wallet status and configuration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Balance:</span>
+                <span className="text-white font-mono">{stats?.balance || '0'} FLOW</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Status:</span>
+                {stats?.sufficient ? (
+                  <Badge className="bg-green-500/20 text-green-400">Ready</Badge>
+                ) : (
+                  <Badge className="bg-red-500/20 text-red-400">Needs Funding</Badge>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Cost per Account:</span>
+                <span className="text-white font-mono">{stats?.estimatedCost || '0.002'} FLOW</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-black border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white">Quick Actions</CardTitle>
+              <CardDescription className="text-gray-400">
+                Manage admin wallet and system
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                onClick={loadAdminStats}
+                className="w-full bg-[#97F11D] hover:bg-[#97F11D]/80 text-black"
+              >
+                Refresh Stats
+              </Button>
+              <Button 
+                variant="outline"
+                className="w-full border-white/20 text-white hover:bg-white/10"
+                onClick={() => window.open('https://flowscan.io', '_blank')}
+              >
+                View on Flowscan
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Warning for insufficient balance */}
+        {stats && !stats.sufficient && (
+          <Card className="bg-red-500/10 border-red-500/30 mt-6">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+                <div>
+                  <h3 className="text-lg font-semibold text-red-400">Admin Wallet Needs Funding</h3>
+                  <p className="text-red-300 mt-1">
+                    Current balance: {stats.balance} FLOW. Minimum required: 0.1 FLOW.
+                    Please fund the admin wallet to enable account creation.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
 }
-
-
