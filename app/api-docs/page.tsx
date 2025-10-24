@@ -101,7 +101,7 @@ export default function APIDocsPage() {
   "success": true,
   "paymentLink": {
     "id": "uuid",
-    "url": "https://useflowpay.xyz/pay/uuid",
+    "url": "https://useflopay.xyz/pay/uuid",
     "merchantId": "0x...",
     "amount": "10.00",
     "token": "USDC",
@@ -132,7 +132,7 @@ export default function APIDocsPage() {
   "paymentLinks": [
     {
       "id": "uuid",
-      "url": "https://useflowpay.xyz/pay/uuid",
+      "url": "https://useflopay.xyz/pay/uuid",
       "productName": "Coffee",
       "amount": "10.00",
       "token": "USDC",
@@ -199,7 +199,7 @@ POST /api/transak/create-order
   "fiatCurrency": "USD",
   "amount": "100.00",
   "walletAddress": "0x...",
-  "redirectUrl": "https://useflowpay.xyz/success"
+  "redirectUrl": "https://useflopay.xyz/success"
 }
 
 // MoonPay webhook handler

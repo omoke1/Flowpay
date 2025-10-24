@@ -138,10 +138,10 @@ export default function SupportPage() {
                 Get detailed help via email. We respond within 24 hours.
               </p>
               <a 
-                href="mailto:support@useflowpay.xyz" 
+                href="mailto:support@useflopay.xyz" 
                 className="inline-flex items-center gap-2 text-[#97F11D] hover:text-[#97F11D]/80 transition-colors"
               >
-                support@useflowpay.xyz
+                support@useflopay.xyz
               </a>
             </div>
 

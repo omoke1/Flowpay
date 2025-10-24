@@ -213,9 +213,9 @@ export default function TermsOfServicePage() {
                 If you have any questions about these Terms, please contact us at:
               </p>
               <div className="bg-white/5 p-4 rounded-lg">
-                <p><strong>Email:</strong> legal@useflowpay.xyz</p>
-                <p><strong>Website:</strong> https://useflowpay.xyz</p>
-                <p><strong>Support:</strong> https://useflowpay.xyz/support</p>
+                <p><strong>Email:</strong> legal@useflopay.xyz</p>
+                <p><strong>Website:</strong> https://useflopay.xyz</p>
+                <p><strong>Support:</strong> https://useflopay.xyz/support</p>
               </div>
             </div>
           </section>

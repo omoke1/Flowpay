@@ -125,7 +125,7 @@ flowpay/
    
    # Email (Optional)
    RESEND_API_KEY=your_resend_api_key
-   NEXT_PUBLIC_FROM_EMAIL=noreply@useflowpay.xyz
+   NEXT_PUBLIC_FROM_EMAIL=noreply@useflopay.xyz
    
    # App (Required)
    NEXT_PUBLIC_APP_URL=http://localhost:3000

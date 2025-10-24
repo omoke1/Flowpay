@@ -41,7 +41,7 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.NODE_ENV === 'production' 
-              ? 'https://useflowpay.xyz' 
+              ? 'https://useflopay.xyz' 
               : 'http://localhost:3000',
           },
           {

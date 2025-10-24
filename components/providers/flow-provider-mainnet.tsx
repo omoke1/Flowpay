@@ -31,7 +31,7 @@ export function FlowProviderMainnet({ children }: { children: React.ReactNode })
         // Configure FCL for mainnet
         fcl.config({
           "app.detail.title": "FlowPay",
-          "app.detail.icon": "https://useflowpay.xyz/logo.svg",
+          "app.detail.icon": "https://useflopay.xyz/logo.svg",
           "accessNode.api": "https://rest-mainnet.onflow.org",
           "discovery.wallet": "https://fcl-discovery.onflow.org/authn",
           "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/authn",
