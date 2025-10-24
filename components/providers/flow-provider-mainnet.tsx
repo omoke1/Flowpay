@@ -34,6 +34,7 @@ export function FlowProviderMainnet({ children }: { children: React.ReactNode })
           "app.detail.icon": "https://useflowpay.xyz/logo.svg",
           "accessNode.api": "https://rest-mainnet.onflow.org",
           "discovery.wallet": "https://fcl-discovery.onflow.org/authn",
+          "discovery.authn.endpoint": "https://fcl-discovery.onflow.org/authn",
           "discovery.wallet.method": "POP/RPC",
           "fcl.limit": 9999,
           "flow.network": "mainnet",
