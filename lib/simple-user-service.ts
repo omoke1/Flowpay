@@ -1,5 +1,6 @@
 // Simple user service to replace the complex wallet service
 import { supabase } from "@/lib/supabase";
+import { decryptRecoveryInfo, generateEncryptionPassword } from "@/lib/encryption-utils";
 
 export interface SimpleUser {
   id: string;
@@ -7,6 +8,14 @@ export interface SimpleUser {
   email?: string;
   display_name?: string;
   created_at: string;
+  encrypted_recovery_info?: string; // Encrypted recovery information
+  recovery_info?: {
+    seedPhrase: string;
+    privateKey: string;
+    publicKey: string;
+    derivationPath: string;
+    createdAt: string;
+  };
 }
 
 export class SimpleUserService {
@@ -14,6 +23,14 @@ export class SimpleUserService {
   static async getOrCreateUser(walletAddress: string, userData?: {
     email?: string;
     display_name?: string;
+    encrypted_recovery_info?: string;
+    recovery_info?: {
+      seedPhrase: string;
+      privateKey: string;
+      publicKey: string;
+      derivationPath: string;
+      createdAt: string;
+    };
   }): Promise<SimpleUser | null> {
     try {
       if (!supabase) {
@@ -25,6 +42,7 @@ export class SimpleUserService {
           email: userData?.email || null,
           display_name: userData?.display_name || null,
           created_at: new Date().toISOString(),
+          // Note: recovery_info not stored in mock user for now
         };
       }
 
@@ -46,6 +64,7 @@ export class SimpleUserService {
           wallet_address: walletAddress,
           email: userData?.email || null,
           display_name: userData?.display_name || null,
+          encrypted_recovery_info: userData?.encrypted_recovery_info || null,
           created_at: new Date().toISOString(),
         })
         .select()
@@ -122,6 +141,45 @@ export class SimpleUserService {
       return user;
     } catch (error) {
       console.error("Error in getUserByEmail:", error);
+      return null;
+    }
+  }
+
+  // Decrypt recovery information for a user
+  static async getDecryptedRecoveryInfo(walletAddress: string, userEmail: string): Promise<any | null> {
+    try {
+      if (!supabase) {
+        console.error("Supabase not configured - cannot decrypt recovery info");
+        return null;
+      }
+
+      // Get user with encrypted recovery info
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("encrypted_recovery_info")
+        .eq("wallet_address", walletAddress)
+        .single();
+
+      if (error || !user || !user.encrypted_recovery_info) {
+        console.error("Error fetching encrypted recovery info:", error);
+        return null;
+      }
+
+      try {
+        // Generate encryption password based on user email + server secret
+        const serverSecret = process.env.ENCRYPTION_SECRET || 'default-secret-change-in-production';
+        const encryptionPassword = generateEncryptionPassword(userEmail, serverSecret);
+        
+        // Decrypt the recovery information
+        const decryptedInfo = decryptRecoveryInfo(user.encrypted_recovery_info, encryptionPassword);
+        
+        return decryptedInfo;
+      } catch (decryptError) {
+        console.error("Error decrypting recovery info:", decryptError);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in getDecryptedRecoveryInfo:", error);
       return null;
     }
   }

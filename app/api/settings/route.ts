@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { realSettingsService } from "@/lib/real-settings-service";
+import { SimpleUserService } from "@/lib/simple-user-service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +14,23 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("Fetching settings for wallet:", walletAddress);
-    const settings = await realSettingsService.getUserSettings(walletAddress);
+    const user = await SimpleUserService.getUserByWalletAddress(walletAddress);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Return user settings (basic user info for now)
+    const settings = {
+      display_name: user.display_name,
+      email: user.email,
+      wallet_address: user.wallet_address,
+      created_at: user.created_at
+    };
+
     console.log("Settings fetched successfully:", settings ? "Found" : "Not found");
     return NextResponse.json({ settings });
   } catch (error) {
@@ -43,10 +59,26 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updatedSettings = await realSettingsService.updateUserSettings(walletAddress, updates);
+    // Update user settings using SimpleUserService
+    const updatedUser = await SimpleUserService.getOrCreateUser(walletAddress, updates);
+    
+    if (!updatedUser) {
+      return NextResponse.json(
+        { error: "Failed to update settings" },
+        { status: 500 }
+      );
+    }
+
+    const settings = {
+      display_name: updatedUser.display_name,
+      email: updatedUser.email,
+      wallet_address: updatedUser.wallet_address,
+      created_at: updatedUser.created_at
+    };
+
     return NextResponse.json({ 
       success: true, 
-      settings: updatedSettings,
+      settings: settings,
       message: "Settings updated successfully"
     });
   } catch (error) {

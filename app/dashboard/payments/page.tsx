@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { PaymentsTable } from "@/components/dashboard/payments-table";
@@ -11,7 +11,7 @@ import { getUserAddress } from "@/lib/utils";
 
 export default function PaymentsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowMinimal();
+  const { isConnected, user, disconnectWallet } = useFlowMainnet();
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

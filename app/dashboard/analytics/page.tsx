@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { getUserAddress } from "@/lib/utils";
 
 export default function AnalyticsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowMinimal();
+  const { isConnected, user, disconnectWallet } = useFlowMainnet();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<any>({});
 
@@ -113,14 +113,14 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-950 text-white">
+      <div className="flex items-center justify-center min-h-screen bg-black dark:bg-[#0A0A0A] text-white">
         <p>Loading analytics...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans antialiased">
+    <div className="min-h-screen bg-black dark:bg-[#0A0A0A] text-gray-900 dark:text-gray-200 font-sans antialiased">
       {/* Mobile Sidebar Backdrop */}
       <div id="mobile-backdrop" className="fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden"></div>
 
@@ -146,29 +146,29 @@ export default function AnalyticsPage() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-100 dark:text-white">Gross Volume</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">${analytics.grossVolume?.toLocaleString() || '0'}</div>
-              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Total revenue</div>
+            <div className="rounded-2xl bg-black border border-white/10 p-4">
+              <div className="text-sm text-gray-400">Gross Volume</div>
+              <div className="mt-2 text-2xl font-semibold text-white">${analytics.grossVolume?.toLocaleString() || '0'}</div>
+              <div className="mt-1 text-xs text-[#97F11D]">Total revenue</div>
             </div>
-            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-100 dark:text-white">Successful Payments</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">{analytics.successfulPayments || 0}</div>
-              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Completed transactions</div>
+            <div className="rounded-2xl bg-black border border-white/10 p-4">
+              <div className="text-sm text-gray-400">Successful Payments</div>
+              <div className="mt-2 text-2xl font-semibold text-white">{analytics.successfulPayments || 0}</div>
+              <div className="mt-1 text-xs text-[#97F11D]">Completed transactions</div>
             </div>
-            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
-              <div className="text-sm text-gray-100 dark:text-white">Refund Rate</div>
-              <div className="mt-2 text-2xl font-semibold text-gray-100 dark:text-white">{analytics.refundRate?.toFixed(1) || '0.0'}%</div>
-              <div className="mt-1 text-xs text-gray-400 dark:text-gray-400">Refund percentage</div>
+            <div className="rounded-2xl bg-black border border-white/10 p-4">
+              <div className="text-sm text-gray-400">Refund Rate</div>
+              <div className="mt-2 text-2xl font-semibold text-white">{analytics.refundRate?.toFixed(1) || '0.0'}%</div>
+              <div className="mt-1 text-xs text-[#97F11D]">Refund percentage</div>
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black border border-white/10 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-100 dark:text-white">Daily volume</div>
-                <div className="text-xs text-gray-400 dark:text-gray-400">Last 14 days</div>
+                <div className="text-sm text-white">Daily volume</div>
+                <div className="text-xs text-gray-400">Last 14 days</div>
               </div>
               <div className="mt-4">
                 {analytics.dailyVolume && analytics.dailyVolume.length > 0 ? (
@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
                     </g>
                   </svg>
                 ) : (
-                  <div className="flex items-center justify-center h-40 text-gray-400 dark:text-gray-500">
+                  <div className="flex items-center justify-center h-40 text-gray-400">
                     <div className="text-center">
                       <div className="text-sm">No payment data yet</div>
                       <div className="text-xs mt-1">Create payment links to see analytics</div>
@@ -214,10 +214,10 @@ export default function AnalyticsPage() {
                 )}
               </div>
             </div>
-            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+            <div className="rounded-2xl bg-black border border-white/10 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-100 dark:text-white">Top tokens</div>
-                <div className="text-xs text-gray-400 dark:text-gray-400">Share of volume</div>
+                <div className="text-sm text-white">Top tokens</div>
+                <div className="text-xs text-gray-400">Share of volume</div>
               </div>
               <div className="mt-4 space-y-3">
                 {analytics.topTokens && analytics.topTokens.length > 0 ? (
@@ -227,11 +227,11 @@ export default function AnalyticsPage() {
                         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: token.color }}></span>
                         {token.name}
                       </div>
-                      <div className="text-gray-900 dark:text-white font-medium">{token.percentage}%</div>
+                      <div className="text-white font-medium">{token.percentage}%</div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center text-gray-400 dark:text-gray-500 text-sm">
+                  <div className="text-center text-gray-400 text-sm">
                     No token data yet
                   </div>
                 )}
@@ -240,19 +240,19 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Top Links */}
-          <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
-            <div className="text-sm text-gray-100 dark:text-white mb-2">Top payment links</div>
+          <div className="rounded-2xl bg-black border border-white/10 p-4">
+            <div className="text-sm text-white mb-2">Top payment links</div>
             {analytics.topLinks && analytics.topLinks.length > 0 ? (
               <ul className="space-y-2 text-sm">
                 {analytics.topLinks.map((link: any, index: number) => (
                   <li key={index} className="flex items-center justify-between">
-                    <span className="text-gray-100 dark:text-white">{link.name}</span>
-                    <span className="text-gray-100 dark:text-white">${link.amount.toLocaleString()}</span>
+                    <span className="text-white">{link.name}</span>
+                    <span className="text-white">${link.amount.toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="text-center text-gray-400 dark:text-gray-500 text-sm py-4">
+              <div className="text-center text-gray-400 text-sm py-4">
                 No payment links with revenue yet
               </div>
             )}

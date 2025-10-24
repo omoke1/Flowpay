@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { SimpleRegistrationModal } from "@/components/auth/simple-registration-modal";
+import { EmailLoginModal } from "@/components/auth/email-login-modal";
 import { useState } from "react";
 
 export default function HomePage() {
-  const { isConnected, user, connectWallet, isLoading, error } = useFlowMinimal();
+  const { isConnected, user, connectWallet, setUserDirectly, isLoading, error } = useFlowMainnet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   return (
     <div className="min-h-screen gradient-bg text-white">
@@ -30,13 +32,22 @@ export default function HomePage() {
                   Dashboard
                 </Link>
               ) : (
-                <button
-                  onClick={() => setShowRegistrationModal(true)}
-                  disabled={isLoading}
-                  className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-white/10 hover:bg-white/20 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Connecting..." : "Get started"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowLoginModal(true)}
+                    disabled={isLoading}
+                    className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-white/10 hover:bg-white/20 border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => setShowRegistrationModal(true)}
+                    disabled={isLoading}
+                    className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-medium transition-all bg-[#97F11D] text-black hover:bg-[#97F11D]/90 border-[#97F11D] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? "Connecting..." : "Get started"}
+                  </button>
+                </div>
               )}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -282,12 +293,29 @@ export default function HomePage() {
       </footer>
 
       {/* Registration Modal */}
-        <SimpleRegistrationModal
+      <SimpleRegistrationModal
         isOpen={showRegistrationModal}
         onClose={() => setShowRegistrationModal(false)}
         onSuccess={() => {
           // Optionally redirect to dashboard after successful registration
           // window.location.href = '/dashboard';
+        }}
+      />
+
+      {/* Email Login Modal */}
+      <EmailLoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={(userData) => {
+          // Set user data in Flow provider for email login
+          console.log('Email login successful:', userData);
+          setUserDirectly({
+            addr: userData.wallet_address,
+            email: userData.email,
+            display_name: userData.display_name,
+            id: userData.id
+          });
+          setShowLoginModal(false);
         }}
       />
     </div>

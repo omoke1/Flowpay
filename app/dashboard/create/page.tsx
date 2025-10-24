@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { useNotification } from "@/components/providers/notification-provider";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -16,7 +16,7 @@ import { getUserAddress } from "@/lib/utils";
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowMinimal();
+  const { isConnected, user, disconnectWallet } = useFlowMainnet();
   const { success, error } = useNotification();
   const [loading, setLoading] = useState(false);
 

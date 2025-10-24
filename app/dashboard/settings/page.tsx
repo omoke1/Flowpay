@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { useNotification } from "@/components/providers/notification-provider";
 import { getUserAddress } from "@/lib/utils";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
@@ -17,12 +17,14 @@ import {
   ShieldAlert,
   Copy,
   Check,
-  BarChart3
+  BarChart3,
+  Wallet,
+  ArrowRight
 } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { isConnected, user, disconnectWallet } = useFlowMinimal();
+  const { isConnected, user, disconnectWallet } = useFlowMainnet();
   const { success, error, warning } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -393,6 +395,22 @@ export default function SettingsPage() {
                 >
                   <BarChart3 className="h-4 w-4" />
                   View webhook logs
+                </button>
+              </div>
+            </div>
+
+            {/* Wallet Settings */}
+            <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-4">
+              <div className="text-sm font-medium text-gray-900 dark:text-white">Wallet Settings</div>
+              <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">Manage your Flow wallet and recovery information.</p>
+              <div className="mt-3">
+                <button 
+                  onClick={() => router.push("/dashboard/settings/wallet")}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 bg-[#97F11D]/10 text-[#97F11D] hover:bg-[#97F11D]/15 border border-[#97F11D]/20"
+                >
+                  <Wallet className="h-4 w-4" />
+                  Manage Wallet & Recovery
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </div>

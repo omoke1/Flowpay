@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useFlowMinimal } from "@/components/providers/flow-provider-minimal";
+import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Wallet, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { WalletRecoveryModal } from "./wallet-recovery-modal";
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -13,12 +14,13 @@ interface RegistrationModalProps {
 }
 
 export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: RegistrationModalProps) {
-  const { connectWallet, isLoading, error, isConnected, user, setUserDirectly } = useFlowMinimal();
-  const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success'>('select');
+  const { connectWallet, isLoading, error, isConnected, user, setUserDirectly } = useFlowMainnet();
+  const [step, setStep] = useState<'select' | 'email-form' | 'authenticating' | 'success' | 'recovery'>('select');
   const [selectedMethod, setSelectedMethod] = useState<'external' | 'email' | null>(null);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [recoveryInfo, setRecoveryInfo] = useState<any>(null);
 
   // Watch for connection changes
   useEffect(() => {
@@ -101,6 +103,9 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
         // This prevents the wallet connection flow that causes testnet switching
         setUserDirectly(flowUser);
         setRegistrationError(null);
+        
+        // Account created successfully - go directly to success
+        // Recovery info is stored securely and accessible via settings
         setStep('success');
       }
 
@@ -117,6 +122,9 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
       setStep('email-form');
     }
   };
+
+  // Recovery modal removed for seamless experience
+  // Recovery info is accessible via Wallet Settings
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -243,8 +251,18 @@ export function SimpleRegistrationModal({ isOpen, onClose, onSuccess }: Registra
             <div className="text-center space-y-4">
               <CheckCircle className="w-8 h-8 mx-auto text-green-600" />
               <p className="text-gray-100 dark:text-white">
-                {selectedMethod === 'external' ? 'Wallet connected successfully!' : 'Wallet created successfully!'}
+                {selectedMethod === 'external' ? 'Wallet connected successfully!' : 'Account created successfully!'}
               </p>
+              {selectedMethod === 'email' && (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-100 dark:text-white/70">
+                    Your secure Flow wallet is ready to use!
+                  </p>
+                  <p className="text-xs text-blue-400">
+                    💡 Recovery information is saved to your account. Access it anytime in Wallet Settings.
+                  </p>
+                </div>
+              )}
               {user && user.address && (
                 <p className="text-sm text-gray-100 dark:text-white/70">
                   Address: {user.address.slice(0, 6)}...{user.address.slice(-4)}

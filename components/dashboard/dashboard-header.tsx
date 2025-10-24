@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Plus, Sun, Moon, ChevronDown, Menu, Settings, LogOut } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export function DashboardHeader({
   address,
   onLogout
 }: DashboardHeaderProps) {
+  const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,6 +47,20 @@ export function DashboardHeader({
     }
   }, []);
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuOpen && !(event.target as Element).closest('.user-menu-container')) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [userMenuOpen]);
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
@@ -60,6 +76,16 @@ export function DashboardHeader({
     setMobileMenuOpen(true);
     // Dispatch event for sidebar to listen
     window.dispatchEvent(new CustomEvent('openMobileSidebar'));
+  };
+
+  const handleSettings = () => {
+    setUserMenuOpen(false);
+    router.push('/dashboard/settings');
+  };
+
+  const handleLogout = () => {
+    setUserMenuOpen(false);
+    onLogout?.();
   };
 
   return (
@@ -109,7 +135,7 @@ export function DashboardHeader({
           </button>
           
           {/* User */}
-          <div className="relative">
+          <div className="relative user-menu-container">
             <button 
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="inline-flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 border border-zinc-900/10 dark:border-white/10"
@@ -126,15 +152,15 @@ export function DashboardHeader({
             </button>
             {userMenuOpen && (
               <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 shadow-lg overflow-hidden">
-                <button className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                <button 
+                  onClick={handleSettings}
+                  className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200"
+                >
                   <Settings className="h-4 w-4" />
                   Settings
                 </button>
                 <button 
-                  onClick={() => {
-                    setUserMenuOpen(false);
-                    onLogout?.();
-                  }}
+                  onClick={handleLogout}
                   className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200"
                 >
                   <LogOut className="h-4 w-4" />
