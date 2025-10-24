@@ -200,7 +200,7 @@ MIT License - see LICENSE file for details
 
 ## 📞 Support
 
-For support, email support@flowpay.app or create an issue on GitHub.
+For support, email support@useflopay.xyz or create an issue on GitHub.
 
 ---
 
