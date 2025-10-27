@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Sun, Moon, ChevronDown, Menu, Settings, LogOut } from "lucide-react";
+import { Search, Plus, Sun, Moon, ChevronDown, Menu, Settings, LogOut, Send } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 
 interface DashboardHeaderProps {
   title: string;
   onSearch: (query: string) => void;
   onCreatePaymentLink: () => void;
+  onSendMoney?: () => void;
   address?: string | null;
   onLogout?: () => void;
 }
@@ -17,6 +18,7 @@ export function DashboardHeader({
   title, 
   onSearch, 
   onCreatePaymentLink, 
+  onSendMoney,
   address,
   onLogout
 }: DashboardHeaderProps) {
@@ -117,6 +119,17 @@ export function DashboardHeader({
           </div>
           
           {/* Actions */}
+          {onSendMoney && (
+            <button 
+              onClick={onSendMoney}
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-sm sm:text-base"
+            >
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Send Money</span>
+              <span className="sm:hidden">Send</span>
+            </button>
+          )}
+          
           <button 
             onClick={onCreatePaymentLink}
             className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-sm sm:text-base"

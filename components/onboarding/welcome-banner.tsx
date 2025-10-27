@@ -9,7 +9,9 @@ import {
   X, 
   Gift,
   Zap,
-  Shield
+  Shield,
+  Send,
+  Mail
 } from "lucide-react";
 
 interface WelcomeBannerProps {
@@ -17,13 +19,15 @@ interface WelcomeBannerProps {
   onStartTour: () => void;
   onDismiss: () => void;
   onCreateFirstLink: () => void;
+  onSendMoney?: () => void;
 }
 
 export function WelcomeBanner({ 
   isVisible, 
   onStartTour, 
   onDismiss, 
-  onCreateFirstLink 
+  onCreateFirstLink,
+  onSendMoney
 }: WelcomeBannerProps) {
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -51,7 +55,7 @@ export function WelcomeBanner({
                   Welcome to FlowPay! 🎉
                 </h2>
                 <p className="text-gray-400 mb-4">
-                  You're all set to start accepting payments. Let's get you started with your first payment link.
+                  You're all set to start accepting payments and sending money globally. Let's get you started!
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -77,11 +81,11 @@ export function WelcomeBanner({
                   
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                      <Gift className="w-4 h-4 text-purple-400" />
+                      <Send className="w-4 h-4 text-purple-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">Multiple Methods</p>
-                      <p className="text-xs text-gray-400">Crypto + Cards</p>
+                      <p className="text-sm font-medium text-white">Send Money</p>
+                      <p className="text-xs text-gray-400">P2P Transfers</p>
                     </div>
                   </div>
                 </div>
@@ -95,6 +99,17 @@ export function WelcomeBanner({
                     Create Your First Payment Link
                     <ArrowRight className="w-4 h-4" />
                   </Button>
+                  
+                  {onSendMoney && (
+                    <Button
+                      onClick={onSendMoney}
+                      variant="outline"
+                      className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10 flex items-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      Try Send Money
+                    </Button>
+                  )}
                   
                   <Button
                     variant="outline"

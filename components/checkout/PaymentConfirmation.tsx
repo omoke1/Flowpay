@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface PaymentConfirmationProps {
   paymentMethod: 'crypto' | 'fiat';
-  transactionReference: string;
+  transactionReference: string | any;
   amount: string;
   productName: string;
   merchantName?: string;
@@ -36,12 +36,42 @@ export function PaymentConfirmation({
 
   const getExplorerUrl = () => {
     if (paymentMethod === 'crypto') {
-      return `https://flowscan.org/transaction/${transactionReference}`;
+      const txHash = typeof transactionReference === 'string' ? transactionReference : transactionReference?.txHash || transactionReference?.id;
+      if (txHash) {
+        return `https://flowscan.org/transaction/${txHash}`;
+      }
     }
     return null;
   };
 
   const explorerUrl = getExplorerUrl();
+
+  // Helper function to format transaction reference
+  const formatTransactionReference = () => {
+    if (typeof transactionReference === 'string') {
+      return transactionReference.length > 16 
+        ? `${transactionReference.slice(0, 8)}...${transactionReference.slice(-8)}`
+        : transactionReference;
+    } else if (transactionReference?.status === 'checkout_opened') {
+      return 'Payment in Progress';
+    } else if (transactionReference?.txHash) {
+      const txHash = transactionReference.txHash;
+      return txHash.length > 16 
+        ? `${txHash.slice(0, 8)}...${txHash.slice(-8)}`
+        : txHash;
+    } else if (transactionReference?.id) {
+      const id = transactionReference.id;
+      return id.length > 16 
+        ? `${id.slice(0, 8)}...${id.slice(-8)}`
+        : id;
+    } else if (transactionReference?.orderId) {
+      const orderId = transactionReference.orderId;
+      return orderId.length > 16 
+        ? `${orderId.slice(0, 8)}...${orderId.slice(-8)}`
+        : orderId;
+    }
+    return 'N/A';
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
@@ -61,10 +91,13 @@ export function PaymentConfirmation({
         
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            Payment Successful!
+            {transactionReference?.status === 'checkout_opened' ? 'Payment in Progress' : 'Payment Successful!'}
           </h2>
                   <p className="text-gray-500 mt-2 text-sm sm:text-base">
-                    Your payment has been processed successfully
+                    {transactionReference?.status === 'checkout_opened' 
+                      ? 'Please complete your payment in the new tab. You will be notified when payment is confirmed.'
+                      : 'Your payment has been processed successfully'
+                    }
                   </p>
         </div>
       </div>
@@ -102,7 +135,7 @@ export function PaymentConfirmation({
             <span className="text-gray-500 text-sm sm:text-base">Transaction ID</span>
             <div className="flex flex-col items-end gap-1">
               <span className="font-mono text-xs sm:text-sm text-white">
-                {transactionReference.slice(0, 8)}...{transactionReference.slice(-8)}
+                {formatTransactionReference()}
               </span>
               {explorerUrl && (
                 <a

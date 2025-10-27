@@ -11,6 +11,7 @@ import { SimpleCryptoPay } from "@/components/checkout/SimpleCryptoPay";
 import { FiatPay } from "@/components/checkout/FiatPay";
 import { PaymentConfirmation } from "@/components/checkout/PaymentConfirmation";
 import { EnhancedCheckout } from "@/components/checkout/EnhancedCheckout";
+import { EnhancedPaymentMethodSelector } from "@/components/checkout/EnhancedPaymentMethodSelector";
 
 type CheckoutStep = 'select' | 'enhanced' | 'payment' | 'confirmation';
 type PaymentMethod = 'crypto' | 'fiat' | null;
@@ -42,7 +43,7 @@ export default function CheckoutPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState<PaymentLinkData | null>(null);
-  const [transactionReference, setTransactionReference] = useState<string>('');
+  const [transactionReference, setTransactionReference] = useState<string | any>('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function CheckoutPage() {
     setStep('enhanced');
   };
 
-  const handlePaymentSuccess = (reference: string) => {
+  const handlePaymentSuccess = (reference: string | any) => {
     setTransactionReference(reference);
     setStep('confirmation');
     
@@ -242,10 +243,14 @@ export default function CheckoutPage() {
           ) : (
             <div className="glass p-4 sm:p-6 rounded-2xl border border-white/10">
               {step === 'select' && (
-                <PaymentMethodSelector
-                  onSelectMethod={handleMethodSelect}
+                <EnhancedPaymentMethodSelector
+                  paymentLinkId={paymentData.id}
+                  merchantAddress={paymentData.merchant_wallet_address || paymentData.users?.wallet_address || ''}
+                  amount={parseFloat(paymentData.amount)}
+                  token={paymentData.token as 'FLOW' | 'USDC'}
                   productName={paymentData.product_name}
-                  amount={paymentData.amount}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
                 />
               )}
 

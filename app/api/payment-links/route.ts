@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // FCL accounts have vaults pre-configured, so we can create payment links directly
+
     // Use SimpleUserService to get or create user by wallet address
     const userData = await SimpleUserService.getOrCreateUser(merchantId);
     if (!userData) {

@@ -153,6 +153,36 @@ transaction(amount: UFix64, to: Address, platformFeeRate: UFix64) {
     }
 }`;
 
+// FlowToken vault setup transaction
+const FLOW_TOKEN_VAULT_SETUP_TRANSACTION = `
+import FungibleToken from 0xf233dcee88fe0abe
+import FlowToken from 0x1654653399040a61
+
+transaction {
+    prepare(signer: auth(Storage) &Account) {
+        // Check if vault already exists
+        if signer.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault) != nil {
+            // Vault already exists, just ensure receiver capability is linked
+            if signer.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver) == nil {
+                signer.capabilities.link<&{FungibleToken.Receiver}>(
+                    /public/flowTokenReceiver,
+                    target: /storage/flowTokenVault
+                )
+            }
+        } else {
+            // Create new vault
+            let vault <- FlowToken.createEmptyVault()
+            signer.storage.save(<-vault, to: /storage/flowTokenVault)
+            
+            // Create receiver capability
+            signer.capabilities.link<&{FungibleToken.Receiver}>(
+                /public/flowTokenReceiver,
+                target: /storage/flowTokenVault
+            )
+        }
+    }
+}`;
+
 // USDC transfer transaction for USDC.e on Flow mainnet
 const USDC_TRANSFER_TRANSACTION = `
 import FungibleToken from 0xf233dcee88fe0abe
@@ -363,11 +393,17 @@ export async function getFlowBalance(address: string): Promise<string> {
         
         access(all) fun main(address: Address): UFix64 {
           let account = getAccount(address)
-          let vaultRef = account.capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
-              .borrow()
-              ?? panic("Could not borrow FlowToken Vault reference")
           
-          return vaultRef.balance
+          // Check if the account has the FlowToken receiver capability
+          let vaultCap = account.capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
+          if vaultCap != nil {
+            if let vaultRef = vaultCap!.borrow() {
+              return vaultRef.balance
+            }
+          }
+          
+          // If no capability or vault reference, return 0
+          return 0.0
         }
       `,
       args: (arg: any, t: any) => [arg(address, t.Address)]
@@ -377,6 +413,40 @@ export async function getFlowBalance(address: string): Promise<string> {
   } catch (error) {
     console.error('Error getting Flow balance:', error);
     return '0';
+  }
+}
+
+/**
+ * Check if an account has FlowToken receiver capability
+ */
+export async function hasFlowTokenCapability(address: string): Promise<boolean> {
+  try {
+    const result = await fcl.query({
+      cadence: `
+        import FungibleToken from 0xf233dcee88fe0abe
+        import FlowToken from 0x1654653399040a61
+        
+        access(all) fun main(address: Address): Bool {
+          let account = getAccount(address)
+          
+          // Check if the account has the FlowToken receiver capability
+          let vaultCap = account.capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
+          if vaultCap != nil {
+            if let vaultRef = vaultCap!.borrow() {
+              return true
+            }
+          }
+          
+          return false
+        }
+      `,
+      args: (arg: any, t: any) => [arg(address, t.Address)]
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error checking FlowToken capability:', error);
+    return false;
   }
 }
 
@@ -392,6 +462,53 @@ export async function getUSDCBalance(address: string): Promise<string> {
   } catch (error) {
     console.error('Error getting USDC balance:', error);
     return '0';
+  }
+}
+
+/**
+ * Setup FlowToken vault for an account
+ * This function executes the vault setup transaction
+ */
+export async function setupFlowTokenVault(): Promise<{
+  success: boolean;
+  transactionId?: string;
+  error?: string;
+}> {
+  try {
+    console.log('Setting up FlowToken vault for current user');
+    
+    const transactionId = await fcl.mutate({
+      cadence: FLOW_TOKEN_VAULT_SETUP_TRANSACTION,
+      proposer: fcl.currentUser,
+      payer: fcl.currentUser,
+      authorizations: [fcl.currentUser],
+      limit: 1000
+    });
+
+    console.log(`FlowToken vault setup transaction submitted: ${transactionId}`);
+    
+    // Wait for transaction to be sealed
+    const transaction = await fcl.tx(transactionId).onceSealed();
+    
+    if (transaction.status === 4) { // TransactionStatus.SEALED
+      console.log('FlowToken vault setup completed successfully');
+      return {
+        success: true,
+        transactionId: transactionId
+      };
+    } else {
+      console.error('FlowToken vault setup transaction failed:', transaction);
+      return {
+        success: false,
+        error: `Transaction failed with status: ${transaction.status}`
+      };
+    }
+  } catch (error) {
+    console.error('Error setting up FlowToken vault:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 

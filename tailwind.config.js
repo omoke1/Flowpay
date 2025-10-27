@@ -12,7 +12,7 @@ const config = {
         flow: {
           green: '#97F11D',
           dark: '#111111',
-          surface: '#3E3411',
+          surface: '#0D0D0D',
           gray: '#707070',
         },
         text: {

@@ -13,7 +13,10 @@ import {
   Link as LinkIcon,
   Wallet,
   Zap,
-  PlayCircle
+  PlayCircle,
+  Send,
+  Mail,
+  Share2
 } from "lucide-react";
 
 interface OnboardingStep {
@@ -124,6 +127,61 @@ export function OnboardingTour({ isOpen, onComplete, onSkip }: OnboardingTourPro
       )
     },
     {
+      id: "send-money",
+      title: "Send Money Globally 💸",
+      description: "Send FLOW or USDC to anyone, anywhere",
+      icon: <Send className="w-8 h-8 text-purple-400" />,
+      content: (
+        <div className="space-y-4">
+          <p className="text-gray-400">
+            FlowPay now supports peer-to-peer transfers! Send money to anyone globally, even if they don't have a FlowPay account.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4">
+              <h4 className="font-medium text-purple-100 mb-2">Send via Link</h4>
+              <ul className="text-sm text-purple-200 space-y-1">
+                <li>• Create a secure claim link</li>
+                <li>• Share via chat, social media, or text</li>
+                <li>• Recipients claim without account</li>
+                <li>• 7-day expiry with auto-refund</li>
+              </ul>
+            </div>
+            <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
+              <h4 className="font-medium text-blue-100 mb-2">Send via Email</h4>
+              <ul className="text-sm text-blue-200 space-y-1">
+                <li>• Send directly to email address</li>
+                <li>• Automatic claim email sent</li>
+                <li>• Professional email template</li>
+                <li>• Personal message included</li>
+              </ul>
+            </div>
+          </div>
+          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
+            <h4 className="font-medium text-green-100 mb-2">Claim Options:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div className="flex items-center gap-2 text-sm text-green-200">
+                <Wallet className="w-4 h-4" />
+                <span>Crypto Wallet (FLOW/USDC)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-green-200">
+                <CreditCard className="w-4 h-4" />
+                <span>Bank Account (via Crossmint)</span>
+              </div>
+            </div>
+          </div>
+          <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
+            <h4 className="font-medium text-yellow-100 mb-2">💡 Perfect For:</h4>
+            <ul className="text-sm text-yellow-200 space-y-1">
+              <li>• Paying freelancers and contractors</li>
+              <li>• Sending money to family and friends</li>
+              <li>• Cross-border payments</li>
+              <li>• Business expense reimbursements</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
       id: "dashboard",
       title: "Your Dashboard",
       description: "Monitor your payments and revenue",
@@ -131,7 +189,7 @@ export function OnboardingTour({ isOpen, onComplete, onSkip }: OnboardingTourPro
       content: (
         <div className="space-y-4">
           <p className="text-gray-400">
-            Your dashboard shows all your payment activity, revenue, and payment links in one place.
+            Your dashboard shows all your payment activity, revenue, payment links, and transfers in one place.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gray-800 rounded-lg p-4">
@@ -144,6 +202,18 @@ export function OnboardingTour({ isOpen, onComplete, onSkip }: OnboardingTourPro
               <h4 className="font-medium text-white mb-2">Analytics Tab</h4>
               <p className="text-sm text-gray-400">
                 Track your revenue, popular payment links, and success rates.
+              </p>
+            </div>
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h4 className="font-medium text-white mb-2">Send Money</h4>
+              <p className="text-sm text-gray-400">
+                Access P2P transfers via the sidebar. Send money globally with links or email.
+              </p>
+            </div>
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h4 className="font-medium text-white mb-2">Payment Links</h4>
+              <p className="text-sm text-gray-400">
+                Manage all your payment links, track their performance, and view analytics.
               </p>
             </div>
           </div>
@@ -186,6 +256,7 @@ export function OnboardingTour({ isOpen, onComplete, onSkip }: OnboardingTourPro
             <h4 className="font-medium text-white mb-2">Ready to Start:</h4>
             <ul className="text-sm text-gray-300 space-y-1">
               <li>• Create your first payment link using the button above</li>
+              <li>• Try sending money via "Send Money" in the sidebar</li>
               <li>• Test the payment flow with a small amount</li>
               <li>• Share your payment links with customers</li>
               <li>• Monitor your dashboard for incoming payments</li>

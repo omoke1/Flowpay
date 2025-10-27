@@ -51,8 +51,8 @@ export function DashboardTabs({
 
   // Transform real data to display format
   const displayPayments = payments.map(payment => ({
-    id: payment.id ? `#${payment.id.slice(-8)}` : payment.tx_hash ? `#${payment.tx_hash.slice(-8)}` : "N/A",
-    customer: payment.payer_address ? `${payment.payer_address.slice(0, 6)}...${payment.payer_address.slice(-4)}` : "Unknown",
+    id: payment.id ? `#${String(payment.id).slice(-8)}` : payment.tx_hash ? `#${String(payment.tx_hash).slice(-8)}` : "N/A",
+    customer: payment.payer_address ? `${String(payment.payer_address).slice(0, 6)}...${String(payment.payer_address).slice(-4)}` : "Unknown",
     amount: `$${payment.amount}`,
     token: payment.token,
     status: payment.status,
@@ -513,7 +513,7 @@ export function DashboardTabs({
                     const topCustomers = Object.entries(customerRevenue)
                       .map(([customerId, revenue]) => ({
                         id: customerId,
-                        name: `Customer ${customerId.slice(0, 6)}...${customerId.slice(-4)}`,
+                        name: `Customer ${String(customerId).slice(0, 6)}...${String(customerId).slice(-4)}`,
                         revenue
                       }))
                       .sort((a, b) => b.revenue - a.revenue)

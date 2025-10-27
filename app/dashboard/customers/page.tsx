@@ -59,8 +59,8 @@ export default function CustomersPage() {
           if (!customerMap.has(customerId)) {
             customerMap.set(customerId, {
               id: customerId,
-              name: `Customer ${customerId.slice(0, 6)}...${customerId.slice(-4)}`,
-              handle: `@${customerId.slice(0, 8)}`,
+              name: `Customer ${String(customerId).slice(0, 6)}...${String(customerId).slice(-4)}`,
+              handle: `@${String(customerId).slice(0, 8)}`,
               payments: 0,
               totalSpent: 0,
               lastSeen: null,

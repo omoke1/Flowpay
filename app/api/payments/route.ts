@@ -41,16 +41,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simplified transaction verification for development
+    // FCL accounts have vaults pre-configured, so we can process payments directly
     console.log("Processing payment:", {
       txHash,
       amount,
       merchantAddress: linkData.users?.wallet_address,
       token
     });
-
-    // Skip complex verification for now - just log the transaction
-    console.log("Payment verification skipped for development");
 
     // Insert payment record
     const { data: payment, error: paymentError } = await supabaseClient

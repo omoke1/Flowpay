@@ -27,45 +27,45 @@ export function NotificationItem({ notification, onRemove }: NotificationItemPro
   const getIcon = () => {
     switch (notification.type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-[#97F11D]" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-5 h-5 text-[#97F11D]" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+        return <AlertTriangle className="w-5 h-5 text-[#97F11D]" />;
       case 'info':
-        return <Info className="w-5 h-5 text-blue-500" />;
+        return <Info className="w-5 h-5 text-[#97F11D]" />;
       default:
-        return <Info className="w-5 h-5 text-gray-500" />;
+        return <Info className="w-5 h-5 text-gray-400" />;
     }
   };
 
   const getBackgroundColor = () => {
     switch (notification.type) {
       case 'success':
-        return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800';
+        return 'bg-black border-[#97F11D]/30';
       case 'error':
-        return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+        return 'bg-black border-[#97F11D]/30';
       case 'warning':
-        return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800';
+        return 'bg-black border-[#97F11D]/30';
       case 'info':
-        return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
+        return 'bg-black border-[#97F11D]/30';
       default:
-        return 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800';
+        return 'bg-black border-white/10';
     }
   };
 
   const getTextColor = () => {
     switch (notification.type) {
       case 'success':
-        return 'text-green-900 dark:text-green-100';
+        return 'text-white';
       case 'error':
-        return 'text-red-900 dark:text-red-100';
+        return 'text-white';
       case 'warning':
-        return 'text-yellow-900 dark:text-yellow-100';
+        return 'text-white';
       case 'info':
-        return 'text-blue-900 dark:text-blue-100';
+        return 'text-white';
       default:
-        return 'text-gray-900 dark:text-gray-100';
+        return 'text-gray-200';
     }
   };
 
@@ -77,6 +77,7 @@ export function NotificationItem({ notification, onRemove }: NotificationItemPro
         ${getBackgroundColor()}
         border rounded-lg p-4 shadow-lg backdrop-blur-sm
         hover:shadow-xl transition-shadow duration-200
+        shadow-[0_0_20px_rgba(151,241,29,0.1)]
       `}
     >
       <div className="flex items-start gap-3">
@@ -109,9 +110,9 @@ export function NotificationItem({ notification, onRemove }: NotificationItemPro
         <button
           onClick={handleRemove}
           className={`
-            flex-shrink-0 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10
+            flex-shrink-0 p-1 rounded-full hover:bg-white/10
             transition-colors duration-200
-            ${getTextColor()} opacity-60 hover:opacity-100
+            text-gray-400 hover:text-white
           `}
         >
           <X className="w-4 h-4" />

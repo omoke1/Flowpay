@@ -58,3 +58,23 @@ export interface Payment {
   paid_at: string;
 }
 
+export interface Transfer {
+  id: string;
+  sender_id: string;
+  sender_address: string;
+  recipient_email?: string;
+  amount: number;
+  token: 'FLOW' | 'USDC';
+  claim_token: string;
+  claim_link: string;
+  note?: string;
+  status: 'pending' | 'claimed' | 'refunded' | 'expired';
+  escrow_tx_hash?: string;
+  claim_tx_hash?: string;
+  claimed_by_address?: string;
+  claimed_at?: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+

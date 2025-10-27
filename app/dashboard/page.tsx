@@ -10,8 +10,7 @@ import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour";
 import { WelcomeBanner } from "@/components/onboarding/welcome-banner";
 import { useTourState } from "@/lib/hooks/use-tour-state";
-import { formatAmount, formatAddress } from "@/lib/utils";
-import { getUserAddress } from "@/lib/utils";
+import { formatAmount, formatAddress, getUserAddress } from "@/lib/utils";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -19,6 +18,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [paymentLinks, setPaymentLinks] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [walletBalance, setWalletBalance] = useState<{ flow: number; usdc: number } | null>(null);
   const [activeTab, setActiveTab] = useState("dash-payments");
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const { hasCompletedTour, showTour, startTour, skipTour, markTourCompleted } = useTourState();
@@ -50,6 +50,25 @@ export default function DashboardPage() {
       const paymentsResponse = await fetch(`/api/payments?merchantId=${userAddress}`);
       const paymentsData = await paymentsResponse.json();
       setPayments(paymentsData.payments || []);
+
+      // Fetch wallet balance
+      try {
+        const { getFlowBalance, getUSDCBalance } = await import('@/lib/flow-transactions');
+        
+        // FCL accounts have vaults pre-configured, so we can directly fetch balances
+        const [flowBalance, usdcBalance] = await Promise.all([
+          getFlowBalance(userAddress),
+          getUSDCBalance(userAddress)
+        ]);
+
+        setWalletBalance({
+          flow: parseFloat(flowBalance) || 0,
+          usdc: parseFloat(usdcBalance) || 0
+        });
+      } catch (error) {
+        console.error('Error fetching wallet balance:', error);
+        setWalletBalance({ flow: 0, usdc: 0 });
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -91,7 +110,7 @@ export default function DashboardPage() {
     totalRevenue: payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0),
     activeLinks: paymentLinks.filter(l => l.status === 'active').length,
     customers: new Set(payments.map(p => p.payer_user?.address)).size,
-    avgPaymentTime: payments.length > 0 ? "3.2s" : "0s",
+    transfersSent: 0, // TODO: Fetch from transfers API
   };
 
   if (loading || (isConnected && !userAddress)) {
@@ -117,6 +136,7 @@ export default function DashboardPage() {
           title="Dashboard" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
+          onSendMoney={() => router.push("/dashboard/send")}
           address={userAddress}
           onLogout={disconnectWallet}
         />
@@ -131,15 +151,16 @@ export default function DashboardPage() {
             }}
             onDismiss={() => setShowWelcomeBanner(false)}
             onCreateFirstLink={() => router.push("/dashboard/create")}
+            onSendMoney={() => router.push("/dashboard/send")}
           />
-          
+
           {/* Dashboard Page */}
           <section className="space-y-8">
             {/* Summary + Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {/* Stat Cards */}
               <div className="col-span-1 lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <DashboardStats stats={stats} />
+                <DashboardStats stats={stats} walletBalance={walletBalance} />
               </div>
             </div>
 
