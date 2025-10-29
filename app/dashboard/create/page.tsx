@@ -13,12 +13,20 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getUserAddress } from "@/lib/utils";
+import { QRCodeComponent } from "@/components/ui/qr-code";
 
 export default function CreatePaymentLinkPage() {
   const router = useRouter();
   const { isConnected, user, disconnectWallet } = useFlowMainnet();
   const { success, error } = useNotification();
   const [loading, setLoading] = useState(false);
+  const [createdLink, setCreatedLink] = useState<{
+    id: string;
+    checkoutUrl: string;
+    productName: string;
+    amount: string;
+    token: string;
+  } | null>(null);
 
   // Get user address using utility function
   const userAddress = getUserAddress(user);
@@ -86,6 +94,15 @@ export default function CreatePaymentLinkPage() {
       const data = await response.json();
       console.log("Payment link created:", data);
 
+      // Store created link data for QR code display
+      setCreatedLink({
+        id: data.paymentLink.id,
+        checkoutUrl: data.checkoutUrl,
+        productName: formData.productName,
+        amount: formData.amount,
+        token: formData.token
+      });
+
       // Show success notification
       success(
         "Payment Link Created! 🎉",
@@ -101,11 +118,6 @@ export default function CreatePaymentLinkPage() {
           }
         }
       );
-      
-      // Redirect back to dashboard after a short delay
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
     } catch (error: any) {
       console.error("Error creating payment link:", error);
       showError(
@@ -284,6 +296,55 @@ export default function CreatePaymentLinkPage() {
                 </form>
               </CardContent>
             </Card>
+
+            {/* QR Code Display */}
+            {createdLink && (
+              <Card className="w-full max-w-md mx-auto bg-black border-[#97F11D]/30 shadow-[0_0_20px_rgba(151,241,29,0.1)]">
+                <CardHeader>
+                  <CardTitle className="text-white text-center">Share Your Payment Link</CardTitle>
+                  <CardDescription className="text-gray-400 text-center">
+                    Scan the QR code or copy the link to share
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <QRCodeComponent
+                    value={createdLink.checkoutUrl}
+                    size={200}
+                    title={`${createdLink.productName} - $${createdLink.amount} ${createdLink.token}`}
+                    description="Scan to pay"
+                    showDownload={true}
+                    showCopy={true}
+                  />
+                  
+                  <div className="mt-4 pt-4 border-t border-gray-700">
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-gray-400">Payment Link Details</p>
+                      <div className="bg-gray-900/50 rounded-lg p-3 space-y-1">
+                        <p className="text-white font-medium">{createdLink.productName}</p>
+                        <p className="text-[#97F11D] font-semibold">${createdLink.amount} {createdLink.token}</p>
+                        <p className="text-xs text-gray-400 break-all">{createdLink.checkoutUrl}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => setCreatedLink(null)}
+                      variant="outline"
+                      className="flex-1 bg-black border-[#97F11D]/30 text-white hover:bg-[#97F11D]/10 hover:border-[#97F11D]/60"
+                    >
+                      Create Another Link
+                    </Button>
+                    <Button
+                      onClick={() => router.push("/dashboard")}
+                      className="flex-1 bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-semibold"
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

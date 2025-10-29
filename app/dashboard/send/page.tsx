@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNotification } from "@/components/providers/notification-provider";
+import { QRCodeComponent } from "@/components/ui/qr-code";
 
 export default function SendMoneyPage() {
   const router = useRouter();
@@ -32,6 +33,14 @@ export default function SendMoneyPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [activeTab, setActiveTab] = useState("link");
+  const [createdTransfer, setCreatedTransfer] = useState<{
+    id: string;
+    claimLink: string;
+    amount: string;
+    token: string;
+    recipientEmail?: string;
+    note?: string;
+  } | null>(null);
   
   // Form state
   const [amount, setAmount] = useState("");
@@ -151,6 +160,16 @@ export default function SendMoneyPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create transfer');
       }
+
+      // Store created transfer data for QR code display
+      setCreatedTransfer({
+        id: data.transfer.id,
+        claimLink: data.transfer.claim_link,
+        amount: amount,
+        token: token,
+        recipientEmail: activeTab === "email" ? recipientEmail : undefined,
+        note: note || undefined
+      });
 
       success(`Transfer created successfully! ${activeTab === "email" ? "Email sent to recipient." : "Share the claim link with the recipient."}`);
       
@@ -479,6 +498,62 @@ export default function SendMoneyPage() {
                   </div>
                 </TabsContent>
               </Tabs>
+
+              {/* QR Code Display */}
+              {createdTransfer && (
+                <div className="mt-8">
+                  <Card className="w-full max-w-md mx-auto bg-black border-[#97F11D]/30 shadow-[0_0_20px_rgba(151,241,29,0.1)]">
+                    <CardHeader>
+                      <CardTitle className="text-white text-center">Share Your Transfer</CardTitle>
+                      <p className="text-gray-400 text-center text-sm">
+                        Scan the QR code or copy the link to share
+                      </p>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <QRCodeComponent
+                        value={createdTransfer.claimLink}
+                        size={200}
+                        title={`${createdTransfer.amount} ${createdTransfer.token} Transfer`}
+                        description={createdTransfer.recipientEmail ? `Sent to ${createdTransfer.recipientEmail}` : "Share to claim"}
+                        showDownload={true}
+                        showCopy={true}
+                      />
+                      
+                      <div className="mt-4 pt-4 border-t border-gray-700">
+                        <div className="text-center space-y-2">
+                          <p className="text-sm text-gray-400">Transfer Details</p>
+                          <div className="bg-gray-900/50 rounded-lg p-3 space-y-1">
+                            <p className="text-[#97F11D] font-semibold">{createdTransfer.amount} {createdTransfer.token}</p>
+                            {createdTransfer.recipientEmail && (
+                              <p className="text-white text-sm">To: {createdTransfer.recipientEmail}</p>
+                            )}
+                            {createdTransfer.note && (
+                              <p className="text-gray-400 text-xs">Note: {createdTransfer.note}</p>
+                            )}
+                            <p className="text-xs text-gray-400 break-all">{createdTransfer.claimLink}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          onClick={() => setCreatedTransfer(null)}
+                          variant="outline"
+                          className="flex-1 bg-black border-[#97F11D]/30 text-white hover:bg-[#97F11D]/10 hover:border-[#97F11D]/60"
+                        >
+                          Send Another
+                        </Button>
+                        <Button
+                          onClick={() => router.push("/dashboard")}
+                          className="flex-1 bg-[#97F11D] hover:bg-[#97F11D]/90 text-black font-semibold"
+                        >
+                          Go to Dashboard
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           </div>
         </main>
