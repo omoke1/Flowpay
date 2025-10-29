@@ -34,7 +34,7 @@ export function VaultSetupCard({ onVaultSetupComplete }: VaultSetupCardProps) {
       
     } catch (err: any) {
       console.error('Vault setup failed:', err);
-      showError(err.message || 'Failed to setup vault. Please try again.');
+      showError("Error", err.message || 'Failed to setup vault. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -199,6 +199,8 @@ export default function LinksPage() {
           title="Payment Links" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
+          onSendMoney={() => router.push("/dashboard/send")}
+          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
         />
 

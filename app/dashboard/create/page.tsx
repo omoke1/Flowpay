@@ -144,6 +144,8 @@ export default function CreatePaymentLinkPage() {
           title="Create Payment Link" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => {}}
+          onSendMoney={() => router.push("/dashboard/send")}
+          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
           onLogout={disconnectWallet}
         />

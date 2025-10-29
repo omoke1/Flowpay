@@ -122,12 +122,12 @@ export default function SendMoneyPage() {
 
   const handleSendTransfer = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      showError("Please enter a valid amount");
+      showError("Error", "Please enter a valid amount");
       return;
     }
 
     if (activeTab === "email" && !recipientEmail) {
-      showError("Please enter recipient email");
+      showError("Error", "Please enter recipient email");
       return;
     }
 
@@ -136,7 +136,7 @@ export default function SendMoneyPage() {
     const availableBalance = token === "FLOW" ? flowBalance : usdcBalance;
     
     if (transferAmount > availableBalance) {
-      showError(`Insufficient ${token} balance. Available: ${availableBalance.toFixed(6)} ${token}`);
+      showError("Error", `Insufficient ${token} balance. Available: ${availableBalance.toFixed(6)} ${token}`);
       return;
     }
 
@@ -183,7 +183,7 @@ export default function SendMoneyPage() {
       
     } catch (err: any) {
       console.error('Transfer creation error:', err);
-      showError(err.message || 'Failed to create transfer');
+      showError("Error", err.message || 'Failed to create transfer');
     } finally {
       setSending(false);
     }
@@ -212,6 +212,8 @@ export default function SendMoneyPage() {
           title="Send Money" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
+          onSendMoney={() => router.push("/dashboard/send")}
+          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
         />
 

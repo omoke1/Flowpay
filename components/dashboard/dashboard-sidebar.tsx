@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
   Send,
+  Repeat,
 } from "lucide-react";
 
 interface DashboardSidebarProps {
@@ -29,6 +30,7 @@ export function DashboardSidebar({ activeItem, onLogout }: DashboardSidebarProps
     { name: "Payments", href: "/dashboard/payments", icon: CreditCard, route: "payments" },
     { name: "Payment Links", href: "/dashboard/links", icon: LinkIcon, route: "links" },
     { name: "Send Money", href: "/dashboard/send", icon: Send, route: "send" },
+    { name: "Subscriptions", href: "/dashboard/subscriptions", icon: Repeat, route: "subscriptions" },
     { name: "Customers", href: "/dashboard/customers", icon: Users, route: "customers" },
     { name: "Analytics", href: "/dashboard/analytics", icon: BarChart2, route: "analytics" },
     { name: "Settings", href: "/dashboard/settings", icon: Settings, route: "settings" },

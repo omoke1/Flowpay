@@ -134,6 +134,8 @@ export default function AnalyticsPage() {
           title="Analytics" 
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
+          onSendMoney={() => router.push("/dashboard/send")}
+          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
         />
 

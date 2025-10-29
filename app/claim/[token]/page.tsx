@@ -50,7 +50,7 @@ export default function ClaimPage() {
 
     } catch (error) {
       console.error('Error loading transfer:', error);
-      showError(error instanceof Error ? error.message : 'Failed to load transfer');
+      showError("Error", error instanceof Error ? error.message : 'Failed to load transfer');
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function ClaimPage() {
     }
 
     if (payoutMethod === 'crypto' && !recipientAddress && !user?.addr) {
-      showError('Please enter recipient address or connect wallet');
+      showError("Error", 'Please enter recipient address or connect wallet');
       return;
     }
 
@@ -107,7 +107,7 @@ export default function ClaimPage() {
 
     } catch (error) {
       console.error('Error claiming transfer:', error);
-      showError(error instanceof Error ? error.message : 'Failed to claim transfer');
+      showError("Error", error instanceof Error ? error.message : 'Failed to claim transfer');
     } finally {
       setClaiming(false);
     }

@@ -139,6 +139,8 @@ export default function CustomersPage() {
           title="Customers" 
           onSearch={setSearchQuery} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
+          onSendMoney={() => router.push("/dashboard/send")}
+          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
         />
 

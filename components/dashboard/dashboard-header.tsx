@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, Sun, Moon, ChevronDown, Menu, Settings, LogOut, Send } from "lucide-react";
+import { Search, Plus, Sun, Moon, ChevronDown, Menu, Settings, LogOut, Send, Repeat } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 
 interface DashboardHeaderProps {
@@ -10,6 +10,7 @@ interface DashboardHeaderProps {
   onSearch: (query: string) => void;
   onCreatePaymentLink: () => void;
   onSendMoney?: () => void;
+  onSubscriptions?: () => void;
   address?: string | null;
   onLogout?: () => void;
 }
@@ -19,6 +20,7 @@ export function DashboardHeader({
   onSearch, 
   onCreatePaymentLink, 
   onSendMoney,
+  onSubscriptions,
   address,
   onLogout
 }: DashboardHeaderProps) {
@@ -122,9 +124,9 @@ export function DashboardHeader({
           {onSendMoney && (
             <button 
               onClick={onSendMoney}
-              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-sm sm:text-base"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
             >
-              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Send className="h-3 w-3" />
               <span className="hidden sm:inline">Send Money</span>
               <span className="sm:hidden">Send</span>
             </button>
@@ -132,12 +134,23 @@ export function DashboardHeader({
           
           <button 
             onClick={onCreatePaymentLink}
-            className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3.5 py-2 sm:py-2.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-sm sm:text-base"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
           >
-            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <Plus className="h-3 w-3" />
             <span className="hidden sm:inline">Create Payment Link</span>
             <span className="sm:hidden">Create</span>
           </button>
+
+          {onSubscriptions && (
+            <button 
+              onClick={onSubscriptions}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
+            >
+              <Repeat className="h-3 w-3" />
+              <span className="hidden sm:inline">Subscriptions</span>
+              <span className="sm:hidden">Subs</span>
+            </button>
+          )}
           
           {/* Theme Toggle */}
           <button 
