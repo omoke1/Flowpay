@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
@@ -18,6 +18,7 @@ import {
   Pause,
   X
 } from "lucide-react";
+import { CustomerManagePanel } from "@/components/subscriptions/customer-manage-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,10 @@ export default function SubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("plans");
   const [showCreatePlan, setShowCreatePlan] = useState(false);
+  const manageToken = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("manageToken");
+  }, []);
   
   // Data state
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -166,7 +171,6 @@ export default function SubscriptionsPage() {
           onSearch={() => {}} 
           onCreatePaymentLink={() => router.push("/dashboard/create")}
           onSendMoney={() => router.push("/dashboard/send")}
-          onSubscriptions={() => router.push("/dashboard/subscriptions")}
           address={userAddress}
         />
 
@@ -240,6 +244,12 @@ export default function SubscriptionsPage() {
                   className="data-[state=active]:bg-[#97F11D] data-[state=active]:!text-black text-gray-300 dark:text-gray-300"
                 >
                   <span className="data-[state=active]:!text-black">Active Subscriptions</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="manage" 
+                  className="data-[state=active]:bg-[#97F11D] data-[state=active]:!text-black text-gray-300 dark:text-gray-300"
+                >
+                  <span className="data-[state=active]:!text-black">Manage</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -390,6 +400,13 @@ export default function SubscriptionsPage() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+            
+            {/* Manage Tab */}
+            <TabsContent value="manage" className="space-y-6">
+              <div className="rounded-2xl bg-black dark:bg-[#111111] border border-zinc-100/10 dark:border-white/10 p-6">
+                <CustomerManagePanel manageToken={manageToken} />
+              </div>
             </TabsContent>
           </Tabs>
 

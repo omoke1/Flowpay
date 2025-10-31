@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFlowMainnet } from "@/components/providers/flow-provider-mainnet";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
@@ -47,6 +47,29 @@ export default function SendMoneyPage() {
   const [token, setToken] = useState("FLOW");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [note, setNote] = useState("");
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState<string>("");
+  const scheduleInputRefLink = useRef<HTMLInputElement | null>(null);
+  const scheduleInputRefEmail = useRef<HTMLInputElement | null>(null);
+  const [supportsDateTimePicker, setSupportsDateTimePicker] = useState<boolean>(true);
+
+  const getDefaultScheduleValue = () => {
+    const d = new Date(Date.now() + 15 * 60 * 1000); // +15 minutes
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  useEffect(() => {
+    // Feature-detect showPicker support for datetime-local
+    try {
+      const el = document.createElement('input');
+      el.type = 'datetime-local';
+      // @ts-expect-error
+      setSupportsDateTimePicker(typeof el.showPicker === 'function');
+    } catch {
+      setSupportsDateTimePicker(false);
+    }
+  }, []);
   
   // Balance state
   const [flowBalance, setFlowBalance] = useState(0);
@@ -142,6 +165,32 @@ export default function SendMoneyPage() {
 
     setSending(true);
     try {
+      // If scheduling is enabled and scheduledAt provided, create scheduled payment instead
+      if (isScheduled && scheduledAt) {
+        const resp = await fetch('/api/scheduled-payments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            merchantId: userAddress,
+            amount: transferAmount,
+            token,
+            delivery: activeTab, // 'link' | 'email'
+            recipientEmail: activeTab === 'email' ? recipientEmail : null,
+            note: note || null,
+            scheduledAt
+          })
+        });
+        const j = await resp.json();
+        if (!resp.ok) throw new Error(j.error || 'Failed to schedule payment');
+        success('Payment scheduled', 'We will process it at the selected time.');
+        setAmount("");
+        setRecipientEmail("");
+        setNote("");
+        setIsScheduled(false);
+        setScheduledAt("");
+        return;
+      }
+
       const response = await fetch('/api/transfers', {
         method: 'POST',
         headers: {
@@ -379,23 +428,97 @@ export default function SendMoneyPage() {
                         </div>
                       </div>
 
-                      <Button
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm text-gray-300 flex items-center gap-2">
+                            <Clock className="h-4 w-4" /> Schedule for later
+                          </label>
+                          <input
+                            type="checkbox"
+                            checked={isScheduled}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setIsScheduled(checked);
+                              if (checked && !scheduledAt) {
+                                setScheduledAt(getDefaultScheduleValue());
+                              }
+                            }}
+                          />
+                        </div>
+                        {isScheduled && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-200 mb-2">Scheduled Date & Time</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="relative">
+                                <Input
+                                  ref={scheduleInputRefLink}
+                                  type="date"
+                                  min={getDefaultScheduleValue().split('T')[0]}
+                                  value={scheduledAt ? scheduledAt.split('T')[0] : ''}
+                                  onChange={(e) => {
+                                    const date = e.target.value;
+                                    const time = scheduledAt ? scheduledAt.split('T')[1] : '12:00';
+                                    setScheduledAt(`${date}T${time}`);
+                                  }}
+                                  className="pr-10 bg-black dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open calendar"
+                                  onClick={() => (scheduleInputRefLink.current?.showPicker?.() || scheduleInputRefLink.current?.focus() || scheduleInputRefLink.current?.click())}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                                >
+                                  <Clock className="h-4 w-4" />
+                                </button>
+                              </div>
+                              <div className="relative">
+                                <Input
+                                  type="time"
+                                  step="60"
+                                  value={scheduledAt ? scheduledAt.split('T')[1] : ''}
+                                  onChange={(e) => {
+                                    const time = e.target.value;
+                                    const date = scheduledAt ? scheduledAt.split('T')[0] : getDefaultScheduleValue().split('T')[0];
+                                    setScheduledAt(`${date}T${time}`);
+                                  }}
+                                  className="pr-10 bg-black dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open time picker"
+                                  onClick={(e) => {
+                                    const el = (e.currentTarget.previousSibling as HTMLInputElement) || null;
+                                    // @ts-expect-error
+                                    el?.showPicker?.();
+                                    el?.focus();
+                                  }}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                                >
+                                  <Clock className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <Button
                         onClick={handleSendTransfer}
-                        disabled={sending || !amount || parseFloat(amount) <= 0 || balanceError}
+                        disabled={sending || !amount || parseFloat(amount) <= 0 || balanceError || (activeTab === 'email' && !recipientEmail) || (isScheduled && !scheduledAt)}
                         className="w-full bg-[#97F11D] text-black hover:brightness-95 font-medium"
                       >
                         {sending ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Creating Transfer...
+                            {isScheduled ? 'Scheduling...' : 'Creating Transfer...'}
                           </>
                         ) : (
                           <>
                             <Send className="h-4 w-4 mr-2" />
-                            SEND VIA LINK
+                            {isScheduled ? 'SCHEDULE PAYMENT' : 'SEND VIA LINK'}
                           </>
                         )}
                       </Button>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -479,23 +602,97 @@ export default function SendMoneyPage() {
                         </div>
                       </div>
 
-                      <Button
-                        onClick={handleSendTransfer}
-                        disabled={sending || !amount || parseFloat(amount) <= 0 || !recipientEmail}
-                        className="w-full bg-[#97F11D] text-black hover:brightness-95 font-medium"
-                      >
-                        {sending ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Creating Transfer...
-                          </>
-                        ) : (
-                          <>
-                            <Mail className="h-4 w-4 mr-2" />
-                            SEND VIA EMAIL
-                          </>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm text-gray-300 flex items-center gap-2">
+                            <Clock className="h-4 w-4" /> Schedule for later
+                          </label>
+                          <input
+                            type="checkbox"
+                            checked={isScheduled}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setIsScheduled(checked);
+                              if (checked && !scheduledAt) {
+                                setScheduledAt(getDefaultScheduleValue());
+                              }
+                            }}
+                          />
+                        </div>
+                        {isScheduled && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-200 mb-2">Scheduled Date & Time</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="relative">
+                                <Input
+                                  ref={scheduleInputRefEmail}
+                                  type="date"
+                                  min={getDefaultScheduleValue().split('T')[0]}
+                                  value={scheduledAt ? scheduledAt.split('T')[0] : ''}
+                                  onChange={(e) => {
+                                    const date = e.target.value;
+                                    const time = scheduledAt ? scheduledAt.split('T')[1] : '12:00';
+                                    setScheduledAt(`${date}T${time}`);
+                                  }}
+                                  className="pr-10 bg-black dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open calendar"
+                                  onClick={() => (scheduleInputRefEmail.current?.showPicker?.() || scheduleInputRefEmail.current?.focus() || scheduleInputRefEmail.current?.click())}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                                >
+                                  <Clock className="h-4 w-4" />
+                                </button>
+                              </div>
+                              <div className="relative">
+                                <Input
+                                  type="time"
+                                  step="60"
+                                  value={scheduledAt ? scheduledAt.split('T')[1] : ''}
+                                  onChange={(e) => {
+                                    const time = e.target.value;
+                                    const date = scheduledAt ? scheduledAt.split('T')[0] : getDefaultScheduleValue().split('T')[0];
+                                    setScheduledAt(`${date}T${time}`);
+                                  }}
+                                  className="pr-10 bg-black dark:bg-white/5 border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  aria-label="Open time picker"
+                                  onClick={(e) => {
+                                    const el = (e.currentTarget.previousSibling as HTMLInputElement) || null;
+                                    // @ts-expect-error
+                                    el?.showPicker?.();
+                                    el?.focus();
+                                  }}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                                >
+                                  <Clock className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         )}
-                      </Button>
+
+                        <Button
+                          onClick={handleSendTransfer}
+                          disabled={sending || !amount || parseFloat(amount) <= 0 || !recipientEmail || (isScheduled && !scheduledAt)}
+                          className="w-full bg[#97F11D] text-black hover:brightness-95 font-medium"
+                        >
+                          {sending ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              {isScheduled ? 'Scheduling...' : 'Creating Transfer...'}
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="h-4 w-4 mr-2" />
+                              {isScheduled ? 'SCHEDULE PAYMENT' : 'SEND VIA EMAIL'}
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
