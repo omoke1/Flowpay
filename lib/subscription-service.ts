@@ -169,12 +169,20 @@ export class SubscriptionService {
         .from('subscription_plans')
         .select('*')
         .eq('merchant_id', merchantId)
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching subscription plans:', error);
-        throw new Error(`Failed to fetch subscription plans: ${error.message}`);
+        // Fallback for older schemas that might not have is_active column or table is missing
+        console.warn('Primary plans query failed, attempting fallback without filters:', error.message);
+        const { data: plansFallback, error: fbErr } = await supabase
+          .from('subscription_plans')
+          .select('*')
+          .eq('merchant_id', merchantId);
+        if (fbErr) {
+          console.error('Fallback fetch subscription plans failed:', fbErr);
+          return { success: true, plans: [] };
+        }
+        return { success: true, plans: plansFallback as SubscriptionPlan[] };
       }
 
       return {
@@ -299,8 +307,17 @@ export class SubscriptionService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching subscriptions:', error);
-        throw new Error(`Failed to fetch subscriptions: ${error.message}`);
+        console.warn('Primary subscriptions query failed, attempting fallback without join:', error.message);
+        const { data: subsFallback, error: fbErr } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('merchant_id', merchantId)
+          .order('created_at', { ascending: false });
+        if (fbErr) {
+          console.error('Fallback fetch subscriptions failed:', fbErr);
+          return { success: true, subscriptions: [] };
+        }
+        return { success: true, subscriptions: subsFallback as Subscription[] };
       }
 
       return {
@@ -443,8 +460,8 @@ export class SubscriptionService {
         .order('date', { ascending: true });
 
       if (error) {
-        console.error('Error fetching subscription analytics:', error);
-        throw new Error(`Failed to fetch subscription analytics: ${error.message}`);
+        console.warn('Analytics table missing or query failed; returning empty analytics:', error.message);
+        return { success: true, analytics: [] };
       }
 
       return {

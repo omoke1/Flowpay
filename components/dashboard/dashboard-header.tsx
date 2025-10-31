@@ -28,6 +28,7 @@ export function DashboardHeader({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
   useEffect(() => {
     // Initialize theme from localStorage or system preference
@@ -51,19 +52,19 @@ export function DashboardHeader({
     }
   }, []);
 
-  // Close user menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuOpen && !(event.target as Element).closest('.user-menu-container')) {
-        setUserMenuOpen(false);
-      }
+      const target = event.target as Element;
+      if (userMenuOpen && !target.closest('.user-menu-container')) setUserMenuOpen(false);
+      if (actionsMenuOpen && !target.closest('.actions-menu-container')) setActionsMenuOpen(false);
     };
 
-    if (userMenuOpen) {
+    if (userMenuOpen || actionsMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [userMenuOpen]);
+  }, [userMenuOpen, actionsMenuOpen]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -94,63 +95,98 @@ export function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-20 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/70 dark:bg-gray-950/90 border-b border-zinc-900/10 dark:border-white/10">
-      <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="px-3 sm:px-6 lg:px-8 min-h-16 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button 
             onClick={openSidebar}
             className="lg:hidden inline-flex items-center justify-center h-9 w-9 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5"
           >
             <Menu className="h-4 w-4" />
           </button>
-          <h1 className="text-xl sm:text-2xl tracking-tight font-semibold text-gray-900 dark:text-white">
+          <h1 className="truncate max-w-[55vw] sm:max-w-none text-xl sm:text-2xl tracking-tight font-semibold text-gray-900 dark:text-white">
             {title}
           </h1>
         </div>
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-visible">
           {/* Search */}
-          <div className="hidden md:block">
+          <div className="hidden md:block flex-shrink">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <input 
                 type="text" 
                 placeholder="Search payments…" 
-                  className="w-72 bg-black dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200 placeholder:text-gray-400 rounded-lg pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40 focus:border-[#97F11D]/60"
+                className="w-56 lg:w-72 bg-black dark:bg-white/5 border border-zinc-100/10 dark:border-white/10 text-gray-100 dark:text-gray-200 placeholder:text-gray-400 rounded-lg pl-9 pr-3 py-2 outline-none focus:ring-2 focus:ring-[#97F11D]/40 focus:border-[#97F11D]/60"
                 onChange={(e) => onSearch(e.target.value)}
               />
             </div>
           </div>
           
-          {/* Actions */}
+          {/* Actions (tablet/desktop) */}
           {onSendMoney && (
             <button 
               onClick={onSendMoney}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
+              className="hidden sm:inline-flex items-center gap-1 rounded-md px-2 py-1 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-[11px]"
             >
               <Send className="h-3 w-3" />
-              <span className="hidden sm:inline">Send Money</span>
-              <span className="sm:hidden">Send</span>
+              <span>Send Money</span>
             </button>
           )}
           
           <button 
             onClick={onCreatePaymentLink}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
+            className="hidden sm:inline-flex items-center gap-1 rounded-md px-2 py-1 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-[11px]"
           >
             <Plus className="h-3 w-3" />
-            <span className="hidden sm:inline">Create Payment Link</span>
-            <span className="sm:hidden">Create</span>
+            <span>Create Payment Link</span>
           </button>
 
           {onSubscriptions && (
             <button 
               onClick={onSubscriptions}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-xs"
+              className="hidden sm:inline-flex items-center gap-1 rounded-md px-2 py-1 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-[11px]"
             >
               <Repeat className="h-3 w-3" />
-              <span className="hidden sm:inline">Subscriptions</span>
-              <span className="sm:hidden">Subs</span>
+              <span>Subscriptions</span>
             </button>
           )}
+
+          {/* Actions (mobile dropdown) */}
+          <div className="relative actions-menu-container sm:hidden flex-shrink-0">
+            <button
+              onClick={() => setActionsMenuOpen((v) => !v)}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 bg-[#97F11D] text-black font-medium hover:brightness-95 active:brightness-90 shadow-[0_0_20px_#97F11D40] border border-[#97F11D]/40 text-[11px]"
+            >
+              <Plus className="h-3 w-3" />
+              Actions
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            {actionsMenuOpen && (
+              <div className="absolute right-0 mt-2 w-44 rounded-lg bg-white dark:bg-gray-900 border border-zinc-900/10 dark:border-white/10 shadow-lg overflow-hidden z-20">
+                {onSendMoney && (
+                  <button 
+                    onClick={() => { setActionsMenuOpen(false); onSendMoney?.(); }}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200"
+                  >
+                    <Send className="h-4 w-4" /> Send Money
+                  </button>
+                )}
+                <button 
+                  onClick={() => { setActionsMenuOpen(false); onCreatePaymentLink(); }}
+                  className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200"
+                >
+                  <Plus className="h-4 w-4" /> Create Payment Link
+                </button>
+                {onSubscriptions && (
+                  <button 
+                    onClick={() => { setActionsMenuOpen(false); onSubscriptions?.(); }}
+                    className="w-full text-left px-3 py-2.5 text-sm hover:bg-black/[0.03] dark:hover:bg-white/5 flex items-center gap-2 text-gray-800 dark:text-gray-200"
+                  >
+                    <Repeat className="h-4 w-4" /> Subscriptions
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           
           {/* Theme Toggle */}
           <button 

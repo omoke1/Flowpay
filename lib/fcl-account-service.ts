@@ -1,5 +1,6 @@
 import * as fcl from '@onflow/fcl';
 import { SimpleUserService } from './simple-user-service';
+import { encryptRecoveryInfo, generateEncryptionPassword } from './encryption-utils';
 
 /**
  * FCL-Compatible Account Creation Service
@@ -56,14 +57,26 @@ export class FCLAccountService {
       
       console.log('FCL Account Service: Account created with address:', mockAddress);
 
-      // Store user info in database
+      // Generate minimal recovery details (mock for dev)
+      const recovery = {
+        seedPhrase: 'turtle program fabric mesh genius antique velvet tennis cereal sugar calm jungle',
+        privateKey: `priv_${Math.random().toString(36).slice(2)}_${Date.now()}`,
+        publicKey: `pub_${Math.random().toString(36).slice(2)}_${Date.now()}`,
+        derivationPath: "m/44'/539'/0'/0/0",
+        createdAt: new Date().toISOString(),
+      };
+
+      // Encrypt recovery with email-derived password
+      const serverSecret = process.env.ENCRYPTION_SECRET || 'default-secret-change-in-production';
+      const encryptionPassword = generateEncryptionPassword(options.email, serverSecret);
+      const encrypted = encryptRecoveryInfo(recovery, encryptionPassword);
+
+      // Store user info in database with encrypted recovery
       const userData = await SimpleUserService.getOrCreateUser(mockAddress, {
         email: options.email,
         display_name: options.name,
-        // Mark as FCL-compatible account
-        account_type: 'fcl_compatible',
-        // Store creation timestamp
-        created_at: new Date().toISOString(),
+        encrypted_recovery_info: encrypted,
+        recovery_info: recovery,
       });
 
       if (!userData) {
